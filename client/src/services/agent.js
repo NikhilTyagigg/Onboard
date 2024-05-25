@@ -12,7 +12,7 @@ const CLOUD = {
     API_ROOT: "http://localhost:5000/api/v1/",
   },
   SERVER: {
-    API_ROOT: "https://onboards.raisedlines.org/api/v1/",
+    API_ROOT: "https://onboarddev.raisedlines.org/api/v1/",
   },
 };
 let URL =
