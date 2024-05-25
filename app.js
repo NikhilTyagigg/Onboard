@@ -30,14 +30,14 @@ app.use(
 
 const apiV1Router = require("./routes/api/v1");
 
-app.use(express.static(path.join(__dirname, "/build")));
+app.use(express.static(path.join(__dirname, "/client/build")));
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use("/api/v1", apiV1Router);
 
 app.get("/", function (req, res, next) {
-  return res.sendFile(path.join(__dirname, "build/index.html"));
+  return res.sendFile(path.join(__dirname, "client/build/index.html"));
 });
 
 // error handler

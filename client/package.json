@@ -124,8 +124,8 @@
   "scripts": {
     "win-start": "SET NODE_OPTIONS=--openssl-legacy-provider && craco start",
     "win-build": "SET NODE_OPTIONS=--openssl-legacy-provider && craco build",
-    "linux-start": "EXPORT SET NODE_OPTIONS=--openssl-legacy-provider && craco start",
-    "linux-build": "EXPORT SET NODE_OPTIONS=--openssl-legacy-provider && craco build",
+    "linux-start": "export SET NODE_OPTIONS=--openssl-legacy-provider && craco start",
+    "linux-build": "export SET NODE_OPTIONS=--openssl-legacy-provider && craco build",
     "test": "craco test",
     "eject": "react-scripts eject",
     "format": "prettier --write \"src/**/*.js\"",
