@@ -1,0 +1,68 @@
+.action-font-style{
+    color: #4CAF50;
+    cursor: pointer;
+}
+
+.three-dots:after {
+    cursor: pointer;
+    color: #FCC;
+    content: '\2807';
+    font-size: 1.25rem;
+    padding: 0 5px;
+  }
+  
+  a {
+    text-decoration: none;
+    /*color: white;*/
+  }
+  
+  a div {
+    padding: 2px;
+  }
+  
+  .dropdown {
+    position: absolute;
+    right: 1.25rem;
+    background-color: #66D;
+    /*box-shadow: 0px 0px 3px 3px #66D;*/
+    outline: none;
+    opacity: 1;
+    z-index: -1;
+    max-height: 0;
+    color: #fff;
+  }
+  
+  .dropdown-container:focus {
+    outline: none; 
+  }
+  
+  .dropdown-container:focus .dropdown {
+    opacity: 1;
+    z-index: 100;
+    max-height: 100vh;
+    margin-top: -23px;
+  }
+  .p-10{
+    padding: 10px;
+    text-align: center;
+  }
+
+  [dir] .table > :not(caption) > * > * {
+    padding: 0.72rem 0.5rem
+  }
+
+  .pp-4{
+    padding: 4px;
+    text-align: center;
+    margin-bottom: 0px;
+  }
+
+  .pth-7{
+    padding: 7px;
+    text-align: center;
+  }
+
+  .color-link{
+    color: #1761fd;
+    cursor: pointer;
+  }

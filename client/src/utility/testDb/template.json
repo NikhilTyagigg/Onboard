@@ -1,0 +1,92 @@
+[
+    {
+        "category": "Blog",
+        "name": "Blog Ideas and Outline",
+        "description": "Create unique selling points with compelling characteristics and help your product stands out",
+        "icon": "NA"
+    },
+    {
+        "category": "Blog",
+        "name": "Blog Section Writing",
+        "description": "Elaborate your ideas and bullet points into engaging paragraphs.",
+        "icon": "NA"
+    },
+    {
+        "category": "Blog",
+        "name": "Blog Intro paragraph",
+        "description": "Kickstart your opening paragraph with creativity.",
+        "icon": "NA"
+    },
+    {
+        "category": "Blog",
+        "name": "Blog Conclusion Paragraph",
+        "description": "Finish up your blog with a neat conclusion paragraph.",
+        "icon": "NA"
+    },
+    {
+        "category": "Blog",
+        "name": "Blog SEO Improver",
+        "description": "SEO-optimize your title tags and meta descriptions for blog posts.",
+        "icon": "NA"
+    },
+    {
+        "category": "Blog",
+        "name": "Article workflow",
+        "description": "Write a whole article from start to finish in 5 mins.",
+        "icon": "NA"
+    },
+    {
+        "category": "Email",
+        "name": "Persuasive Bullet Points",
+        "description": "Generate bullet points to insert into your blogs, essays, emails and more.",
+        "icon": "NA"
+    },
+    {
+        "category": "Email",
+        "name": "Cold Emails",
+        "description": "Write cold emails that actually convert customers.",
+        "icon": "NA"
+    },
+    {
+        "category": "Email",
+        "name": "Email Subject Lines",
+        "description": "Create eye-catching email subject headline in one click",
+        "icon": "NA"
+    },
+    {
+        "category": "Email",
+        "name": "Request A New Template",
+        "description": "Missing a template for your business? let us know and we will release it!",
+        "icon": "NA"
+    },
+    {
+        "category": "Website",
+        "name": "Website Headline",
+        "description": "Create worth-clicking headlines for your website.",
+        "icon": "NA"
+    },
+    {
+        "category": "Website",
+        "name": "Website Sub-headline",
+        "description": "Create clear and informative sub-headlines for your websites.",
+        "icon": "NA"
+    },
+    {
+        "category": "Website",
+        "name": "Company Bio",
+        "description": "Create a captivating bio for your company.",
+        "icon": "NA"
+    },
+    {
+        "category": "Website",
+        "name": "Product Core Value",
+        "description": "Tell customers the core value of the product to reach their needs quickly and promote sales conversion.",
+        "icon": "NA"
+    },
+    {
+        "category": "Website",
+        "name": "Homepage SEO Improver",
+        "description": "SEO-optimize title tags and meta descriptions for homepages.",
+        "icon": "NA"
+    }
+]

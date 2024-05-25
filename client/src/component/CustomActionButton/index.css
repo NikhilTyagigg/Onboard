@@ -1,0 +1,103 @@
+.custom-btn-container{
+    height: 48px;
+    width: 100%;
+    max-width: 300px;
+    display: inline-block;
+    color: #FFFFFF;
+    text-align: center;
+    padding: 12px;
+    gap: 10px;
+    font-size: 0.875rem;
+    font-weight: bold;
+    cursor: pointer;
+    background: #1761fd;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+}
+.custom-btn-container > .btn-text-name{
+  min-width: 200px;
+  color: #000;
+}
+.invert-success{
+  background: #FFFFFF;
+  border: 1px solid #4CAF50;
+  color: #4CAF50;
+}
+.invert-success:hover{
+  background: #4CAF50;
+  border: 1px solid #4CAF50;
+  color: #FFFFFF;
+}
+.invert-primary{
+  background: #FFFFFF;
+  border: 1px solid #1761fd;
+  color: #1761fd;
+}
+.invert-primary:hover{
+  background: #1761fd;
+  border: 1px solid #1761fd;
+  color: #FFFFFF;
+}
+/* CSS */
+.custom-ui-btn-container {
+  margin-top: 30px;
+  height: 40px;
+  width: 100%;
+  align-items: center;
+  appearance: none;
+  background-image: radial-gradient(100% 100% at 100% 0, #ed72d4 0, #1761fd 100%);
+  border: 0;
+  border-radius: 6px;
+  box-shadow: rgba(45, 35, 66, .4) 0 2px 4px,rgba(45, 35, 66, .3) 0 7px 13px -3px,rgba(58, 65, 111, .5) 0 -3px 0 inset;
+  box-sizing: border-box;
+  color: #fff;
+  cursor: pointer;
+  display: inline-flex;
+  /* font-family: "JetBrains Mono",monospace; */
+  height: 48px;
+  justify-content: center;
+  line-height: 1;
+  list-style: none;
+  overflow: hidden;
+  padding-left: 16px;
+  padding-right: 16px;
+  position: relative;
+  text-align: left;
+  text-decoration: none;
+  transition: box-shadow .15s,transform .15s;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  white-space: nowrap;
+  will-change: box-shadow,transform;
+  font-size: 1.125rem;
+}
+
+.button-29:focus {
+  box-shadow: #3c4fe0 0 0 0 1.5px inset, rgba(45, 35, 66, .4) 0 2px 4px, rgba(45, 35, 66, .3) 0 7px 13px -3px, #3c4fe0 0 -3px 0 inset;
+}
+
+.button-29:hover {
+  box-shadow: rgba(45, 35, 66, .4) 0 4px 8px, rgba(45, 35, 66, .3) 0 7px 13px -3px, #3c4fe0 0 -3px 0 inset;
+  transform: translateY(-2px);
+}
+
+.button-29:active {
+  box-shadow: #3c4fe0 0 3px 7px inset;
+  transform: translateY(2px);
+}
+
+.custombutton {
+  font-size: '1rem';
+  font-weight: '500';
+  line-height: '1rem';
+  border-radius: '12px';
+  padding: '12px';
+  min-width: '300px !important';
+}
+
+.spinner-border-sm {
+  --bs-spinner-width: 1.5rem;
+  --bs-spinner-height: 1.5rem;
+  --bs-spinner-border-width: 0.2em;
+}

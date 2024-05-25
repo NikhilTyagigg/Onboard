@@ -1,0 +1,158 @@
+@import "../../stylesheets/variables.scss";
+@import "../../stylesheets/responsive.scss";
+@import "../../stylesheets/common-style.scss";
+
+.outlinePointBoxV2{
+    padding-left: 8px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    border-radius: 5px;
+    border: 0.3px solid #546E7A;
+    margin-bottom: 70px;
+}
+.outlinePointBoxV2 .contentHead{
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+.outlineVersionPointBox{
+    padding-left: 40px;
+    padding-right: 40px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+.outlineVersionPointBox .statusHeader{
+    font-weight: bold;
+    margin-bottom: 15px;
+    font-size: 0.938rem;
+}
+.outlinePointBoxText{
+    width: 100%;
+    display: inline-block;
+    text-align: justify;
+    font-size: 0.938rem;
+    cursor: pointer;
+    white-space:pre-wrap;
+}
+.outlinePointBoxDelete{
+    width: 10%;
+    display: none;
+}
+.outlinePointBoxV2:hover > .outlinePointBoxDelete{
+    height: 100%;
+    display: inline-block;
+}
+/* ./ inner points section area */
+
+/* Action points CSS */
+
+.outlineSectionBoxSelected{
+    padding-top: 8px;
+    padding-bottom: 8px;
+    padding-left: 40px;
+    text-align: start;
+    border: 0.3px solid #66BB6A;
+}
+.outlineSectionBoxSelectedInput{
+    width: 90%;
+    display: inline-block;
+    text-align: start;
+    font-size: 0.938rem;
+    color: $editorDiaplyFontColor;
+    border-radius: 5px;
+    border: 0px;
+    cursor: auto;
+    outline: none;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    word-wrap: break-word;
+}
+.outline-point-boxes-inner-input:hover{
+    cursor: auto;
+}
+.outline-point-delete-inner-selected{
+    width: 10%;
+    height: 100%;
+    display: inline-block;
+}
+.actionButtonSection{
+    color: #1761fd;
+    font-weight: bold;
+    font-size: 0.875rem;
+    margin-top: 10px;
+    height: 40px;
+    cursor: pointer;
+}
+.actionButtonSection .info{
+    color: #607D8B;
+    font-size: 0.75rem;
+    padding-right: 10px;
+    padding-left: 0px;
+    border-radius: 4px;
+    margin-right: 10px;
+}
+
+// Version selection state
+.selectionState{
+    border: 1px solid #B0BEC5;
+    padding-bottom: 0px;
+}
+
+.actionButtonSection > .choiseButton{
+    color: white;
+    background: #1761fd;
+    padding: 5px;
+    border-radius: 5px;
+}
+
+.addNewHighlighted{
+    font-style: italic;
+    font-weight: bold;
+}
+
+// Paraphrase options
+.paraphraseOption{
+    // display: flex;
+    // overflow-x: scroll;
+}
+.paraphraseOption .paraphraseBtn{
+    /*border: 1px solid #EEE;
+    color: #5543ff;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-right: 10px;
+    padding-left: 10px;
+    margin-right: 10px;
+    margin-bottom: 40px;
+    font-size: 0.938em;
+    box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+    cursor: pointer;*/
+    border: 1px solid #EEE;
+    padding: 2px 10px 2px 10px;
+    cursor: pointer;
+    width: auto;
+    color: #000000;
+    background: rgba(0, 0, 0, 0.08);
+    border-radius: 16px;
+    margin-right: 16px;
+    margin-top: 8px;
+    font-size: 13px;
+}
+
+.paraphraseBtn:hover{
+    background: #1761fd;
+    color: #FFFFFF;
+}
+
+.paraphraseOption .paraphraseClose{
+    border: 1px solid #EEE;
+    color: #5543ff;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 5px;
+    margin-right: 10px;
+    box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+    cursor: pointer;
+}
+.paraphraseOption .addModeStyle{
+    border-bottom: 2px solid 5543ff;
+}

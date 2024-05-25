@@ -1,0 +1,30 @@
+@import "../../stylesheets/variables.scss";
+@import "../../stylesheets/responsive.scss";
+@import "../../stylesheets/common-style.scss";
+
+.ioReviewBlogText {
+    font-size: 0.875rem;
+    text-decoration: underline;
+    cursor: pointer;
+    color: #2196F3;
+    margin-left: 10px;
+}
+.tipNoteStyleDropdown{
+    text-align: start;
+    font-size: 0.75rem;
+    margin-top: 5px;
+}
+.tipNoteStyleHeadDropdown{
+    color: $primaryColor;
+    font-weight: "bold";
+}
+.toneInput{
+    margin-top: 8px;
+    height:50px;
+    width: 100%;
+    outline: 0;
+    text-align: start;
+    outline: none;
+    padding-left: 0.5px;
+    padding-right: 0.5px;
+}

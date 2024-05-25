@@ -1,0 +1,312 @@
+// Pagination
+
+// default look for page item, first and last item
+.pagination {
+  float: right;
+}
+
+.page-item {
+  border-radius: 0rem;
+
+  &:not(.prev-item),
+  &:not(.next-item),
+  &:not(.first),
+  &:not(.last),
+  &:not(.active) {
+    .page-link {
+      line-height: 1.3;
+      margin-left: 5px;
+      margin-right: 5px;
+    }
+  }
+
+  .page-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: linear-gradient(0deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.95)), #1761fd;
+    box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.13);
+    color: #000;
+  }
+  &.previous,
+  &.prev,
+  &.next,
+  &.first,
+  &.last {
+    .page-link {
+      width: auto;
+    }
+  }
+
+  &.prev-item,
+  &.next-item {
+    .page-link {
+      transition: all 0.2s ease-out;
+    }
+  }
+
+  // prev and next item separated styles
+  &.prev-item {
+    margin-right: 0.3571rem;
+
+    .page-link {
+      border-radius: 0%;
+      &:before {
+        background-image: url(str-replace(str-replace($chevron-left, 'currentColor', $pagination-color), '#', '%23'));
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: 14px;
+        color: $body-color;
+        width: 8px;
+        height: 18px;
+        content: '';
+      }
+
+      &:hover {
+        background: $pagination-hover-bg;
+        color: $pagination-hover-color;
+      }
+      &:active,
+      &:hover {
+        background-color: $primary !important;
+        &:before {
+          background-image: url(str-replace(str-replace($chevron-left, 'currentColor', $white), '#', '%23')) !important;
+        }
+      }
+    }
+    &.disabled {
+      .page-link {
+        &:before {
+          background-image: url(str-replace(
+            str-replace($chevron-left, 'currentColor', $pagination-disabled-color),
+            '#',
+            '%23'
+          ));
+        }
+      }
+    }
+
+    & ~ .page-item:nth-child(2) {
+      border-top-left-radius: 5rem;
+      border-bottom-left-radius: 5rem;
+      .page-link {
+        border-top-left-radius: 5rem !important;
+        border-bottom-left-radius: 5rem !important;
+      }
+    }
+
+    & ~ .page-item:nth-last-child(2) {
+      border-top-right-radius: 5rem;
+      border-bottom-right-radius: 5rem;
+      .page-link {
+        border-top-right-radius: 5rem !important;
+        border-bottom-right-radius: 5rem !important;
+      }
+    }
+  }
+
+  &.next-item {
+    margin-left: 0.3571rem;
+
+    .page-link {
+      border-radius: 0%;
+      &:after {
+        background-image: url(str-replace(str-replace($chevron-right, 'currentColor', $pagination-color), '#', '%23'));
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: 14px;
+        width: 8px;
+        height: 18px;
+        content: '';
+      }
+
+      &:hover {
+        background: $pagination-hover-bg;
+        color: $pagination-hover-color;
+      }
+      &:active,
+      &:hover {
+        background-color: $primary !important;
+        &:after {
+          background-image: url(str-replace(
+            str-replace($chevron-right, 'currentColor', $white),
+            '#',
+            '%23'
+          )) !important;
+        }
+      }
+    }
+    &.disabled {
+      .page-link {
+        &:after {
+          background-image: url(str-replace(
+            str-replace($chevron-right, 'currentColor', $pagination-disabled-color),
+            '#',
+            '%23'
+          ));
+        }
+      }
+    }
+  }
+
+  // prev and next style
+  &.prev,
+  &.previous {
+    .page-link {
+      &:before {
+        background-image: url(str-replace(str-replace($chevron-left, 'currentColor', $pagination-color), '#', '%23'));
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: 14px;
+        color: $body-color;
+        width: 12px;
+        height: 18px;
+        content: '';
+      }
+      // &:active,
+      &:hover {
+        &:before {
+          background-image: url(str-replace(
+            str-replace($chevron-left, 'currentColor', $pagination-active-color),
+            '#',
+            '%23'
+          )) !important;
+        }
+      }
+    }
+    &.disabled {
+      .page-link {
+        &:before {
+          background-image: url(str-replace(
+            str-replace($chevron-left, 'currentColor', $pagination-disabled-color),
+            '#',
+            '%23'
+          ));
+        }
+      }
+    }
+  }
+  &.next {
+    .page-link {
+      &:after {
+        background-image: url(str-replace(str-replace($chevron-right, 'currentColor', $pagination-color), '#', '%23'));
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: 14px;
+        color: $body-color;
+        width: 12px;
+        height: 18px;
+        content: '';
+      }
+      // &:active,
+      &:hover {
+        &:after {
+          background-image: url(str-replace(
+            str-replace($chevron-right, 'currentColor', $primary),
+            '#',
+            '%23'
+          )) !important;
+        }
+      }
+    }
+    &.disabled {
+      .page-link {
+        &:after {
+          background-image: url(str-replace(
+            str-replace($chevron-right, 'currentColor', $pagination-disabled-color),
+            '#',
+            '%23'
+          ));
+        }
+      }
+    }
+  }
+
+  &.disabled {
+    .page-link {
+      color: $pagination-disabled-color;
+    }
+  }
+
+  // page link customization
+
+  .page-link {
+    margin: 0;
+    margin-left: 0;
+    font-size: 1rem;
+    min-width: 2.286rem;
+    &:focus {
+      box-shadow: none;
+    }
+
+    &:hover {
+      color: $primary;
+    }
+  }
+
+  // for active page item
+  &.active {
+    //background-color: $pagination-bg;
+    border-radius: 0px;
+    .page-link {
+      z-index: 3;
+      border-radius: 0rem;
+      background-color: $primary;
+      box-shadow: 0px 1px 1px #1761fd;
+      color: $white !important;
+      font-weight: 600;
+    }
+  }
+
+  // if you don't want separated look
+
+  &:first-child:not(.prev-item) {
+    &.active {
+      border-top-left-radius: 1.428rem;
+      border-bottom-left-radius: 1.428rem;
+      .page-link {
+        border-radius: 0rem;
+      }
+    }
+    .page-link {
+      border-top-left-radius: 0rem;
+      border-bottom-left-radius: 0rem;
+    }
+  }
+
+  &:last-child:not(.next-item) {
+    &.active {
+      border-top-right-radius: 0rem;
+      border-bottom-right-radius: 0rem;
+      .page-link {
+        border-radius: 0rem;
+      }
+    }
+    .page-link {
+      border-top-right-radius: 0rem;
+      border-bottom-right-radius: 0rem;
+    }
+  }
+}
+
+// For Pagination Font sizes
+.pagination {
+  // For Pagination lg
+  &.pagination-lg {
+    .page-item {
+      .page-link {
+        font-size: $pagination-font-size-lg;
+        min-width: 2.6rem;
+      }
+    }
+  }
+  // For Pagination sm
+  &.pagination-sm {
+    .page-item {
+      .page-link {
+        font-size: $pagination-font-size-sm;
+        min-width: 2rem;
+      }
+    }
+  }
+}

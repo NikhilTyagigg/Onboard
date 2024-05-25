@@ -1,0 +1,66 @@
+@import "../../stylesheets/variables.scss";
+@import "../../stylesheets/responsive.scss";
+@import "../../stylesheets/common-style.scss";
+
+.guideTooltipContainer{
+    margin-top: 10px;
+    border-radius: 7px;
+    padding-bottom: 20px;
+    border: 1px solid hsl(0deg 0% 80%);
+}
+.fullHeight{
+    height: 100%;
+}
+.guideTooltipContainer .head{
+    height: 40px;
+    border-top-left-radius: 7px;
+    border-top-right-radius: 7px;
+    display: flex;
+}
+.guideTooltipContainer .iconContainer{
+    height: 100%;
+}
+.tooltipIcon {
+    height: 35px;
+    width: 35px;
+    margin-left: 10px;
+}
+.guideTooltipContainer .head .headerText{
+    width: 70%;
+    text-align: center;
+    padding-top: 7px;
+    font-size: 0.938rem;
+    color: $primaryColor;
+    font-weight: bold;
+}
+.tooltipContent{
+    width: 100%;
+    text-align: start;
+    padding-top: 15px;
+    padding-left: 10px;
+    padding-right: 10px;
+    font-size: 0.813rem;
+}
+.guideTooltipContainer .closeBtnContainer{
+    width: 100%;
+    height: 30px;
+    text-align: center;
+}
+.guideTooltipContainer .closeBtnContainer .closeBtn{
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    height: 30px;
+    width: 100px;
+    margin-top: 10px;
+    display: inline-block;
+    border: 1px solid hsl(0deg 0% 80%);
+    border-radius: 5px;
+    cursor: pointer;
+}
+.guideTooltipContainer .closeBtnContainer .closeBtn:hover{
+    border: 0px;
+    background: #90A4AE;
+    color: white;
+}

@@ -1,0 +1,4 @@
+node_modules
+logs
+client/node_modules
+client/build

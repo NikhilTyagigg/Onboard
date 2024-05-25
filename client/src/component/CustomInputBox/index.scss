@@ -1,0 +1,55 @@
+@import "../../stylesheets/variables.scss";
+@import "../../stylesheets/responsive.scss";
+@import "../../stylesheets/common-style.scss";
+
+.inputBoxContainer{
+    margin-top: 24px;
+    margin-bottom: 24px;
+}
+.merge-content-delete{
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+.ioReviewBlogText {
+    font-size: 0.875rem;
+    text-decoration: underline;
+    cursor: pointer;
+    color: #2196F3;
+    margin-left: 10px;
+}
+.topicAreaStyle{
+    border: 0;
+    outline: 0;
+    margin-top: 8px;
+    width: 100%;
+    font-size: 1rem;
+    // height: 120px;
+    border-radius: 5px;
+    padding: 10px;
+    border: 1px solid hsl(0deg 0% 80%);
+}
+.smallBox{
+    height: auto;
+}
+.tipNoteStyle{
+    text-align: start;
+    font-size: 0.875rem;
+    margin-top: 5px;
+    opacity: 0.7;
+}
+.tipNoteStyleHead{
+    color: $primaryColor;
+    font-weight: "bold";
+}
+.suggestionLabelBlockButton{
+    background: rgba(255, 255, 255, 0.86);
+    border: 1px solid #1761fd;
+    border-radius: 5px;
+    padding: 4px 8px;
+    float: right;
+    font-weight: 600;
+    font-size: 0.813rem;
+    line-height: 16px;
+    /* identical to box height, or 123% */
+    color: #1761fd;
+}

@@ -1,0 +1,52 @@
+/****************fonts*********************/
+$primary-font-family: 'Cabin', sans-serif;;
+
+/***********font size***************/
+
+$normal-font: 1.125vmax;
+$normal-font-table: 2vmax;
+$normal-font-mobile: 2.5vmax;
+
+$regular-font: 0.875vmax;
+$regular-font-tablet: 1.75vmax;
+$regular-font-mobile: 2.015vmax;
+
+$small-font: 0.75vmax;
+$small-font-tablet: 1.25vmax;
+$small-font-mobile: 1.45vmax;
+
+$large-font: 1.5vmax;
+$large-font-tablet: 2.3vmax;
+$large-font-mobile: 2.4vmax;
+
+/*********main color**************/
+$white: #ffffff;
+$black: #000000;
+
+$light-grey: #eeeeee;
+$medium-grey: #767171;
+$grey: #afabab;
+
+$editorGreen: #43A047;
+
+$orange: #ff8b0c;
+$alice-blue: #f3f8fd;
+$primaryColor: #1761fd;
+$translucent: rgba(100, 100, 100, 0.6);
+$paleRed: #E57373;
+$dark-red: #c00001;
+$tag-blue: #2196F3;
+$black-with-opacity: rgba(0, 0, 0, 0.55);
+
+/****************box shadow colors*************/
+$box-shadow-dark: 0 3px 6px rgba(0, 0, 0, 0.2);
+$box-shadow-light: 0px 1px 2px rgba(0, 0, 0, 0.2);
+$button-box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+$container-box-shadow: 0px 0px 12px 1px rgba(0, 0, 0, 0.4);
+
+/****************borders*************/
+$primary-border: 2px solid $light-grey;
+
+/****************Font colors*************/
+$editorDiaplyFontColor: #546E7A;
+$editorDisabledFontColor: #90A4AE;
