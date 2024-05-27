@@ -171,6 +171,7 @@ export const addMultipleRoutes = (payload) => {
 };
 
 export const sendResetPasswordLinkHandler = (payload) => {
+  console.log("hey", payload);
   return requests.post("auth/send_reset_password_email/", payload);
 };
 

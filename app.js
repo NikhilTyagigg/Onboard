@@ -53,7 +53,7 @@ app.use(function (err, req, res, next) {
 });
 
 app.get("/*", function (req, res, next) {
-  return res.sendFile(path.join(__dirname, "build/index.html"));
+  return res.sendFile(path.join(__dirname, "client/build/index.html"));
 });
 
 mqtt.connectToMqtt();
