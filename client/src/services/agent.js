@@ -12,7 +12,7 @@ const CLOUD = {
     API_ROOT: "http://localhost:5000/api/v1/",
   },
   SERVER: {
-    API_ROOT: "https://onboarddev.raisedlines.org/api/v1/",
+    API_ROOT: "https://onboard.iwayplus.in/api/v1/",
   },
 };
 let URL =
@@ -171,7 +171,6 @@ export const addMultipleRoutes = (payload) => {
 };
 
 export const sendResetPasswordLinkHandler = (payload) => {
-  console.log("hey", payload);
   return requests.post("auth/send_reset_password_email/", payload);
 };
 

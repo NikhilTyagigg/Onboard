@@ -848,19 +848,19 @@ class RouteRecords extends Component {
               <Table style={{ textAlign: "center" }} bordered>
                 <thead style={{ position: "sticky", top: 0 }}>
                   <tr>
-                    <th>#</th>
-                    <th>Route Number</th>
-                    <th>Start Point</th>
-                    <th>End Point</th>
-                    <th>Depot Name</th>
-                    <th>Start Time</th>
-                    <th>End Time</th>
-                    <th>Frequency</th>
-                    <th>Trip Length</th>
-                    <th>Schedule Number </th>
-                    <th>Services</th>
-                    <th>Intermediatery stops</th>
-                    <th>Action</th>
+                    <th style={{ width: "20%" }}>#</th>
+                    <th style={{ width: "20%" }}>Route Number</th>
+                    <th style={{ width: "20%" }}>Start Point</th>
+                    <th style={{ width: "20%" }}>End Point</th>
+                    <th style={{ width: "40%" }}>Depot Name</th>
+                    <th style={{ width: "20%" }}>Start Time</th>
+                    <th style={{ width: "20%" }}>End Time</th>
+                    <th style={{ width: "20%" }}>Frequency</th>
+                    <th style={{ width: "20%" }}>Trip Length</th>
+                    <th style={{ width: "20%" }}>Schedule Number </th>
+                    <th style={{ width: "20%" }}>Services</th>
+                    <th style={{ width: "20%" }}>Intermediatery stops</th>
+                    <th style={{ width: "20%" }}>Action</th>
                   </tr>
                 </thead>
                 <tbody>{this.renderUser()}</tbody>

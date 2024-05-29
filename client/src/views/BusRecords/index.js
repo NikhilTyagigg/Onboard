@@ -347,7 +347,7 @@ class BusRecords extends Component {
 
   renderModePopup = () => {
     if (this.state.showModePopup) {
-        console.log(this.state.vehicleType);
+      console.log(this.state.vehicleType);
       return (
         <Modal
           size="sm"
@@ -398,14 +398,18 @@ class BusRecords extends Component {
             />
 
             <CustomDropdown
-                  label="Vehicle Type"
-                  mandatory={true}
-                  options={this.state.vehicleType}
-                  optionHandler={(text)=>{this.setState({newVehicleInfo : {...this.state.newVehicleInfo,type:text}})}}
-                  value={this.state.newVehicleInfo?.type || ''}
-                  size={"md"}                  
-                  placeholderText="Input the vehicle type"
-                />
+              label="Vehicle Type"
+              mandatory={true}
+              options={this.state.vehicleType}
+              optionHandler={(text) => {
+                this.setState({
+                  newVehicleInfo: { ...this.state.newVehicleInfo, type: text },
+                });
+              }}
+              value={this.state.newVehicleInfo?.type || ""}
+              size={"md"}
+              placeholderText="Input the vehicle type"
+            />
             {/* <CustomDropdown
               label="Vehicle Type"
               mandatory={true}
@@ -607,23 +611,14 @@ class BusRecords extends Component {
             <div className="tab-container" style={{ width: "20%" }}>
               <div className="section-head">Bus Records</div>
             </div>
-            <div className="row">
-              {/*  <div className='col-sm-5 text-left'>
-                        {/* <input type={'text'} placeholder="Search by Vehicle ID/Number and Type" name='filter' value={this.state.filter} className="form-control" onChange={(e)=>{this.onSearchByString(e.target.value)}} style={{marginTop: '7px'}}></input> 
-                      <span>Auto refresh</span>
-
-                    </div>  */}
-              {/* <div className='col-sm-3' style={{textAlign: 'right', marginTop: '12px'}}>
-                    <button className='btn btn-sm btn-primary' onClick={this.fetchVehicleFromAPI}>Fetch from API</button>
-                    </div>  */}
-
+            <div className="row justify-content-end">
               <div
-                className="col-sm-2 text-right"
+                className="col-auto text-right"
                 style={{ marginTop: "15px", textAlign: "right" }}
               >
                 <span> Import File: </span>
               </div>
-              <div className="col-lg-2" style={{ marginTop: "12px" }}>
+              <div className="col-auto" style={{ marginTop: "12px" }}>
                 <input
                   type="file"
                   accept=".csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
@@ -631,30 +626,26 @@ class BusRecords extends Component {
                   onChange={this._handleFileLoad}
                 />
               </div>
-              <div
-                className="col-sm-3"
-                style={{ textAlign: "right", marginTop: "12px" }}
-              >
+              <div className="col-auto" style={{ marginTop: "12px" }}>
                 <button
                   className="btn btn-sm btn-primary"
-                  onClick={() => this.addRecord()}
+                  onClick={this.addRecord}
                 >
                   Add Record
                 </button>
               </div>
-              {/*Adding the button to ftech the data from the api ...... */}
             </div>
           </div>
           <div className="page-container no-scroll-bar">
             {!this.state.loader ? (
-              <Table style={{ textAlign: "center" }} bordered>
+              <Table bordered style={{ textAlign: "center" }}>
                 <thead style={{ position: "sticky", top: 0 }}>
                   <tr>
-                    <th>#</th>
-                    <th>Vehicle Number</th>
-                    <th>Module Number</th>
-                    <th>Vehicle Type</th>
-                    <th>Action</th>
+                    <th style={{ width: "20%" }}>Serial Number</th>
+                    <th style={{ width: "20%" }}>Vehicle Number</th>
+                    <th style={{ width: "20%" }}>Module Number</th>
+                    <th style={{ width: "20%" }}>Vehicle Type</th>
+                    <th style={{ width: "20%" }}>Action</th>
                   </tr>
                 </thead>
                 <tbody>{this.renderVehicles()}</tbody>
@@ -671,18 +662,18 @@ class BusRecords extends Component {
           {this.renderModePopup()}
           {this.renderDeletePopup()}
           {/* <div className='row'>
-                    <div className='col-lg-12' >
-                        <Pagination
-                        activePage={this.state.activePage}
-                        itemClass="page-item"
-                        linkClass="page-link"
-                        itemsCountPerPage={this.state.itemsCountPerPage}
-                        totalItemsCount={this.state.totalItemsCount}
-                        pageRangeDisplayed={this.state.pageRangeDisplayed}
-                        onChange={this.handlePageChange.bind(this)}
-                        />
-                    </div>
-                </div> */}
+            <div className='col-lg-12'>
+              <Pagination
+                activePage={this.state.activePage}
+                itemClass="page-item"
+                linkClass="page-link"
+                itemsCountPerPage={this.state.itemsCountPerPage}
+                totalItemsCount={this.state.totalItemsCount}
+                pageRangeDisplayed={this.state.pageRangeDisplayed}
+                onChange={this.handlePageChange.bind(this)}
+              />
+            </div>
+          </div> */}
         </div>
       </Card>
     );

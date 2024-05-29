@@ -28,6 +28,8 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import moment from "moment";
 import Countdown from "react-countdown";
+import Excel from "exceljs";
+import Papa from "papaparse";
 
 const override = {
   borderColor: "#1761fd",
@@ -486,6 +488,59 @@ class RouteConfiguration extends Component {
       );
     }
   };
+  _handleFileLoad = async (e) => {
+    const file = e.target.files[0];
+    const extension = e.target.files[0].name.split(".").pop().toLowerCase();
+    this.setState({ loader: true });
+    let params = [];
+    if (extension == "csv") {
+      Papa.parse(file, {
+        header: false,
+        skipEmptyLines: true,
+        complete: (results) => {
+          params = [...results.data];
+          if (params.length > 0) {
+            params.splice(0, 1);
+            this.addConfig(params);
+          }
+          if (params.length > 2000) {
+            this.setState({ loader: false });
+            showErrorToast("Upto 2000 records can be added in one go!!");
+            return;
+          }
+          //  console.log("-----------", params);
+        },
+      });
+    } else if (extension == "xlsx") {
+      const wb = new Excel.Workbook();
+      const reader = new FileReader();
+      reader.readAsArrayBuffer(file);
+      reader.onload = () => {
+        const buffer = reader.result;
+        wb.xlsx.load(buffer).then((workbook) => {
+          workbook.eachSheet((sheet, id) => {
+            sheet.eachRow((row, rowIndex) => {
+              if (rowIndex != 1) {
+                let temp = [...row.values];
+                temp.splice(0, 1);
+                params.push(temp);
+              }
+            });
+            if (params.length > 2000) {
+              this.setState({ loader: false });
+              showErrorToast("Upto 2000 records can be added in one go!!");
+              return;
+            }
+            this.addConfig(params);
+            console.log("-----------", params);
+          });
+        });
+      };
+    } else {
+      this.setState({ loader: false });
+      showErrorToast("We are accepting only csv/xlsx file!");
+    }
+  };
 
   render() {
     return (
@@ -499,22 +554,21 @@ class RouteConfiguration extends Component {
           data-testid="loader"
         />
         <div className="container-fluid vh-50">
-          <div className="page-header">
+          <div className="page-header header12">
             <div className="tab-container" style={{ width: "50%" }}>
               <div className="section-head">Route Configurations</div>
             </div>
-            <div className="row">
+            <div className="d-flex">
               <div
-                className="col-sm-12 d-flex ml-5"
+                className="col-sm-12 d-flex"
                 style={{
-                  textAlign: "right",
+                  textAlign: "left",
                   marginTop: "10px",
                   float: "right",
-                  marginLeft: "40%",
                 }}
               >
                 <div
-                  style={{ width: "40%", marginTop: "15px", marginRight: 10 }}
+                  style={{ width: "30%", marginTop: "15px", marginRight: 10 }}
                 >
                   {this.state.refreshTime && (
                     <Countdown
@@ -524,13 +578,28 @@ class RouteConfiguration extends Component {
                     />
                   )}
                 </div>
-                <button
-                  className="btn btn-sm btn-primary"
-                  onClick={() => this.addRecord()}
+
+                <div
+                  className="col-sm-2 text-left"
+                  style={{ marginTop: "15px", textAlign: "left", width: "30%" }}
                 >
-                  Add Record
-                </button>
+                  <span> Import File: </span>
+                </div>
+                <div className="col-md-1" style={{ marginTop: "12px" }}>
+                  <input
+                    type="file"
+                    accept=".csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                    ref={(ref) => (this.state.fileRef = ref)}
+                    onChange={this._handleFileLoad}
+                  />
+                </div>
               </div>
+              <button
+                className="btn btn-sm btn-primary "
+                onClick={() => this.addRecord()}
+              >
+                Add Record
+              </button>
             </div>
           </div>
 
