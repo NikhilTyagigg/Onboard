@@ -131,6 +131,7 @@ const Register = () => {
         username: getUserNameFromEmail(data.email),
       };
       setLoader(true);
+      sendVerificationLink(payload);
       signUpHandler(payload)
         .then((res) => {
           console.log("Res :", res);
@@ -141,7 +142,7 @@ const Register = () => {
               "Your account is successfully created.Please go back and login!!"
             );
             setShowVerificationPage(true);
-            window.location.replace("/login");
+            // window.location.replace('/login');
 
             let seconds = 5;
             let foo = setInterval(function () {
@@ -316,7 +317,7 @@ const Register = () => {
             <p className="titleCard">Verify your email</p>
             <div className="imgBox">
               <EmailVerify />
-              <p>Wiat</p>
+              <sendVerificationLink />
             </div>
             <p className="textArea">{Message.SENT_EMAIL_VERIFICATION_LINK} </p>
             <Link to="/login" className="backToHome">

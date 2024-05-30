@@ -148,6 +148,36 @@ router.post(
     }
   })
 );
+router.post("/send-otp", async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ error: "Email is required" });
+    }
+    await sendOtp(email);
+    res.status(200).json({ message: "OTP sent successfully" });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Route to verify OTP
+router.post("/verify-otp", async (req, res, next) => {
+  try {
+    const { email, otp } = req.body;
+    if (!email || !otp) {
+      return res.status(400).json({ error: "Email and OTP are required" });
+    }
+    const isVerified = await verifyOtp(email, otp);
+    if (isVerified) {
+      res.status(200).json({ message: "OTP verified successfully" });
+    } else {
+      res.status(400).json({ error: "Invalid OTP" });
+    }
+  } catch (error) {
+    next(error);
+  }
+});
 // Send password reset email
 router.post(
   "/send_reset_password_email",

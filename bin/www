@@ -4,117 +4,111 @@
  * Module dependencies.
  */
 
- var app = require('../app');
- var debug = require('debug')('onboard:server');
- var http = require('http');
-var logger = require('../helper/logger');
-const lgmUrl = ['http://localhost:3001']; //frontend url to be plugged in
- 
- /**
-  * Get port from environment and store in Express.
-  */
- 
- var port = normalizePort(process.env.PORT || '5000');
- app.set('port', port);
- 
- /**
-  * Create HTTP server.
-  */
- 
- var server = http.createServer(app);
+var app = require("../app");
+var debug = require("debug")("onboard:server");
+var http = require("http");
+var logger = require("../helper/logger");
+const lgmUrl = ["http://localhost:3000"]; //frontend url to be plugged in
 
- //socket connection
-const socket_io_server = require('socket.io')(server, 
-  {
+/**
+ * Get port from environment and store in Express.
+ */
+
+var port = normalizePort(process.env.PORT || "5000");
+app.set("port", port);
+
+/**
+ * Create HTTP server.
+ */
+
+var server = http.createServer(app);
+
+//socket connection
+const socket_io_server = require("socket.io")(server, {
   handlePreflightRequest: (req, res) => {
     const headers = {
       "Access-Control-Allow-Headers": "Content-Type, Authorization",
       "Access-Control-Allow-Origin": "*", //or the specific origin you want to give access to,
-      "Access-Control-Allow-Credentials": true
+      "Access-Control-Allow-Credentials": true,
     };
     res.writeHead(200, headers);
     res.end();
   },
   cors: {
-    origins: lgmUrl
+    origins: lgmUrl,
   },
-  allowUpgrades: true, 
-  transports: [ "websocket", "polling"]
+  allowUpgrades: true,
+  transports: ["websocket", "polling"],
 });
 
 // const socketsHandler = require('../routes/api/v1/Socket');
 
 // socketsHandler.populateSocketNamespaces(socket_io_server);
- 
- server.listen(port, ()=> {
-     console.log(`Onboard Server is running on the port ${port} ✌️`);
-     logger.info(`Onboard Server is started and running at the port ${port}`);
- });
- server.on('error', onError);
- server.on('listening', onListening);
 
- socket_io_server.on('connect', (client) => {
+server.listen(port, () => {
+  console.log(`Onboard Server is running on the port ${port} ✌️`);
+  logger.info(`Onboard Server is started and running at the port ${port}`);
+});
+server.on("error", onError);
+server.on("listening", onListening);
+
+socket_io_server.on("connect", (client) => {
   console.log("New socket Connection=> " + client.id);
 });
- 
- /**
-  * Normalize a port into a number, string, or false.
-  */
- 
- function normalizePort(val) {
-   var port = parseInt(val, 10);
- 
-   if (isNaN(port)) {
-     // named pipe
-     return val;
-   }
- 
-   if (port >= 0) {
-     // port number
-     return port;
-   }
- 
-   return false;
- }
- 
- /**
-  * Event listener for HTTP server "error" event.
-  */
- 
- function onError(error) {
-   console.log("server_error=> ",error);
-   if (error.syscall !== 'listen') {
-     throw error;
-   }
- 
-   var bind = typeof port === 'string'
-     ? 'Pipe ' + port
-     : 'Port ' + port;
- 
-   // handle specific listen errors with friendly messages
-   switch (error.code) {
-     case 'EACCES':
-       console.error(bind + ' requires elevated privileges');
-       process.exit(1);
-       break;
-     case 'EADDRINUSE':
-       console.error(bind + ' is already in use');
-       process.exit(1);
-       break;
-     default:
-       throw error;
-   }
- }
- 
- /**
-  * Event listener for HTTP server "listening" event.
-  */
- 
- function onListening() {
-   var addr = server.address();
-   var bind = typeof addr === 'string'
-     ? 'pipe ' + addr
-     : 'port ' + addr.port;
-   debug('Listening on ' + bind);
- }
- 
+
+/**
+ * Normalize a port into a number, string, or false.
+ */
+
+function normalizePort(val) {
+  var port = parseInt(val, 10);
+
+  if (isNaN(port)) {
+    // named pipe
+    return val;
+  }
+
+  if (port >= 0) {
+    // port number
+    return port;
+  }
+
+  return false;
+}
+
+/**
+ * Event listener for HTTP server "error" event.
+ */
+
+function onError(error) {
+  console.log("server_error=> ", error);
+  if (error.syscall !== "listen") {
+    throw error;
+  }
+
+  var bind = typeof port === "string" ? "Pipe " + port : "Port " + port;
+
+  // handle specific listen errors with friendly messages
+  switch (error.code) {
+    case "EACCES":
+      console.error(bind + " requires elevated privileges");
+      process.exit(1);
+      break;
+    case "EADDRINUSE":
+      console.error(bind + " is already in use");
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+}
+
+/**
+ * Event listener for HTTP server "listening" event.
+ */
+
+function onListening() {
+  var addr = server.address();
+  var bind = typeof addr === "string" ? "pipe " + addr : "port " + addr.port;
+  debug("Listening on " + bind);
+}

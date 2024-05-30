@@ -171,6 +171,7 @@ export const addMultipleRoutes = (payload) => {
 };
 
 export const sendResetPasswordLinkHandler = (payload) => {
+  console.log("hey", payload);
   return requests.post("auth/send_reset_password_email/", payload);
 };
 
@@ -179,7 +180,8 @@ export const resetPasswordHandler = (payload) => {
 };
 
 export const sendEmailVerification = (payload) => {
-  return requests.postPublic(`auth/send_verification_email/`, payload);
+  console.log(payload);
+  return requests.postPublic(`auth/send-otp/`, payload);
 };
 
 export const verifyEmail = (payload) => {
