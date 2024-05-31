@@ -131,7 +131,6 @@ const Register = () => {
         username: getUserNameFromEmail(data.email),
       };
       setLoader(true);
-      sendVerificationLink(payload);
       signUpHandler(payload)
         .then((res) => {
           console.log("Res :", res);
@@ -141,7 +140,7 @@ const Register = () => {
             showSuccessToast(
               "Your account is successfully created.Please go back and login!!"
             );
-            setShowVerificationPage(true);
+            //setShowVerificationPage(true);
             // window.location.replace('/login');
 
             let seconds = 5;
@@ -150,8 +149,8 @@ const Register = () => {
               seconds--;
               if (seconds == -1) {
                 clearInterval(foo);
+                //setShowVerificationPage(true);
                 window.location.replace("/login");
-                setShowVerificationPage(true);
               }
             }, 1000);
           } else if (res.request.status == statusCode.HTTP_400_BAD_REQUEST) {
@@ -317,7 +316,6 @@ const Register = () => {
             <p className="titleCard">Verify your email</p>
             <div className="imgBox">
               <EmailVerify />
-              <sendVerificationLink />
             </div>
             <p className="textArea">{Message.SENT_EMAIL_VERIFICATION_LINK} </p>
             <Link to="/login" className="backToHome">

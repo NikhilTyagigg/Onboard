@@ -65,8 +65,12 @@ router.post("/addVehicle", async (req, res, next) => {
 
 router.post("/getRoutes", async (req, res, next) => {
   try {
-    let routes = await getRoutes(req.body);
-    res.send(successBody({ ...routes }));
+    const page = parseInt(req.query.page) || 1;
+    const records = parseInt(req.query.records) || 10;
+
+    let routes = await getRoutes({ page, records });
+
+    res.send(successBody(routes));
   } catch (e) {
     logger.error(e);
     next(e);
