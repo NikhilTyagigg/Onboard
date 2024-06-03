@@ -26,6 +26,7 @@ class RouteRecords extends Component {
       userListOrg: [],
       loader: false,
       searchFilter: "",
+      searchRouteNo: "", // Add this line
       selectedUserForDocument: null,
       showModePopup: false,
       type: "",
@@ -68,6 +69,13 @@ class RouteRecords extends Component {
     });
     // console.log(this.state.newRouteInfo.startTime);
   };
+  handleSearchChange = (e) => {
+    this.setState({ searchRouteNo: e.target.value });
+  };
+
+  handleSearchSubmit = () => {
+    this.getRoutes();
+  };
 
   componentDidMount = () => {
     localStorage.removeItem("active_doc");
@@ -109,7 +117,9 @@ class RouteRecords extends Component {
 
   handlePageChange(pageNumber) {
     console.log(`active page is ${pageNumber}`);
-    this.setState({ activePage: pageNumber }, () => {});
+    this.setState({ activePage: pageNumber }, () => {
+      this.getRoutes();
+    });
   }
 
   changeTab = (index) => {
@@ -120,9 +130,36 @@ class RouteRecords extends Component {
     this.setState({ searchFilter: e.target.value });
   };
 
+  // getRoutes = () => {
+  //   this.setState({ loader: true });
+  //   const queryParams = `?page=${this.state.activePage}&records=${this.state.itemsCountPerPage}`;
+  //   getRoutes(queryParams)
+  //     .then((res) => {
+  //       if (res.status == statusCode.HTTP_200_OK) {
+  //         let routes = res.data.data;
+  //         this.setState({
+  //           totalItemsCount: routes.count,
+  //           routeList: routes.rows,
+  //           loader: false,
+  //         });
+  //       } else {
+  //         toast.error(res.message, { ...toastStyle.error });
+  //         this.setState({ loader: false, vehicleList: [], userListOrg: [] });
+  //       }
+  //     })
+  //     .catch((err) => {
+  //       toast.error(err?.message, { ...toastStyle.error });
+  //       this.setState({ loader: false, vehicleList: [], userListOrg: [] });
+  //     });
+  // };
   getRoutes = () => {
     this.setState({ loader: true });
-    const queryParams = `?page=${this.state.activePage}&records=${this.state.itemsCountPerPage}`;
+    const { activePage, itemsCountPerPage, searchRouteNo } = this.state;
+    let queryParams = `?page=${activePage}&records=${itemsCountPerPage}`;
+    if (searchRouteNo) {
+      queryParams += `&routeNo=${encodeURIComponent(searchRouteNo.trim())}`;
+    }
+
     getRoutes(queryParams)
       .then((res) => {
         if (res.status == statusCode.HTTP_200_OK) {
@@ -142,7 +179,6 @@ class RouteRecords extends Component {
         this.setState({ loader: false, vehicleList: [], userListOrg: [] });
       });
   };
-
   addRoute = (isActive = true) => {
     let newRouteInfo = this.state.newRouteInfo;
     if (
@@ -665,15 +701,68 @@ class RouteRecords extends Component {
     });
   };
 
+  // renderUser = () => {
+  //   return (
+  //     this.state.routeList &&
+  //     this.state.routeList.map((route, index) => {
+  //       const intermediateStopsKey = `intermediateStops_${index}`; // Unique key for intermediate stops
+  //       return (
+  //         <tr key={index}>
+  //           <th scope="row" style={{ width: "100px" }}>
+  //             {index + 1}
+  //           </th>
+  //           <td>{route.routeNo}</td>
+  //           <td>{route.startPoint}</td>
+  //           <td>{route.endPoint}</td>
+  //           <td>{route.depotname}</td>
+  //           <td>{route.startTime}</td>
+  //           <td>{route.endTime}</td>
+  //           <td>{route.frequency}</td>
+  //           <td>{route.trip_length}</td>
+  //           <td>{route.SCH_NO}</td>
+  //           <td>{route.SERVICE}</td>
+  //           <td key={intermediateStopsKey}>
+  //             <button
+  //               onClick={() =>
+  //                 this.openIntermediateStopsPopup(route.intermediateStops)
+  //               }
+  //             >
+  //               View Stops
+  //             </button>
+  //           </td>
+
+  //           <td>
+  //             <span
+  //               style={{ cursor: "pointer" }}
+  //               onClick={() => this.onEditClick(route)}
+  //             >
+  //               <Edit3 size={20} />
+  //             </span>{" "}
+  //             &nbsp;{" "}
+  //             <span
+  //               onClick={() => this.onDeleteClick(route)}
+  //               style={{ cursor: "pointer", color: "blue" }}
+  //             >
+  //               <Trash2 size={20} />
+  //             </span>
+  //           </td>
+  //         </tr>
+  //       );
+  //     })
+  //   );
+  // };
   renderUser = () => {
+    const { activePage, itemsCountPerPage, routeList } = this.state;
+    const startIndex = (activePage - 1) * itemsCountPerPage + 1;
+
     return (
-      this.state.routeList &&
-      this.state.routeList.map((route, index) => {
+      routeList &&
+      routeList.map((route, index) => {
         const intermediateStopsKey = `intermediateStops_${index}`; // Unique key for intermediate stops
         return (
           <tr key={index}>
             <th scope="row" style={{ width: "100px" }}>
-              {index + 1}
+              {startIndex + index}
             </th>
             <td>{route.routeNo}</td>
             <td>{route.startPoint}</td>
@@ -802,9 +891,25 @@ class RouteRecords extends Component {
               <div className="section-head">Route Records</div>
             </div>
             <div className="row">
-              <div className="col-sm-5">
-                {/* <input type={'text'} placeholder="Search by Route ID/Number" name='filter' value={this.state.filter} className="form-control" onChange={(e)=>{this.onSearchByString(e.target.value)}} style={{marginTop: '7px'}}></input> */}
+              <div className="col-sm-5 d-flex align-items-center">
+                <input
+                  type="text"
+                  placeholder="Search by Route ID/Number"
+                  name="filter"
+                  value={this.state.searchRouteNo}
+                  className="form-control"
+                  onChange={this.handleSearchChange}
+                  style={{ marginRight: "10px", marginTop: "7px" }} // Add marginRight to create space between input and button
+                />
+                <button
+                  className="btn btn-primary"
+                  onClick={this.handleSearchSubmit}
+                  style={{ marginTop: "7px" }}
+                >
+                  Search
+                </button>
               </div>
+
               <div
                 className="col-sm-2 text-right"
                 style={{ marginTop: "15px", textAlign: "right" }}
@@ -837,7 +942,7 @@ class RouteRecords extends Component {
               <Table style={{ textAlign: "center" }} bordered>
                 <thead style={{ position: "sticky", top: 0 }}>
                   <tr>
-                    <th style={{ width: "20%" }}>#</th>
+                    <th style={{ width: "20%" }}>SERIAL NUMBER</th>
                     <th style={{ width: "20%" }}>Route Number</th>
                     <th style={{ width: "20%" }}>Start Point</th>
                     <th style={{ width: "20%" }}>End Point</th>
@@ -855,32 +960,24 @@ class RouteRecords extends Component {
                 <tbody>{this.renderUser()}</tbody>
               </Table>
             ) : (
-              <div className="page-sipnner-container">
-                <Spinner size="lg" color="primary" />
-                <div className="page-spinner-text">
-                  Please wait while we load all users...
-                </div>
-              </div>
+              <Spinner color="primary" />
             )}
           </div>
-          {this.renderModePopup()}
-          {this.renderDeletePopup()}
-          {this.renderIntermediateStopsPopup()}
-
-          {/* <div className='row'>
- <div className='col-lg-12' >
- <Pagination
- activePage={this.state.activePage}
- itemClass="page-item"
- linkClass="page-link"
- itemsCountPerPage={this.state.itemsCountPerPage}
- totalItemsCount={this.state.totalItemsCount}
- pageRangeDisplayed={this.state.pageRangeDisplayed}
- onChange={this.handlePageChange.bind(this)}
- />
- </div>
- </div> */}
+          <div className="pagination-wrapper">
+            <Pagination
+              activePage={this.state.activePage}
+              itemsCountPerPage={this.state.itemsCountPerPage}
+              totalItemsCount={this.state.totalItemsCount}
+              pageRangeDisplayed={this.state.pageRangeDisplayed}
+              onChange={this.handlePageChange.bind(this)}
+              itemClass="page-item"
+              linkClass="page-link"
+            />
+          </div>
         </div>
+        {this.renderModePopup()}
+        {this.renderDeletePopup()}
+        {this.renderIntermediateStopsPopup()}
       </Card>
     );
   }

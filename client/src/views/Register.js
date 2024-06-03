@@ -1,11 +1,9 @@
-import React, { Fragment, useState } from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useSkin } from "@hooks/useSkin";
-import { Facebook, Twitter, Mail, GitHub } from "react-feather";
 import InputPasswordToggle from "@components/input-password-toggle";
 import { statusCode } from "../utility/constants/utilObject";
 import {
-  Row,
   Col,
   CardTitle,
   CardText,
@@ -17,34 +15,25 @@ import {
 } from "reactstrap";
 import "@styles/react/pages/page-authentication.scss";
 import toast from "react-hot-toast";
-import {
-  toastStyle,
-  blogTitleFormat,
-  showErrorToast,
-  showSuccessToast,
-} from "../utility/helper";
-import {
-  getUserNameFromEmail,
-  isValidEmail,
-  isValidPassword,
-  isValidMobile,
-} from "../utility/helper";
-import { signUpHandler, sendEmailVerification } from "../services/agent";
+import { showErrorToast, showSuccessToast } from "../utility/helper";
+import { getUserNameFromEmail } from "../utility/helper";
+import { otpHandler, sendEmailVerification } from "../services/agent";
+
 import { ReactComponent as EmailVerify } from "../assets/images/pages/Email-Verify.svg";
 import { ChevronLeft } from "react-feather";
 import { Message } from "../utility/constants/message";
+import OtpVerification from "./OtpVerification"; // Import your otpVerification component here
 
 const Register = () => {
   const { skin } = useSkin();
-
   const illustration =
     skin === "dark" ? "register-v2-dark.svg" : "register-v2.svg";
 
-  const [data, setData] = React.useState({
+  const [data, setData] = useState({
     first_name: "",
-    last_name: "",
     email: "",
     password: "",
+    ConfirmPassword: "",
     username: "",
     designation: "",
     company: "",
@@ -52,13 +41,12 @@ const Register = () => {
     purpose: "",
     iAgree: false,
   });
-  const [loader, setLoader] = React.useState(false);
-
-  const [status, setStatus] = React.useState(false);
-
-  const [iAgree, SetIAgree] = React.useState(false);
-
+  const [loader, setLoader] = useState(false);
+  const [status, setStatus] = useState(false);
+  const [iAgree, setIAgree] = useState(false);
   const [showVerificationPage, setShowVerificationPage] = useState(false);
+  const [otp, setOtp] = useState("");
+  const [Payload, setPayload] = useState(""); // State to hold the OTP
 
   const handleChange = (e) => {
     const value = e.target.value;
@@ -68,118 +56,125 @@ const Register = () => {
     });
   };
 
-  const resetData = () => {
-    setData({
-      first_name: "",
-      last_name: "",
-      email: "",
-      password: "",
-      username: "",
-      designation: "",
-      company: "",
-      mobile: "",
-      purpose: "",
-      name: "",
-    });
-  };
+  // const resetData = () => {
+  //   setData({
+  //     first_name: "",
+  //     last_name: "",
+  //     email: "",
+  //     password: "",
+  //     username: "",
+  //     designation: "",
+  //     company: "",
+  //     mobile: "",
+  //     purpose: "",
+  //     name: "",
+  //   });
+  // };
 
-  const sendVerificationLink = () => {
+  // const sendVerificationLink = () => {
+  //   const payload = {
+  //     email: data.email,
+  //     origin: "",
+  //   };
+  //   setLoader(true);
+  //   sendEmailVerification(payload)
+  //     .then((res) => {
+  //       setLoader(false);
+  //       if (res.status === statusCode.HTTP_200_OK) {
+  //         toast.success(Message.SENT_VERIFICATION_LINK, {
+  //           ...toastStyle.success,
+  //         });
+  //       } else {
+  //         let key = Object.keys(res.response.data);
+  //         key = key[0];
+  //         toast.error("Sending failed: " + res.response.data.detail, {
+  //           ...toastStyle.error,
+  //         });
+  //       }
+  //     })
+  //     .catch((err) => {
+  //       setLoader(false);
+  //       toast.error("Sending failed: " + err.message, {
+  //         ...toastStyle.error,
+  //       });
+  //     });
+  // };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log("Form submitted"); // Check if the form is being submitted
     const payload = {
-      email: data.email,
-      origin: "",
+      ...data,
+      role: 1,
+      name: data.first_name,
+      username: getUserNameFromEmail(data.email),
     };
     setLoader(true);
-    sendEmailVerification(payload)
+    setPayload(payload);
+    console.log("Payload:", payload); // Check the payload before sending OTP
+    otpHandler(payload.username)
       .then((res) => {
         setLoader(false);
+        console.log("OTP Response:", res.data.otp);
+        console.log("ye rha ", res.status);
+        console.log("log=", statusCode.HTTP_200_OK); // Check the response from otpHandler
         if (res.status == statusCode.HTTP_200_OK) {
-          toast.success(Message.SENT_VERIFICATION_LINK, {
-            ...toastStyle.success,
-          });
-        } else {
-          let key = Object.keys(res.response.data);
-          key = key[0];
-          toast.success("Sending failed: " + res.response.data.detail, {
-            ...toastStyle.error,
-          });
+          console.log(
+            "OTP successfully sent, redirecting to verification page."
+          );
+          setStatus(true);
+          showSuccessToast(
+            "OTP sent successfully to your gmail account. Please verify!"
+          );
+          setShowVerificationPage(true);
+          setOtp(res.data.otp);
+        } else if (res.request.status == statusCode.HTTP_400_BAD_REQUEST) {
+          showErrorToast(res.response.data.message);
         }
       })
       .catch((err) => {
         setLoader(false);
-        toast.success("Sending failed: " + err.message, {
-          ...toastStyle.error,
-        });
+        showErrorToast("Something went wrong. Please try again later.");
+        console.error("Error:", err);
       });
   };
 
-  const handleSubmit = (e) => {
-    // if(!data.first_name || !data.last_name || !data.email || !data.password || !data.designation || !data.purpose || !data.company){
-    //   toast.error(Message.MANDATORY_FIELDS,{...toastStyle.error});
-    // }else if(!iAgree){
-    //   toast.error("Please accept the terms and conditions to signup",{...toastStyle.error});
-    // }else if(!isValidEmail(data.email)){
-    //   toast.error("Invalid email address",{...toastStyle.error});
-    // }else if(!isValidPassword(data.password)){
-    //   toast.error("Password length should be greater than 6",{...toastStyle.error});
-    // }else if(data.mobile && !isValidMobile(data.mobile)){
-    //   toast.error("Invalid phone number",{...toastStyle.error});
-    {
-      const payload = {
-        ...data,
-        role: 1,
-        name: data.first_name,
-        username: getUserNameFromEmail(data.email),
-      };
-      setLoader(true);
-      signUpHandler(payload)
-        .then((res) => {
-          console.log("Res :", res);
-          setLoader(false);
-          if (res.status == statusCode.HTTP_200_OK) {
-            setStatus(true);
-            showSuccessToast(
-              "Your account is successfully created.Please go back and login!!"
-            );
-            //setShowVerificationPage(true);
-            // window.location.replace('/login');
-
-            let seconds = 5;
-            let foo = setInterval(function () {
-              document.getElementById("seconds").innerHTML = seconds;
-              seconds--;
-              if (seconds == -1) {
-                clearInterval(foo);
-                //setShowVerificationPage(true);
-                window.location.replace("/login");
-              }
-            }, 1000);
-          } else if (res.request.status == statusCode.HTTP_400_BAD_REQUEST) {
-            {
-              showErrorToast(res.response.data.message);
-            }
-          }
-        })
-        .catch((err) => {
-          setLoader(false);
-          showErrorToast("Something went wrong, Please try after some time");
-        });
-    }
-  };
-
   const onChecked = () => {
-    SetIAgree(iAgree ? false : true);
+    setIAgree(!iAgree);
   };
+  // const getotprecord = () => {
+  //   this.setState({ loader: true });
+  //   const queryParams = `?page=${this.state.activePage}&records=${this.state.itemsCountPerPage}`;
+  //   getotp(queryParams)
+  //     .then((response) => {
+  //       console.log("Response Status:", response.status);
+  //       // Handle the response data here, if needed
+  //       this.setState({ loader: false });
+  //     })
+  //     .catch((error) => {
+  //       console.error("Error:", error);
+  //       // Handle the error here, if needed
+  //       this.setState({ loader: false });
+  //     });
+  // };
 
   return (
-    <div className="registerWrapper">
+    <div
+      className="registerWrapper"
+      style={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        height: "100vh",
+        overflow: "hidden",
+        backgroundColor: "#f5f5f5",
+      }}
+    >
       {!showVerificationPage ? (
-        <div className="forgotPassSection">
+        <div className="forgotPassSection" style={{ width: "100%" }}>
           <div className="formDetail">
             <Col className="formCard">
-              <CardTitle>
-                <div className="text-center">Sign Up</div>
-              </CardTitle>
-              {status == true && (
+              {status && (
                 <CardText className="mb-2">
                   You should be automatically redirected to the login page in{" "}
                   <span id="seconds">5</span> seconds.
@@ -187,36 +182,69 @@ const Register = () => {
               )}
               <Form
                 className="formSection"
-                onSubmit={(e) => e.preventDefault()}
+                onSubmit={handleSubmit}
+                style={{
+                  padding: "20px",
+                  border: "1px solid #ccc",
+                  borderRadius: "8px",
+                  backgroundColor: "#fff",
+                  boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                  overflow: "hidden",
+                  maxHeight: "100%", // Prevent overflow in height
+                }}
               >
-                <div className="cardRow">
-                  <div className="w-50">
-                    <Label for="register-username">First Name *</Label>
+                <h2 style={{ textAlign: "center", marginBottom: "20px" }}>
+                  Sign Up
+                </h2>
+                <div className="cardRow" style={{ marginBottom: "15px" }}>
+                  <div className="w-100">
+                    <Label
+                      for="register-username"
+                      style={{
+                        marginBottom: "5px",
+                        display: "block",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Enter Name *
+                    </Label>
                     <Input
                       type="text"
                       id="register-username"
                       placeholder="First Name"
                       name="first_name"
                       autoFocus
-                      value={data.name}
+                      value={data.first_name}
                       onChange={handleChange}
-                    />
-                  </div>
-                  <div className="w-50">
-                    <Label for="register-username">Last Name *</Label>
-                    <Input
-                      type="text"
-                      id="register-username"
-                      placeholder="Last Name"
-                      name="last_name"
-                      value={data.name}
-                      onChange={handleChange}
+                      style={{
+                        width: "100%",
+                        padding: "10px",
+                        border: "1px solid #ccc",
+                        borderRadius: "4px",
+                        boxSizing: "border-box",
+                      }}
                     />
                   </div>
                 </div>
-                <div className="cardRow">
-                  <div className="w-50">
-                    <Label for="designation">Email *</Label>
+                <div
+                  className="cardRow"
+                  style={{
+                    marginBottom: "15px",
+                    display: "flex",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <div className="w-50" style={{ marginRight: "10px" }}>
+                    <Label
+                      for="designation"
+                      style={{
+                        marginBottom: "5px",
+                        display: "block",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Email *
+                    </Label>
                     <Input
                       className="input-group-merge"
                       id="designation"
@@ -224,24 +252,84 @@ const Register = () => {
                       placeholder="john@example.com"
                       value={data.email}
                       onChange={handleChange}
+                      style={{
+                        width: "100%",
+                        padding: "10px",
+                        border: "1px solid #ccc",
+                        borderRadius: "4px",
+                        boxSizing: "border-box",
+                      }}
                     />
                   </div>
                   <div className="w-50">
-                    <Label for="phone-number">Password</Label>
+                    <Label
+                      for="register-password"
+                      style={{
+                        marginBottom: "5px",
+                        display: "block",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Password *
+                    </Label>
                     <InputPasswordToggle
                       className="input-group-merge"
                       id="register-password"
-                      placeholder="password"
+                      placeholder="Password"
                       name="password"
                       value={data.password}
                       onChange={handleChange}
+                      style={{
+                        width: "100%",
+                        padding: "10px",
+                        border: "1px solid #ccc",
+                        borderRadius: "4px",
+                        boxSizing: "border-box",
+                      }}
                     />
                   </div>
                 </div>
-
-                <div className="cardRow">
+                <div className="cardRow" style={{ marginBottom: "15px" }}>
                   <div className="w-100">
-                    <Label for="register-password">Phone Number *</Label>
+                    <Label
+                      for="ConfirmPassword"
+                      style={{
+                        marginBottom: "5px",
+                        display: "block",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Confirm Password *
+                    </Label>
+                    <InputPasswordToggle
+                      className="input-group-merge"
+                      id="confirmpassword"
+                      placeholder="Confirm Password"
+                      name="ConfirmPassword"
+                      value={data.ConfirmPassword}
+                      onChange={handleChange}
+                      style={{
+                        width: "100%",
+                        padding: "10px",
+                        border: "1px solid #ccc",
+                        borderRadius: "4px",
+                        boxSizing: "border-box",
+                      }}
+                    />
+                  </div>
+                </div>
+                <div className="cardRow" style={{ marginBottom: "15px" }}>
+                  <div className="w-100">
+                    <Label
+                      for="phone-number"
+                      style={{
+                        marginBottom: "5px",
+                        display: "block",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Phone Number *
+                    </Label>
                     <Input
                       className="input-group-merge"
                       id="phone-number"
@@ -249,75 +337,99 @@ const Register = () => {
                       placeholder="Phone number"
                       value={data.mobile}
                       onChange={handleChange}
+                      style={{
+                        width: "100%",
+                        padding: "10px",
+                        border: "1px solid #ccc",
+                        borderRadius: "4px",
+                        boxSizing: "border-box",
+                      }}
                     />
                   </div>
                 </div>
-                {/* <div className="cardRow">
-                  <div className="w-100">
-                    <Label for="register-email">
-                      Designation *
-                    </Label>
-                    <Input
-                      type="email"
-                      id="register-email"
-                      placeholder="Designation"
-                      name="email"
-                      value={data.email}                   
-                      onChange={handleChange}
-                    />
-                  </div>
-                </div> */}
-
-                <div className="policyCheckBox">
+                <div
+                  className="policyCheckBox"
+                  style={{
+                    marginBottom: "15px",
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                >
                   <Input
                     type="checkbox"
                     id="terms"
                     checked={iAgree}
-                    onChange={() => onChecked()}
+                    onChange={onChecked}
+                    style={{ marginRight: "10px" }}
                   />
                   <Label for="terms">
                     I agree to
-                    <a href="/" onClick={(e) => e.preventDefault()}>
+                    <a
+                      href="/"
+                      onClick={(e) => e.preventDefault()}
+                      style={{
+                        color: "#1761fd",
+                        textDecoration: "underline",
+                        marginLeft: "5px",
+                      }}
+                    >
                       privacy policy & terms
                     </a>
                   </Label>
                 </div>
-                {
-                  <div className="submitButtonRow">
-                    <div className="buttonCard">
-                      <Button className="submit" onClick={handleSubmit}>
-                        {loader ? (
-                          <Spinner color="#1761fd" size="sm" />
-                        ) : (
-                          "Sign up"
-                        )}
-                      </Button>
-                      {!loader && (
-                        <p>
-                          Already have an account,
-                          <Link to="/login">
-                            <span>Sign In</span>
-                          </Link>
-                        </p>
-                      )}
-                    </div>
+                <div
+                  className="submitButtonRow"
+                  style={{ textAlign: "center" }}
+                >
+                  <div className="buttonCard">
+                    <Button
+                      className="submit"
+                      type="submit"
+                      disabled={loader}
+                      style={{
+                        backgroundColor: "#1761fd",
+                        color: "#fff",
+                        padding: "10px 20px",
+                        border: "none",
+                        borderRadius: "4px",
+                        cursor: loader ? "not-allowed" : "pointer",
+                        width: "100%",
+                      }}
+                    >
+                      {loader ? <Spinner color="#fff" size="sm" /> : "Sign up"}
+                    </Button>
+                    {!loader && (
+                      <p style={{ marginTop: "10px" }}>
+                        Already have an account,
+                        <Link
+                          to="/login"
+                          style={{
+                            color: "#1761fd",
+                            textDecoration: "underline",
+                            marginLeft: "5px",
+                          }}
+                        >
+                          Sign In
+                        </Link>
+                      </p>
+                    )}
                   </div>
-                }
+                </div>
               </Form>
             </Col>
           </div>
         </div>
       ) : (
         <div className="verificationDetail">
-          <Link className="brand-logo" to="/login">
-            <img src={"/assets/images/logo/logoColor.png"} width="80%"></img>
-          </Link>
           <div className="forgetPass align-items-center">
             <p className="titleCard">Verify your email</p>
             <div className="imgBox">
               <EmailVerify />
             </div>
             <p className="textArea">{Message.SENT_EMAIL_VERIFICATION_LINK} </p>
+
+            <OtpVerification userData={Payload} otp={otp} />
+
             <Link to="/login" className="backToHome">
               <ChevronLeft />
               <span>Back To Home Page</span>

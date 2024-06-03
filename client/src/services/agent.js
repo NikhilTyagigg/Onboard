@@ -127,6 +127,16 @@ export const loginHandler = (payload) => {
 export const signUpHandler = (payload) => {
   return requests.postPublic("auth/register/", payload);
 };
+export const otpHandler = (payload) => {
+  return requests.postPublic("auth/send-otp/", payload);
+};
+export const verifyOtp = (payload) => {
+  console.log("api wala", payload);
+  return requests.postPublic("auth/verify-otp/", payload);
+};
+export const getotp = (queryParams = "") => {
+  return requests.post("auth/getotp" + queryParams);
+};
 
 // ############# ONBOARD APIS ##################
 export const getLogs = (queryParams = "") => {
@@ -142,6 +152,7 @@ export const addVehicle = (payload) => {
 };
 
 export const getRoutes = (queryParams = "") => {
+  console.log("routes wale = ", queryParams);
   return requests.post("route/getRoutes" + queryParams);
 };
 
@@ -171,7 +182,7 @@ export const addMultipleRoutes = (payload) => {
 };
 
 export const sendResetPasswordLinkHandler = (payload) => {
-  console.log("hey", payload);
+  console.log("hey checking reset wala", payload);
   return requests.post("auth/send_reset_password_email/", payload);
 };
 

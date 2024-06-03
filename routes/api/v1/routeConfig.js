@@ -67,8 +67,9 @@ router.post("/getRoutes", async (req, res, next) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const records = parseInt(req.query.records) || 10;
+    const routeNo = req.query.routeNo || null;
 
-    let routes = await getRoutes({ page, records });
+    let routes = await getRoutes({ page, records, routeNo });
 
     res.send(successBody(routes));
   } catch (e) {

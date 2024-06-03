@@ -2,6 +2,9 @@ var express = require("express");
 const db = require("../../../models");
 const moment = require("moment");
 const logger = require("../../../helper/logger");
+const otpController = require("../../../controllers/otpController");
+const verifyOTP = require("../../../controllers/verifyOTP");
+const sendResetPasswordEmail = require("../../../controllers/sendResetPasswordEmail");
 
 const {
   NotAuthorizedError,
@@ -101,6 +104,8 @@ router.get("/token", function (req, res, next) {
       }
     });
 });
+router.post("/send-otp", otpController.sendOTP);
+router.post("/verify-otp", verifyOTP.verifyotp);
 
 router.post(
   "/logout",
@@ -113,7 +118,6 @@ router.post(
     });
   })
 );
-
 router.post(
   "/register",
   runAsyncWrapper(async (req, res, next) => {
@@ -130,6 +134,15 @@ router.post(
       if (user) {
         throw new ConflictError("Email Already registered!!");
       }
+      // const response = await OTP.find({ email })
+      //   .sort({ createdAt: -1 })
+      //   .limit(1);
+      // if (response.length === 0 || otp !== response[0].otp) {
+      //   return res.status(400).json({
+      //     success: false,
+      //     message: "The OTP is not valid",
+      //   });
+      // }
 
       user = await db.User.create({
         name: name,
@@ -148,124 +161,114 @@ router.post(
     }
   })
 );
-router.post("/send-otp", async (req, res, next) => {
-  try {
-    const { email } = req.body;
-    if (!email) {
-      return res.status(400).json({ error: "Email is required" });
-    }
-    await sendOtp(email);
-    res.status(200).json({ message: "OTP sent successfully" });
-  } catch (error) {
-    next(error);
-  }
-});
 
 // Route to verify OTP
-router.post("/verify-otp", async (req, res, next) => {
-  try {
-    const { email, otp } = req.body;
-    if (!email || !otp) {
-      return res.status(400).json({ error: "Email and OTP are required" });
-    }
-    const isVerified = await verifyOtp(email, otp);
-    if (isVerified) {
-      res.status(200).json({ message: "OTP verified successfully" });
-    } else {
-      res.status(400).json({ error: "Invalid OTP" });
-    }
-  } catch (error) {
-    next(error);
-  }
-});
+
 // Send password reset email
-router.post(
-  "/send_reset_password_email",
-  runAsyncWrapper(async (req, res, next) => {
+// router.post("/send_reset_password_email", async (req, res) => {
+//   try {
+//     const { email } = req.body;
+//     if (!email) {
+//       return res.status(400).json({ message: "Email is required" });
+//     }
+//     await sendResetPasswordEmail(email);
+//     res.status(200).json({ message: "Reset password email sent successfully" });
+//   } catch (error) {
+//     console.error("Error sending reset password email:", error);
+//     res.status(500).json({ message: "Internal server error" });
+//   }
+// });
+router.post("/send_reset_password_email", async (req, res) => {
+  try {
+    console.log("Request body:", req.body); // Log the entire request body
+
     const { email } = req.body;
+    console.log("Extracted email:", email); // Log the extracted email
 
     if (!email) {
-      throw new UserError("Email is required");
+      return res.status(400).json({ message: "Email is required" });
     }
 
-    const user = await db.User.findOne({ where: { email } });
-
-    if (!user) {
-      throw new NotFoundError("User not found");
-    }
-
-    const token = crypto.randomBytes(32).toString("hex");
-    const expireTime = moment().add(1, "hour").toDate();
-
-    await db.PasswordReset.create({
-      email: user.email,
-      token: sha512(token),
-      expiresAt: expireTime,
-    });
-
-    const resetLink = `http://localhost:3000/reset-password?token=${token}&email=${user.email}`;
-
-    const transporter = nodemailer.createTransport({
-      service: "Gmail",
-      auth: {
-        user: process.env.EMAIL,
-        pass: process.env.EMAIL_PASSWORD,
-      },
-    });
-
-    const mailOptions = {
-      from: process.env.EMAIL,
-      to: user.email,
-      subject: "Password Reset",
-      text: `You requested for a password reset. Click the link to reset your password: ${resetLink}`,
-    };
-
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        logger.error(error);
-        return next(new ApplicationError("Error sending email"));
-      } else {
-        res.send(successBody({ msg: "Reset email sent successfully" }));
-      }
-    });
-  })
-);
+    await sendResetPasswordEmail(email);
+    res.status(200).json({ message: "Reset password email sent successfully" });
+  } catch (error) {
+    console.error("Error sending reset password email:", error.message);
+    res
+      .status(500)
+      .json({ message: "Internal server error", error: error.message });
+  }
+});
 
 // Reset password
-router.post(
-  "/reset_password",
-  runAsyncWrapper(async (req, res, next) => {
-    const { token, email, password } = req.body;
+// router.post(
+//   "/reset_password",
+//   runAsyncWrapper(async (req, res, next) => {
+//     const { token, email, password } = req.body;
 
-    if (!token || !email || !password) {
-      throw new UserError("All fields are required");
-    }
+//     if (!token || !email || !password) {
+//       throw new UserError("All fields are required");
+//     }
 
-    const passwordReset = await db.PasswordReset.findOne({
-      where: {
-        email,
-        token: sha512(token),
-        expiresAt: { [Op.gt]: new Date() },
-      },
-    });
+//     const passwordReset = await db.PasswordReset.findOne({
+//       where: {
+//         email: process.env.MAIL_USER,
+//         token: sha512(token),
+//         expiresAt: { [Op.gt]: new Date() },
+//       },
+//     });
 
-    if (!passwordReset) {
-      throw new NotAuthorizedError("Invalid or expired token");
-    }
+//     if (!passwordReset) {
+//       throw new NotAuthorizedError("Invalid or expired token");
+//     }
 
-    const user = await db.User.findOne({ where: { email } });
+//     const user = await db.User.findOne({ where: { email } });
 
-    if (!user) {
-      throw new NotFoundError("User not found");
-    }
+//     if (!user) {
+//       throw new NotFoundError("User not found");
+//     }
 
-    user.password = sha512(password);
+//     user.password = sha512(password);
+//     await user.save();
+
+//     await passwordReset.destroy();
+
+//     res.send(successBody({ msg: "Password reset successfully" }));
+//   })
+// );
+router.post("/reset_password", async (req, res) => {
+  try {
+    const { email, newPassword } = req.body;
+
+    // if (!email || !newPassword) {
+    //   return res.status(400).json({ success: false, message: "Invalid input" });
+    // }
+
+    // const user = await User.findOne({ where: { email } });
+    // if (!user) {
+    //   return res
+    //     .status(404)
+    //     .json({ success: false, message: "User not found" });
+    // }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
     await user.save();
 
-    await passwordReset.destroy();
-
-    res.send(successBody({ msg: "Password reset successfully" }));
-  })
-);
+    res.json({ success: true, message: "Password updated successfully" });
+  } catch (error) {
+    console.error("Error in /reset-password:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+});
+router.post("/getotp", async (req, res, next) => {
+  logger.info("Fetching otp data");
+  try {
+    let data = await getotpmap();
+    res.send(successBody({ ...data }));
+  } catch (e) {
+    logger.error(e);
+    next(e);
+  }
+});
 
 module.exports = router;
