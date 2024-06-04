@@ -3,13 +3,13 @@ const { Model, DataTypes, Op } = require("sequelize");
 const mailSender = require("../utils/mailSender");
 
 module.exports = (sequelize) => {
-  class otps extends Model {
+  class OTP extends Model {
     static associate(models) {
       // Define associations here if needed
     }
   }
 
-  otps.init(
+  OTP.init(
     {
       email: {
         type: DataTypes.STRING,
@@ -31,7 +31,7 @@ module.exports = (sequelize) => {
     }
   );
 
-  otps.beforeCreate(async (otp) => {
+  OTP.beforeCreate(async (otp) => {
     console.log("New document saved to the database");
     console.log(otp.email, otp.otp);
     await sendVerificationEmail(otp.email, otp.otp);
@@ -56,7 +56,7 @@ module.exports = (sequelize) => {
   // Periodically delete expired OTPs every 5 minutes
   setInterval(async () => {
     try {
-      const result = await otps.destroy({
+      const result = await OTP.destroy({
         where: {
           createdAt: {
             [Op.lt]: sequelize.literal("NOW() - INTERVAL 5 MINUTE"),
@@ -69,5 +69,5 @@ module.exports = (sequelize) => {
     }
   }, 5 * 60 * 1000); // 5 minutes
 
-  return otps;
+  return OTP;
 };

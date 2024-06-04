@@ -118,49 +118,39 @@ router.post(
     });
   })
 );
-router.post(
-  "/register",
-  runAsyncWrapper(async (req, res, next) => {
-    let { name, role, password, email } = req.body;
-    try {
-      if (!name || !role || !password || !email) {
-        throw new UserError("Please fill all the mandatory fields!!");
-      }
-      let user = await db.User.findOne({
-        where: {
-          email: email,
-        },
-      });
-      if (user) {
-        throw new ConflictError("Email Already registered!!");
-      }
-      // const response = await OTP.find({ email })
-      //   .sort({ createdAt: -1 })
-      //   .limit(1);
-      // if (response.length === 0 || otp !== response[0].otp) {
-      //   return res.status(400).json({
-      //     success: false,
-      //     message: "The OTP is not valid",
-      //   });
-      // }
-
-      user = await db.User.create({
-        name: name,
-        password: sha512(password),
-        email: email,
-        role: role,
-      });
-      res.send(
-        successBody({
-          msg: "User created successfully. Please login!!",
-        })
-      );
-    } catch (e) {
-      logger.error(e);
-      throw new Error(e);
-    }
-  })
-);
+// router.post(
+//   "/register",
+//   runAsyncWrapper(async (req, res, next) => {
+//     let { name, role, password, email } = req.body;
+//     try {
+//       if (!name || !role || !password || !email) {
+//         throw new UserError("Please fill all the mandatory fields!!");
+//       }
+//       let user = await db.User.findOne({
+//         where: {
+//           email: email,
+//         },
+//       });
+//       if (user) {
+//         throw new ConflictError("Email Already registered!!");
+//       }
+//       user = await db.User.create({
+//         name: name,
+//         password: sha512(password),
+//         email: email,
+//         role: role,
+//       });
+//       res.send(
+//         successBody({
+//           msg: "User created successfully. Please login!!",
+//         })
+//       );
+//     } catch (e) {
+//       logger.error(e);
+//       throw new Error(e);
+//     }
+//   })
+// );
 
 // Route to verify OTP
 
@@ -178,6 +168,50 @@ router.post(
 //     res.status(500).json({ message: "Internal server error" });
 //   }
 // });
+router.post(
+  "/register",
+  runAsyncWrapper(async (req, res, next) => {
+    const { full_name, role, password, contact } = req.body;
+    try {
+      if (!full_name || !role || !password || !contact) {
+        throw new UserError("Please fill all the mandatory fields!!");
+      }
+
+      let user;
+      const isEmail = /\S+@\S+\.\S+/.test(contact);
+
+      if (isEmail) {
+        user = await db.User.findOne({ where: { email: contact } });
+        if (user) {
+          throw new ConflictError("Email already registered!!");
+        }
+      } else {
+        user = await db.User.findOne({ where: { phone: contact } });
+        if (user) {
+          throw new ConflictError("Phone number already registered!!");
+        }
+      }
+
+      user = await db.User.create({
+        name: full_name,
+        password: sha512(password),
+        email: isEmail ? contact : null,
+        phone: isEmail ? null : contact,
+        role,
+      });
+
+      res.send(
+        successBody({
+          msg: "User created successfully. Please verify the OTP!!",
+        })
+      );
+    } catch (e) {
+      logger.error(e);
+      throw new Error(e);
+    }
+  })
+);
+
 router.post("/send_reset_password_email", async (req, res) => {
   try {
     console.log("Request body:", req.body); // Log the entire request body

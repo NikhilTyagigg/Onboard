@@ -3,22 +3,12 @@ import { Link } from "react-router-dom";
 import { useSkin } from "@hooks/useSkin";
 import InputPasswordToggle from "@components/input-password-toggle";
 import { statusCode } from "../utility/constants/utilObject";
-import {
-  Col,
-  CardTitle,
-  CardText,
-  Form,
-  Label,
-  Input,
-  Button,
-  Spinner,
-} from "reactstrap";
+import { Col, CardText, Form, Label, Input, Button, Spinner } from "reactstrap";
 import "@styles/react/pages/page-authentication.scss";
 import toast from "react-hot-toast";
 import { showErrorToast, showSuccessToast } from "../utility/helper";
 import { getUserNameFromEmail } from "../utility/helper";
-import { otpHandler, sendEmailVerification } from "../services/agent";
-
+import { otpHandler } from "../services/agent";
 import { ReactComponent as EmailVerify } from "../assets/images/pages/Email-Verify.svg";
 import { ChevronLeft } from "react-feather";
 import { Message } from "../utility/constants/message";
@@ -26,20 +16,12 @@ import OtpVerification from "./OtpVerification"; // Import your otpVerification 
 
 const Register = () => {
   const { skin } = useSkin();
-  const illustration =
-    skin === "dark" ? "register-v2-dark.svg" : "register-v2.svg";
 
   const [data, setData] = useState({
-    first_name: "",
-    email: "",
+    full_name: "",
+    contact: "",
     password: "",
     ConfirmPassword: "",
-    username: "",
-    designation: "",
-    company: "",
-    mobile: "",
-    purpose: "",
-    iAgree: false,
   });
   const [loader, setLoader] = useState(false);
   const [status, setStatus] = useState(false);
@@ -56,80 +38,66 @@ const Register = () => {
     });
   };
 
-  // const resetData = () => {
-  //   setData({
-  //     first_name: "",
-  //     last_name: "",
-  //     email: "",
-  //     password: "",
-  //     username: "",
-  //     designation: "",
-  //     company: "",
-  //     mobile: "",
-  //     purpose: "",
-  //     name: "",
-  //   });
-  // };
-
-  // const sendVerificationLink = () => {
+  // const handleSubmit = (e) => {
+  //   e.preventDefault();
+  //   const isEmail = /\S+@\S+\.\S+/.test(data.contact);
   //   const payload = {
-  //     email: data.email,
-  //     origin: "",
+  //     ...data,
+  //     role: 1,
+  //     username: isEmail ? getUserNameFromEmail(data.contact) : data.contact,
+  //     phone: isEmail ? null : data.contact,
+  //     email: isEmail ? data.contact : null,
   //   };
   //   setLoader(true);
-  //   sendEmailVerification(payload)
+  //   setPayload(payload);
+
+  //   otpHandler(payload.username)
   //     .then((res) => {
   //       setLoader(false);
-  //       if (res.status === statusCode.HTTP_200_OK) {
-  //         toast.success(Message.SENT_VERIFICATION_LINK, {
-  //           ...toastStyle.success,
-  //         });
-  //       } else {
-  //         let key = Object.keys(res.response.data);
-  //         key = key[0];
-  //         toast.error("Sending failed: " + res.response.data.detail, {
-  //           ...toastStyle.error,
-  //         });
+  //       console.log("OTP Handler Response:", res);
+  //       if (res.status == statusCode.HTTP_200_OK) {
+  //         setStatus(true);
+  //         showSuccessToast("OTP sent successfully. Please verify!");
+  //         setShowVerificationPage(true);
+  //         setOtp(res.data.otp);
+  //       } else if (res.request.status === statusCode.HTTP_400_BAD_REQUEST) {
+  //         showErrorToast(res.response.data.message);
   //       }
   //     })
   //     .catch((err) => {
   //       setLoader(false);
-  //       toast.error("Sending failed: " + err.message, {
-  //         ...toastStyle.error,
-  //       });
+  //       showErrorToast("Something went wrong. Please try again later.");
+  //       console.error("Error:", err);
   //     });
   // };
-
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Form submitted"); // Check if the form is being submitted
+    const isEmail = /\S+@\S+\.\S+/.test(data.contact);
     const payload = {
-      ...data,
+      full_name: data.full_name,
+      contact: data.contact,
+      password: data.password,
+      ConfirmPassword: data.ConfirmPassword,
       role: 1,
-      name: data.first_name,
-      username: getUserNameFromEmail(data.email),
+      username: isEmail ? getUserNameFromEmail(data.contact) : data.contact,
+      phone: isEmail ? null : data.contact,
+      email: isEmail ? data.contact : null,
     };
     setLoader(true);
     setPayload(payload);
-    console.log("Payload:", payload); // Check the payload before sending OTP
+
     otpHandler(payload.username)
       .then((res) => {
         setLoader(false);
-        console.log("OTP Response:", res.data.otp);
-        console.log("ye rha ", res.status);
-        console.log("log=", statusCode.HTTP_200_OK); // Check the response from otpHandler
         if (res.status == statusCode.HTTP_200_OK) {
-          console.log(
-            "OTP successfully sent, redirecting to verification page."
-          );
           setStatus(true);
-          showSuccessToast(
-            "OTP sent successfully to your gmail account. Please verify!"
-          );
+          showSuccessToast("OTP sent successfully. Please verify!");
           setShowVerificationPage(true);
           setOtp(res.data.otp);
         } else if (res.request.status == statusCode.HTTP_400_BAD_REQUEST) {
           showErrorToast(res.response.data.message);
+        } else if (res.request.status == statusCode.HTTP_401_UNAUTHORIZED) {
+          showErrorToast("Unauthorized request. User Already registered.");
         }
       })
       .catch((err) => {
@@ -142,21 +110,6 @@ const Register = () => {
   const onChecked = () => {
     setIAgree(!iAgree);
   };
-  // const getotprecord = () => {
-  //   this.setState({ loader: true });
-  //   const queryParams = `?page=${this.state.activePage}&records=${this.state.itemsCountPerPage}`;
-  //   getotp(queryParams)
-  //     .then((response) => {
-  //       console.log("Response Status:", response.status);
-  //       // Handle the response data here, if needed
-  //       this.setState({ loader: false });
-  //     })
-  //     .catch((error) => {
-  //       console.error("Error:", error);
-  //       // Handle the error here, if needed
-  //       this.setState({ loader: false });
-  //     });
-  // };
 
   return (
     <div
@@ -199,22 +152,22 @@ const Register = () => {
                 <div className="cardRow" style={{ marginBottom: "15px" }}>
                   <div className="w-100">
                     <Label
-                      for="register-username"
+                      for="register-full-name"
                       style={{
                         marginBottom: "5px",
                         display: "block",
                         fontWeight: "bold",
                       }}
                     >
-                      Enter Name *
+                      Enter Full Name *
                     </Label>
                     <Input
                       type="text"
-                      id="register-username"
-                      placeholder="First Name"
-                      name="first_name"
+                      id="register-full-name"
+                      placeholder="Full Name"
+                      name="full_name"
                       autoFocus
-                      value={data.first_name}
+                      value={data.full_name}
                       onChange={handleChange}
                       style={{
                         width: "100%",
@@ -226,31 +179,24 @@ const Register = () => {
                     />
                   </div>
                 </div>
-                <div
-                  className="cardRow"
-                  style={{
-                    marginBottom: "15px",
-                    display: "flex",
-                    justifyContent: "space-between",
-                  }}
-                >
-                  <div className="w-50" style={{ marginRight: "10px" }}>
+                <div className="cardRow" style={{ marginBottom: "15px" }}>
+                  <div className="w-100">
                     <Label
-                      for="designation"
+                      for="contact"
                       style={{
                         marginBottom: "5px",
                         display: "block",
                         fontWeight: "bold",
                       }}
                     >
-                      Email *
+                      Phone Number / Email *
                     </Label>
                     <Input
                       className="input-group-merge"
-                      id="designation"
-                      name="email"
-                      placeholder="john@example.com"
-                      value={data.email}
+                      id="contact"
+                      name="contact"
+                      placeholder="Mobile number / E-mail"
+                      value={data.contact}
                       onChange={handleChange}
                       style={{
                         width: "100%",
@@ -261,7 +207,9 @@ const Register = () => {
                       }}
                     />
                   </div>
-                  <div className="w-50">
+                </div>
+                <div className="cardRow" style={{ marginBottom: "15px" }}>
+                  <div className="w-100">
                     <Label
                       for="register-password"
                       style={{
@@ -287,6 +235,15 @@ const Register = () => {
                         boxSizing: "border-box",
                       }}
                     />
+                    <CardText
+                      style={{
+                        fontSize: "12px",
+                        color: "#6c757d",
+                        marginTop: "5px",
+                      }}
+                    >
+                      Password must be 8 characters long
+                    </CardText>
                   </div>
                 </div>
                 <div className="cardRow" style={{ marginBottom: "15px" }}>
@@ -316,35 +273,15 @@ const Register = () => {
                         boxSizing: "border-box",
                       }}
                     />
-                  </div>
-                </div>
-                <div className="cardRow" style={{ marginBottom: "15px" }}>
-                  <div className="w-100">
-                    <Label
-                      for="phone-number"
+                    <CardText
                       style={{
-                        marginBottom: "5px",
-                        display: "block",
-                        fontWeight: "bold",
+                        fontSize: "12px",
+                        color: "#6c757d",
+                        marginTop: "5px",
                       }}
                     >
-                      Phone Number *
-                    </Label>
-                    <Input
-                      className="input-group-merge"
-                      id="phone-number"
-                      name="mobile"
-                      placeholder="Phone number"
-                      value={data.mobile}
-                      onChange={handleChange}
-                      style={{
-                        width: "100%",
-                        padding: "10px",
-                        border: "1px solid #ccc",
-                        borderRadius: "4px",
-                        boxSizing: "border-box",
-                      }}
-                    />
+                      Password must be 8 characters long
+                    </CardText>
                   </div>
                 </div>
                 <div
