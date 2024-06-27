@@ -501,7 +501,7 @@ class RouteConfiguration extends Component {
           params = [...results.data];
           if (params.length > 0) {
             params.splice(0, 1);
-            this.addConfig(params);
+            this.addRouteConfig(params);
           }
           if (params.length > 2000) {
             this.setState({ loader: false });
@@ -531,7 +531,7 @@ class RouteConfiguration extends Component {
               showErrorToast("Upto 2000 records can be added in one go!!");
               return;
             }
-            this.addConfig(params);
+            this.addRouteConfig(params);
             console.log("-----------", params);
           });
         });
@@ -558,45 +558,41 @@ class RouteConfiguration extends Component {
             <div className="tab-container" style={{ width: "50%" }}>
               <div className="section-head">Route Configurations</div>
             </div>
-            <div className="d-flex">
-              <div
-                className="col-sm-12 d-flex"
-                style={{
-                  textAlign: "left",
-                  marginTop: "10px",
-                  float: "right",
-                }}
-              >
-                <div
-                  style={{ width: "30%", marginTop: "15px", marginRight: 10 }}
-                >
-                  {this.state.refreshTime && (
-                    <Countdown
-                      key={this.state.keyValue}
-                      date={this.state.refreshTime}
-                      renderer={this.renderer}
-                    />
-                  )}
-                </div>
-
-                <div
-                  className="col-sm-2 text-left"
-                  style={{ marginTop: "15px", textAlign: "left", width: "30%" }}
-                >
-                  <span> Import File: </span>
-                </div>
-                <div className="col-md-1" style={{ marginTop: "12px" }}>
-                  <input
-                    type="file"
-                    accept=".csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
-                    ref={(ref) => (this.state.fileRef = ref)}
-                    onChange={this._handleFileLoad}
+            <div
+              className="d-flex justify-content-between align-items-center"
+              style={{ marginTop: "10px", whiteSpace: "nowrap" }}
+            >
+              <div style={{ marginRight: "10px" }}>
+                {this.state.refreshTime && (
+                  <Countdown
+                    key={this.state.keyValue}
+                    date={this.state.refreshTime}
+                    renderer={({ minutes, seconds }) => (
+                      <span>
+                        Auto refresh in {minutes}:
+                        {seconds < 10 ? `0${seconds}` : seconds} minutes
+                      </span>
+                    )}
                   />
-                </div>
+                )}
+              </div>
+              <div
+                className="d-flex align-items-center"
+                style={{ marginRight: "10px" }}
+              >
+                <span>Import File:</span>
+                <input
+                  type="file"
+                  accept=".csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
+                  ref={(ref) => (this.state.fileRef = ref)}
+                  onChange={this._handleFileLoad}
+                  style={{ marginLeft: "10px" }}
+                />
               </div>
               <button
-                className="btn btn-sm btn-primary "
+                className="btn btn-sm btn-primary"
                 onClick={() => this.addRecord()}
+                style={{ marginLeft: "6px" }}
               >
                 Add Record
               </button>
@@ -619,7 +615,7 @@ class RouteConfiguration extends Component {
                 <tbody style={{ height: "20%" }}>{this.renderUser()}</tbody>
               </Table>
             ) : (
-              <div className="page-sipnner-container">
+              <div className="page-spinner-container">
                 <Spinner size="lg" color="primary" />
                 <div className="page-spinner-text">
                   Please wait while we load all users...
@@ -629,18 +625,18 @@ class RouteConfiguration extends Component {
           </div>
           {this.renderModePopup()}
           {/* <div className='row'>
-                    <div className='col-lg-12' >
-                        <Pagination
-                        activePage={this.state.activePage}
-                        itemClass="page-item"
-                        linkClass="page-link"
-                        itemsCountPerPage={this.state.itemsCountPerPage}
-                        totalItemsCount={this.state.totalItemsCount}
-                        pageRangeDisplayed={this.state.pageRangeDisplayed}
-                        onChange={this.handlePageChange.bind(this)}
-                        />
-                    </div>
-                </div> */}
+    <div className='col-lg-12'>
+      <Pagination
+        activePage={this.state.activePage}
+        itemClass="page-item"
+        linkClass="page-link"
+        itemsCountPerPage={this.state.itemsCountPerPage}
+        totalItemsCount={this.state.totalItemsCount}
+        pageRangeDisplayed={this.state.pageRangeDisplayed}
+        onChange={this.handlePageChange.bind(this)}
+      />
+    </div>
+  </div> */}
         </div>
       </Card>
     );

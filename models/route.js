@@ -31,16 +31,16 @@ module.exports = (sequelize, DataTypes) => {
       },
 
       startTime: {
-        type: DataTypes.STRING, // Use TIME type for time values
+        type: DataTypes.STRING,
       },
       endTime: {
         type: DataTypes.STRING,
       },
       depotname: {
-        type: DataTypes.STRING, // Typo: Correct it to "depotName
+        type: DataTypes.STRING,
       },
       frequency: {
-        type: DataTypes.STRING, // Use STRING for frequency
+        type: DataTypes.STRING,
       },
       trip_length: {
         type: DataTypes.STRING,
@@ -52,7 +52,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
       },
       intermediateStops: {
-        type: DataTypes.JSONB, // Use JSONB type for storing JSON data
+        type: DataTypes.JSONB,
       },
       isActive: {
         type: DataTypes.BOOLEAN,

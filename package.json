@@ -17,7 +17,9 @@
   "author": "Keshav.goyal",
   "license": "ISC",
   "dependencies": {
+    "@aws-sdk/client-sns": "^3.600.0",
     "aws-iot-device-sdk": "^2.2.12",
+    "aws-sdk": "^2.1633.0",
     "bcrypt": "^5.1.1",
     "config": "^3.3.9",
     "cors": "^2.8.5",

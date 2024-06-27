@@ -9,7 +9,7 @@ const Route = models.Route;
 const VehicleRouteDriverMaps = models.VehicleRouteDriverMap;
 
 const device = awsIot.device({
-  clientId: "iotconsole-82c56985-b764-44e8-bf39-781c7397dc76",
+  clientId: "iotconsole-83b31e63-8d8b-4e0c-b477-3602b316aa48",
   host: "a31nhrmeyspsde-ats.iot.ap-south-1.amazonaws.com",
   certPath: "onboarddevtestdevice.cert.pem",
   keyPath: "onboarddevtestdevice.private.key",

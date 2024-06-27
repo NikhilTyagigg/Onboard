@@ -13,11 +13,37 @@ if (!OTP || !User) {
 
 exports.sendOTP = async (req, res) => {
   try {
-    const email = Object.keys(req.body)[0];
-    console.log("Received email:", email);
+    console.log(req.body);
+    const recipient = Object.keys(req.body)[0];
+
+    console.log("Received email:", recipient);
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phonePattern = /^\+?[1-9]\d{1,14}$/;
+    let email = null;
+    let phone = null;
+    if (emailPattern.test(recipient)) {
+      email = recipient;
+      console.log("Recipient is an email address.");
+      // Handle email address
+    } else if (phonePattern.test(recipient)) {
+      phone = recipient;
+      console.log("Recipient is a phone number.");
+      // Handle phone number
+    } else {
+      console.log(
+        "Recipient is neither a valid email address nor a valid phone number."
+      );
+      // Handle invalid recipient
+    }
 
     // Check if user is already present
-    const checkUserPresent = await User.findOne({ where: { email } });
+    let checkUserPresent;
+    if (email) {
+      checkUserPresent = await User.findOne({ where: { email } });
+    } else if (phone) {
+      checkUserPresent = await User.findOne({ where: { phone: phone } });
+    }
+
     if (checkUserPresent) {
       return res.status(401).json({
         success: false,
@@ -26,16 +52,22 @@ exports.sendOTP = async (req, res) => {
       });
     }
 
-    // Check if an OTP is already present for the email
-    const checkOtpPresent = await OTP.findOne({ where: { email } });
+    // Check if an OTP is already present for the recipient
+    let checkOtpPresent;
+    if (email) {
+      checkOtpPresent = await OTP.findOne({ where: { email } });
+    } else if (phone) {
+      checkOtpPresent = await OTP.findOne({ where: { phone: phone } });
+    }
+
     if (checkOtpPresent) {
       return res.status(401).json({
         success: false,
-        message: "OTP is already sent to this email",
+        message: "OTP is already sent to this recipient",
       });
     }
 
-    // Generate a unique 6-digit OTP
+    // Generate a unique 4-digit OTP
     let otp = otpGenerator.generate(4, {
       upperCaseAlphabets: false,
       lowerCaseAlphabets: false,
@@ -52,7 +84,8 @@ exports.sendOTP = async (req, res) => {
       result = await OTP.findOne({ where: { otp } });
     }
 
-    const otpPayload = { email, otp };
+    const otpPayload = { email, phone, otp };
+    console.log("otphai=", otpPayload);
     await OTP.create(otpPayload);
 
     res.status(200).json({

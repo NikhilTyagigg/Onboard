@@ -11,24 +11,32 @@ if (!OTP || !User) {
 
 exports.verifyotp = async (req, res) => {
   try {
+    console.log("Verifying OTP for request body:", req.body);
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ success: false, errors: errors.array() });
     }
 
-    const { email, userOtp, otp } = req.body;
-    console.log("Verifying OTP for email:", email);
+    const { email, phone, userOtp } = req.body;
+    console.log("Verifying OTP for email or phone:", email || phone);
 
-    // Check if the provided userOtp matches the otp for the email
-    if (userOtp !== otp) {
-      return res.status(401).json({
+    // Ensure either email or phone is provided
+    if (!email && !phone) {
+      return res.status(400).json({
         success: false,
-        message: "Invalid OTP",
+        message: "Either email or phone must be provided.",
       });
     }
 
-    // Find the OTP record for the provided email and OTP
-    const otpRecord = await OTP.findOne({ where: { email, otp: userOtp } });
+    // Construct where condition based on email or phone
+    const whereCondition = email
+      ? { email, otp: userOtp }
+      : { phone, otp: userOtp };
+
+    // Find the OTP record for the provided email or phone and OTP
+    console.log("here is wherec= ", whereCondition);
+    const otpRecord = await OTP.findOne({ where: whereCondition });
+    console.log(otpRecord);
 
     if (!otpRecord) {
       return res.status(401).json({
@@ -50,14 +58,14 @@ exports.verifyotp = async (req, res) => {
     // For example, you might want to create a new user or reset a password, etc.
 
     // Remove the used OTP from the database
-    await OTP.destroy({ where: { email, otp: userOtp } });
+    await OTP.destroy({ where: whereCondition });
 
     res.status(200).json({
       success: true,
       message: "OTP verified successfully",
     });
   } catch (error) {
-    console.log(error.message);
+    console.error("Error during OTP verification:", error.message);
     return res.status(500).json({ success: false, error: error.message });
   }
 };

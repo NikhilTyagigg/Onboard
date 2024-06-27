@@ -3,7 +3,7 @@ const nodemailer = require("nodemailer");
 const mailSender = async (email, title, body) => {
   try {
     // Create a Transporter to send emails
-    console.log(email, "ye tit", title, body);
+    // console.log(email, "ye tit", title, body);
     let transporter = nodemailer.createTransport({
       service: "gmail",
       host: process.env.MAIL_HOST,
@@ -15,10 +15,10 @@ const mailSender = async (email, title, body) => {
       },
     });
     // Send emails to users
-    console.log(transporter);
+    // console.log(transporter);
     let info = await transporter.sendMail({
       from: {
-        name: "Nikhil",
+        name: "Verify Your Otp",
         address: process.env.MAIL_USER,
       },
       to: email,

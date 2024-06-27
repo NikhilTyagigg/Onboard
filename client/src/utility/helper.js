@@ -20,6 +20,12 @@ export const isValidEmail = (email) => {
     );
 };
 
+// Function to validate phone number
+export const isValidPhoneNumber = (phone) => {
+  const re = /^\d{10}$/; // This regex matches a 10-digit phone number
+  return re.test(phone);
+};
+
 export const isValidMobile = (mobile) => {
   return mobile.match(/^(\+\d{1,3}[- ]?)?\d{10}$/) && !mobile.match(/0{5,}/);
 };

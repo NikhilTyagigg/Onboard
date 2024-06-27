@@ -83,7 +83,7 @@ router.post(
     }
   })
 );
-
+// Backend route to resend OTP
 /* refresh the token*/
 router.get("/token", function (req, res, next) {
   var refreshToken = req.headers["refreshtoken"];
@@ -103,6 +103,15 @@ router.get("/token", function (req, res, next) {
         next(new UserError("Invalid request"));
       }
     });
+});
+router.get("/token_verify/", async function (req, res, next) {
+  try {
+    const payload = req.query.payload; // assuming payload is passed as a query parameter
+    const response = await verifyToken(payload);
+    res.json(response.data);
+  } catch (error) {
+    res.status(401).json({ error: "Invalid token" });
+  }
 });
 router.post("/send-otp", otpController.sendOTP);
 router.post("/verify-otp", verifyOTP.verifyotp);
@@ -151,23 +160,6 @@ router.post(
 //     }
 //   })
 // );
-
-// Route to verify OTP
-
-// Send password reset email
-// router.post("/send_reset_password_email", async (req, res) => {
-//   try {
-//     const { email } = req.body;
-//     if (!email) {
-//       return res.status(400).json({ message: "Email is required" });
-//     }
-//     await sendResetPasswordEmail(email);
-//     res.status(200).json({ message: "Reset password email sent successfully" });
-//   } catch (error) {
-//     console.error("Error sending reset password email:", error);
-//     res.status(500).json({ message: "Internal server error" });
-//   }
-// });
 router.post(
   "/register",
   runAsyncWrapper(async (req, res, next) => {
@@ -214,10 +206,10 @@ router.post(
 
 router.post("/send_reset_password_email", async (req, res) => {
   try {
-    console.log("Request body:", req.body); // Log the entire request body
+    console.log("Request body:", req.body);
 
     const { email } = req.body;
-    console.log("Extracted email:", email); // Log the extracted email
+    console.log("Extracted email:", email);
 
     if (!email) {
       return res.status(400).json({ message: "Email is required" });
@@ -234,56 +226,9 @@ router.post("/send_reset_password_email", async (req, res) => {
 });
 
 // Reset password
-// router.post(
-//   "/reset_password",
-//   runAsyncWrapper(async (req, res, next) => {
-//     const { token, email, password } = req.body;
-
-//     if (!token || !email || !password) {
-//       throw new UserError("All fields are required");
-//     }
-
-//     const passwordReset = await db.PasswordReset.findOne({
-//       where: {
-//         email: process.env.MAIL_USER,
-//         token: sha512(token),
-//         expiresAt: { [Op.gt]: new Date() },
-//       },
-//     });
-
-//     if (!passwordReset) {
-//       throw new NotAuthorizedError("Invalid or expired token");
-//     }
-
-//     const user = await db.User.findOne({ where: { email } });
-
-//     if (!user) {
-//       throw new NotFoundError("User not found");
-//     }
-
-//     user.password = sha512(password);
-//     await user.save();
-
-//     await passwordReset.destroy();
-
-//     res.send(successBody({ msg: "Password reset successfully" }));
-//   })
-// );
 router.post("/reset_password", async (req, res) => {
   try {
     const { email, newPassword } = req.body;
-
-    // if (!email || !newPassword) {
-    //   return res.status(400).json({ success: false, message: "Invalid input" });
-    // }
-
-    // const user = await User.findOne({ where: { email } });
-    // if (!user) {
-    //   return res
-    //     .status(404)
-    //     .json({ success: false, message: "User not found" });
-    // }
-
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     user.password = hashedPassword;
     await user.save();

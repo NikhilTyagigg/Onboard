@@ -56,18 +56,17 @@ class RouteRecords extends Component {
       },
       showDeletePopup: false,
     };
+    this.onEditClick = this.onEditClick.bind(this);
   }
 
   handleInputChange = (event) => {
-    const { value, name } = event.target;
-    console.log(value);
-    this.setState({
+    const { name, value } = event.target;
+    this.setState((prevState) => ({
       newRouteInfo: {
-        ...this.state.newRouteInfo,
+        ...prevState.newRouteInfo,
         [name]: value,
       },
-    });
-    // console.log(this.state.newRouteInfo.startTime);
+    }));
   };
   handleSearchChange = (e) => {
     this.setState({ searchRouteNo: e.target.value });
@@ -98,14 +97,41 @@ class RouteRecords extends Component {
       },
     }));
   };
-  handleIntermediateStopChange = (e, index, fieldName) => {
-    const { value } = e.target;
+  handleIntermediateStopChange = (event, index, field) => {
+    const { value } = event.target;
+
     this.setState((prevState) => {
       const intermediateStops = [...prevState.newRouteInfo.intermediateStops];
       intermediateStops[index] = {
         ...intermediateStops[index],
-        [fieldName]: value,
+        [field]: value,
       };
+
+      // If stopLocation is being updated, validate or process latitude and longitude
+      if (field === "stopLocation") {
+        // Example: Assume stopLocation is entered as "latitude, longitude"
+        const [latitude, longitude] = value.split(",");
+
+        if (latitude && longitude) {
+          intermediateStops[index] = {
+            ...intermediateStops[index],
+            stopLocation: value.trim(), // Trim the entire value
+            latitude: parseFloat(latitude.trim()), // Convert to float
+            longitude: parseFloat(longitude.trim()), // Convert to float
+          };
+        } else {
+          // Handle case where latitude or longitude is missing
+          console.warn("Invalid format for latitude and longitude");
+          // Optionally, reset latitude and longitude to empty or default values
+          intermediateStops[index] = {
+            ...intermediateStops[index],
+            stopLocation: value.trim(), // Trim the entire value
+            latitude: null,
+            longitude: null,
+          };
+        }
+      }
+
       return {
         newRouteInfo: {
           ...prevState.newRouteInfo,
@@ -288,6 +314,10 @@ class RouteRecords extends Component {
       newRouteInfo: {},
     });
   };
+  handleClose = () => {
+    // Add the logic to close the modal, e.g., by calling a parent function to toggle the modal visibility
+    this.props.onClose();
+  };
 
   onChangeRouteNo = (text) => {
     // let regex = new RegExp(/^(?=.*[a-zA-Z])(?=.*[0-9])[A-Za-z0-9]+$/);
@@ -314,7 +344,17 @@ class RouteRecords extends Component {
           isOpen={this.state.showModePopup}
           style={{ marginTop: "5%" }}
         >
-          <ModalHeader>Add Route</ModalHeader>
+          <ModalHeader className="d-flex justify-content-between">
+            <span>Add Route</span>
+            <button
+              type="button"
+              className="close"
+              onClick={this.props.onClose}
+              aria-label="Close"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </ModalHeader>
           <ModalBody>
             <div className="row">
               <div className="col-lg-6 custom-input-box">
@@ -539,7 +579,7 @@ class RouteRecords extends Component {
                           <input
                             type="text"
                             name="stopLocation"
-                            placeholder="Stop Location"
+                            placeholder="Stop Location (latitude, longitude)"
                             value={stop.stopLocation}
                             onChange={(e) =>
                               this.handleIntermediateStopChange(
@@ -638,7 +678,7 @@ class RouteRecords extends Component {
                   <th>Arrival Time</th>
                   <th>Departure Time</th>
                   <th>Frequency</th>
-                  <th>Stop Location</th>
+                  <th>Stop Location (Lat, Long)</th>
                 </tr>
               </thead>
               <tbody>
@@ -668,17 +708,29 @@ class RouteRecords extends Component {
   };
 
   onEditClick = (route) => {
+    console.log("Editing route:", route);
+    const intermediateStops = route.intermediateStops || [];
     this.setState({
       newRouteInfo: {
-        number: route.routeNo,
-        startPoint: route.startPoint,
-        endPoint: route.endPoint,
-        depotname: route.depotname,
-        startTime: route.startTime,
-        endTime: route.endTime,
-        frequency: route.frequency,
-        intermediateStops: route?.intermediateStops || "",
-        id: route.routeId,
+        number: route.routeNo || "",
+        startPoint: route.startPoint || "",
+        endPoint: route.endPoint || "",
+        depotname: route.depotname || "",
+        startTime: route.startTime || "",
+        endTime: route.endTime || "",
+        frequency: route.frequency || "",
+        trip_length: route.trip_length || "",
+        SCH_NO: route.SCH_NO || "",
+        SERVICE: route.SERVICE || "",
+        intermediateStops: intermediateStops.map((stop) => ({
+          ...stop,
+          stopName: stop.stopName || "",
+          arrivalTime: stop.arrivalTime || "",
+          departureTime: stop.departureTime || "",
+          frequency: stop.frequency || "",
+          stopLocation: stop.stopLocation || "",
+        })),
+        id: route.routeId || "",
       },
       showModePopup: true,
     });

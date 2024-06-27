@@ -45,7 +45,7 @@ const requests = {
     return axiosInstance
       .post(URL.API_ROOT + url, body)
       .then((res) => {
-        //console.log(body);
+        console.log(body);
         return res;
       })
       .catch((error) => {
@@ -105,7 +105,7 @@ const Auth = {
 };
 
 export const verifyToken = (payload) => {
-  return requests.post("auth/token/verify/", payload);
+  return requests.post("auth/token_verify/", payload);
 };
 
 export const updateUserPassword = (payload) => {
@@ -117,6 +117,7 @@ export const updateUserProfile = (payload) => {
 };
 
 export const getUserProfile = (payload) => {
+  console.log("getuseridpayload", payload);
   return requests.post("auth/userprofile/fetch_user_by_id/", payload);
 };
 
@@ -131,7 +132,6 @@ export const otpHandler = (payload) => {
   return requests.postPublic("auth/send-otp/", payload);
 };
 export const verifyOtp = (payload) => {
-  console.log("api wala", payload);
   return requests.postPublic("auth/verify-otp/", payload);
 };
 export const getotp = (queryParams = "") => {
@@ -182,7 +182,7 @@ export const addMultipleRoutes = (payload) => {
 };
 
 export const sendResetPasswordLinkHandler = (payload) => {
-  console.log("hey checking reset wala", payload);
+  //console.log("hey checking reset wala", payload);
   return requests.post("auth/send_reset_password_email/", payload);
 };
 
@@ -191,7 +191,7 @@ export const resetPasswordHandler = (payload) => {
 };
 
 export const sendEmailVerification = (payload) => {
-  console.log(payload);
+  // console.log(payload);
   return requests.postPublic(`auth/send-otp/`, payload);
 };
 

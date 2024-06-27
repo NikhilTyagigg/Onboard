@@ -6,20 +6,20 @@
  */
 
 const ErrorCodes = {
-  ERR_NONE                  : 'ERR_NONE',
-  ERR_INTERNAL              : 'ERR_INTERNAL',
-  ERR_BAD_REQUEST           : 'ERR_BAD_REQUEST',
-  ERR_NOT_FOUND             : 'ERR_NOT_FOUND',
-  ERR_NOT_AUTHORIZED        : 'ERR_NOT_AUTHORIZED',
-  ERR_NOT_IMPLEMENTED       : 'ERR_NOT_IMPLEMENTED',
-  ERR_FORBIDDEN             : 'ERR_FORBIDDEN',
-  ERR_VALIDATION            : 'ERR_VALIDATION',
-  ERR_DATABASE              : 'ERR_DATABASE',
-  ERR_DATABASE_TIMEOUT      : 'ERR_DATABASE_TIMEOUT',
-  ERR_ACCESS_TOKEN_EXPIRED  : 'ERR_ACCESS_TOKEN_EXPIRED',
-  ERR_REFRESH_TOKEN_EXPIRED : 'ERR_REFRESH_TOKEN_EXPIRED',
-  ERR_PAYLOAD_TOO_LARGE     : 'ERR_PAYLOAD_TOO_LARGE',
-  ERR_CONFLICT              : 'ERR_CONFLICT',
+  ERR_NONE: "ERR_NONE",
+  ERR_INTERNAL: "ERR_INTERNAL",
+  ERR_BAD_REQUEST: "ERR_BAD_REQUEST",
+  ERR_NOT_FOUND: "ERR_NOT_FOUND",
+  ERR_NOT_AUTHORIZED: "ERR_NOT_AUTHORIZED",
+  ERR_NOT_IMPLEMENTED: "ERR_NOT_IMPLEMENTED",
+  ERR_FORBIDDEN: "ERR_FORBIDDEN",
+  ERR_VALIDATION: "ERR_VALIDATION",
+  ERR_DATABASE: "ERR_DATABASE",
+  ERR_DATABASE_TIMEOUT: "ERR_DATABASE_TIMEOUT",
+  ERR_ACCESS_TOKEN_EXPIRED: "ERR_ACCESS_TOKEN_EXPIRED",
+  ERR_REFRESH_TOKEN_EXPIRED: "ERR_REFRESH_TOKEN_EXPIRED",
+  ERR_PAYLOAD_TOO_LARGE: "ERR_PAYLOAD_TOO_LARGE",
+  ERR_CONFLICT: "ERR_CONFLICT",
 };
 
 class ApplicationError extends Error {
@@ -50,37 +50,40 @@ class UserError extends ApplicationError {
 }
 
 class NotAuthorizedError extends UserError {
-  constructor(message = 'Not authorized', code = ErrorCodes.ERR_NOT_AUTHORIZED) {
+  constructor(
+    message = "Not authorized",
+    code = ErrorCodes.ERR_NOT_AUTHORIZED
+  ) {
     super(message, code, 401);
   }
 }
 
 class ForbiddenError extends UserError {
-  constructor(message = 'Forbidden') {
+  constructor(message = "Forbidden") {
     super(message, ErrorCodes.ERR_FORBIDDEN, 403);
   }
 }
 
 class NotImplementedError extends UserError {
-  constructor(message = 'Not implemented') {
+  constructor(message = "Not implemented") {
     super(message, ErrorCodes.ERR_NOT_IMPLEMENTED, 501);
   }
 }
 
 class NotFoundError extends UserError {
-  constructor(message = 'Not found') {
+  constructor(message = "Not found") {
     super(message, ErrorCodes.ERR_NOT_FOUND, 404);
   }
 }
 
 class PayloadTooLargeError extends UserError {
-  constructor(message = 'File size is too large') {
+  constructor(message = "File size is too large") {
     super(message, ErrorCodes.ERR_PAYLOAD_TOO_LARGE, 413);
   }
 }
 
 class ConflictError extends UserError {
-  constructor(message = 'Duplicate found') {
+  constructor(message = "Duplicate found") {
     super(message, ErrorCodes.ERR_CONFLICT, 409);
   }
 }

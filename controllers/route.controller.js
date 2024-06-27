@@ -367,7 +367,7 @@ main.addRoute = async (data) => {
 //     throw new InternalError("An error occurred while retrieving routes.");
 //   }
 // };
-main.getRoutes = async ({ page = 1, records = 900, routeNo = null }) => {
+main.getRoutes = async ({ page = 1, records = 10, routeNo = null }) => {
   logger.info("Get routes");
 
   try {
@@ -387,17 +387,15 @@ main.getRoutes = async ({ page = 1, records = 900, routeNo = null }) => {
     const routes = await Route.findAndCountAll({
       order: [["updatedAt", "DESC"]],
       where: whereClause,
-      limit: limit,
-      offset: offset,
+      limit: routeNo ? undefined : limit, // Ignore limit if searching by routeNo
+      offset: routeNo ? undefined : offset, // Ignore offset if searching by routeNo
       logging: (sql) => logger.info(`SQL Query: ${sql}`),
     });
 
-    // Log the count of retrieved routes
     logger.info(
       `Retrieved ${routes.rows.length} routes out of ${routes.count} total`
     );
 
-    // Check if limit and offset are applied correctly
     if (
       routes.rows.length < limit &&
       routes.count > offset + routes.rows.length
@@ -407,7 +405,6 @@ main.getRoutes = async ({ page = 1, records = 900, routeNo = null }) => {
       );
     }
 
-    // Iterate through routes and convert intermediateStops from Buffer to JSON
     for (let i = 0; i < routes.rows.length; i++) {
       const route = routes.rows[i];
       if (route.intermediateStops && Buffer.isBuffer(route.intermediateStops)) {
@@ -712,6 +709,20 @@ main.addMultipleVehicles = async (data = []) => {
   } catch (err) {
     logger.error(err);
     throw new InternalError(err);
+  }
+};
+main.verifyToken = async (payload) => {
+  const url = "http://localhost:5000/api/v1/auth/token_verify/";
+  const headers = {
+    "Content-Type": "application/json",
+  };
+  const data = JSON.stringify({ token: payload });
+
+  try {
+    const response = await fetch(url, { method: "POST", headers, data });
+    return response.json();
+  } catch (error) {
+    throw error;
   }
 };
 

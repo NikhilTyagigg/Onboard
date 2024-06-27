@@ -1,8 +1,8 @@
 // ** React Imports
-import { Link } from "react-router-dom"
+import { Link } from "react-router-dom";
 
 // ** Custom Components
-import Avatar from "@components/avatar"
+import Avatar from "@components/avatar";
 
 // ** Third Party Components
 import {
@@ -13,59 +13,60 @@ import {
   Settings,
   CreditCard,
   HelpCircle,
-  Power
-} from "react-feather"
+  Power,
+} from "react-feather";
 
 // ** Reactstrap Imports
 import {
   UncontrolledDropdown,
   DropdownMenu,
   DropdownToggle,
-  DropdownItem
-} from "reactstrap"
+  DropdownItem,
+} from "reactstrap";
 
 // ** Default Avatar Image
-import defaultAvatar from "@src/assets/images/portrait/small/avatar-user.png"
+import defaultAvatar from "@src/assets/images/portrait/small/avatar-user.png";
 
 const onLogout = () => {
   // Remove Auth Details
-  localStorage.removeItem("token")
-  localStorage.removeItem("id")
-  localStorage.removeItem('first_name')
-  localStorage.removeItem('last_name')
-  localStorage.removeItem('email')
-  localStorage.removeItem('refresh')
-}
+  localStorage.removeItem("token");
+  localStorage.removeItem("id");
+  localStorage.removeItem("first_name");
+  localStorage.removeItem("last_name");
+  localStorage.removeItem("email");
+  localStorage.removeItem("refresh");
+};
 
-const userInfo = JSON.parse(localStorage.getItem('userInfo'))
-const userName = userInfo ? userInfo?.name : ''
+const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+const userName = userInfo ? userInfo?.name : "";
 
 const UserDropdown = () => {
   return (
-    <UncontrolledDropdown tag="li" className="dropdown-user nav-item" style={{marginTop: '-36px', zIndex: '9999'}}>
+    <UncontrolledDropdown
+      tag="li"
+      className="dropdown-user nav-item"
+      style={{ marginTop: "-36px", zIndex: "9999" }}
+    >
       <DropdownToggle
         href="/"
         tag="a"
         className="nav-link dropdown-user-link"
         onClick={(e) => e.preventDefault()}
       >
-        {<div className="user-nav d-sm-flex fw-bold">
-            {userName}
-        </div>
-        }
+        {<div className="user-nav d-sm-flex fw-bold">{userName}</div>}
         <Avatar
-            img={defaultAvatar}
-            imgHeight="40"
-            imgWidth="40"
-            status="online"
-          />        
+          img={defaultAvatar}
+          imgHeight="40"
+          imgWidth="40"
+          status="online"
+        />
       </DropdownToggle>
 
       <DropdownMenu end>
-        {/* <DropdownItem tag={Link} to="/profile">
+        <DropdownItem tag={Link} to="/profile">
           <User size={14} className="me-75" />
           <span className="align-middle">Profile</span>
-        </DropdownItem> */}
+        </DropdownItem>
         {/* <DropdownItem tag={Link} to="/" onClick={(e) => e.preventDefault()}>
           <Mail size={14} className="me-75" />
           <span className="align-middle">Inbox</span>
@@ -101,7 +102,7 @@ const UserDropdown = () => {
         </DropdownItem>
       </DropdownMenu>
     </UncontrolledDropdown>
-  )
-}
+  );
+};
 
-export default UserDropdown
+export default UserDropdown;

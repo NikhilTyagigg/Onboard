@@ -21,11 +21,24 @@ const OtpVerification = ({ userData, otp }) => {
       console.log(userData.username);
       console.log("user wala", userotp);
       console.log("email wala", otp);
-      const payload = {
-        email: userData.username,
-        userOtp: userotp,
-        otp: otp,
-      };
+      // Assuming userData.username can be either an email or a phone number
+      let payload;
+
+      if (userData.username.match(/^\d+$/)) {
+        // If userData.username is a phone number
+        payload = {
+          phone: "+91" + userData.username,
+          userOtp: userotp,
+          otp: otp,
+        };
+      } else {
+        // If userData.username is an email
+        payload = {
+          email: userData.username,
+          userOtp: userotp,
+          otp: otp,
+        };
+      }
       console.log("payload", payload);
       const res = await verifyOtp(payload);
       console.log(userData);
@@ -64,6 +77,7 @@ const OtpVerification = ({ userData, otp }) => {
           {loading ? <Spinner size="sm" /> : "Verify OTP"}
         </Button>
       </div>
+      <Button>Resend Otp</Button>
     </div>
   );
 };
