@@ -5,6 +5,7 @@ const logger = require("../../../helper/logger");
 const otpController = require("../../../controllers/otpController");
 const verifyOTP = require("../../../controllers/verifyOTP");
 const sendResetPasswordEmail = require("../../../controllers/sendResetPasswordEmail");
+const jwt = require("../../../auth/jwt");
 
 const {
   NotAuthorizedError,
@@ -73,6 +74,7 @@ router.post(
             email: user.email,
             name: user.name,
             role: user.role,
+            identity: user.identity,
             date: clientDate,
             ...tokens,
           })
@@ -106,8 +108,9 @@ router.get("/token", function (req, res, next) {
 });
 router.get("/token_verify/", async function (req, res, next) {
   try {
-    const payload = req.query.payload; // assuming payload is passed as a query parameter
-    const response = await verifyToken(payload);
+    const payload = req.body.token;
+    console.log("==================", payload); // assuming payload is passed as a query parameter
+    const response = await jwt.verifyAccessToken(payload);
     res.json(response.data);
   } catch (error) {
     res.status(401).json({ error: "Invalid token" });
@@ -163,9 +166,18 @@ router.post(
 router.post(
   "/register",
   runAsyncWrapper(async (req, res, next) => {
-    const { full_name, role, password, contact } = req.body;
+    const { full_name, contact, password, ConfirmPassword, dob, identity } =
+      req.body;
+
     try {
-      if (!full_name || !role || !password || !contact) {
+      if (
+        !full_name ||
+        !contact ||
+        !password ||
+        !ConfirmPassword ||
+        !dob ||
+        !identity
+      ) {
         throw new UserError("Please fill all the mandatory fields!!");
       }
 
@@ -184,13 +196,20 @@ router.post(
         }
       }
 
+      // Create the user record in the database
       user = await db.User.create({
         name: full_name,
         password: sha512(password),
+        ConfirmPassword: sha512(ConfirmPassword), // Ensure you have a proper hashing function like sha512
         email: isEmail ? contact : null,
         phone: isEmail ? null : contact,
-        role,
+        role: 1, // Assuming role 1 corresponds to a standard user role
+        dob: dob,
+        identity: identity,
       });
+
+      // Assuming you have an OTP service to send and validate OTPs
+      // You can handle OTP sending and validation separately
 
       res.send(
         successBody({
@@ -247,6 +266,24 @@ router.post("/getotp", async (req, res, next) => {
   } catch (e) {
     logger.error(e);
     next(e);
+  }
+});
+router.post("/fetch_user_by_id", async (req, res) => {
+  console.log("dekh dekh dekh = ", req.body);
+  const { id } = req.body;
+  if (!id) {
+    return res.status(400).json({ error: "User ID is required" });
+  }
+
+  try {
+    const user = await db.User.findByPk(id);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    res.status(200).json({ data: user });
+  } catch (error) {
+    console.error("Error fetching user:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 

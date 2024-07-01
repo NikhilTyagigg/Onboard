@@ -104,8 +104,10 @@ const Auth = {
   },
 };
 
-export const verifyToken = (payload) => {
-  return requests.post("auth/token_verify/", payload);
+// Assuming requests.post handles sending the token in the header
+export const verifyToken = (token) => {
+  console.log("Verifying token...");
+  return requests.post("auth/token_verify/", { token });
 };
 
 export const updateUserPassword = (payload) => {
@@ -118,7 +120,7 @@ export const updateUserProfile = (payload) => {
 
 export const getUserProfile = (payload) => {
   console.log("getuseridpayload", payload);
-  return requests.post("auth/userprofile/fetch_user_by_id/", payload);
+  return requests.post("auth/fetch_user_by_id/", payload);
 };
 
 export const loginHandler = (payload) => {
@@ -136,6 +138,9 @@ export const verifyOtp = (payload) => {
 };
 export const getotp = (queryParams = "") => {
   return requests.post("auth/getotp" + queryParams);
+};
+export const deleteUserProfile = () => {
+  // Your function implementation
 };
 
 // ############# ONBOARD APIS ##################
@@ -166,6 +171,7 @@ export const getMasterData = (payload) => {
 };
 
 export const getRouteConfig = (payload) => {
+  console.log("hello getrouteconfig =", payload);
   return requests.post("route/getVehicleRouteMap", {});
 };
 

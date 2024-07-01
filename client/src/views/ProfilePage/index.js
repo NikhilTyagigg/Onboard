@@ -1,12 +1,12 @@
 import React from "react";
-import { Card, CardBody } from "reactstrap";
-import InputPasswordToggle from "@components/input-password-toggle";
+import { Card, CardBody, Button, Input, Label } from "reactstrap";
 import LocalStorageService from "../../services/localstorage.service";
 import {
   verifyToken,
   updateUserPassword,
   updateUserProfile,
   getUserProfile,
+  deleteUserProfile,
 } from "../../services/agent";
 import "./index.scss";
 import toast from "react-hot-toast";
@@ -24,15 +24,19 @@ class ProfilePage extends React.Component {
   constructor(props) {
     super(props);
     const email = localStorage.getItem("email");
-    const name = localStorage.getItem("first_name");
+    const firstName = localStorage.getItem("first_name");
+    const lastName = localStorage.getItem("last_name");
+    const name = `${firstName} ${lastName}`;
+
     const phone = localStorage.getItem("phone");
+    const gender = localStorage.getItem("identity");
     const userInfo = LocalStorageService.getUserInfo();
     this.state = {
       id: userInfo?.userid,
       name: name,
       email: email,
       phone: phone,
-      gender: "",
+      gender: gender,
       oldPass: "",
       newPass: "",
       retypeNewPass: "",
@@ -47,7 +51,7 @@ class ProfilePage extends React.Component {
   componentDidMount() {
     localStorage.removeItem("active_doc");
     const token = LocalStorageService.getAccessToken();
-    verifyToken({ token: token });
+    //this.verifyToken(token);
     this.getUserDetails();
   }
 
@@ -57,30 +61,38 @@ class ProfilePage extends React.Component {
     localStorage.removeItem("name");
     localStorage.removeItem("email");
     localStorage.removeItem("refresh");
+    LocalStorageService.clearToken();
+    LocalStorageService.clearLocalStorage();
+    window.location = "/";
   };
 
   getUserDetails = () => {
     const payload = {
-      id: this.state.userInfo?.userid,
+      id: this.state.userInfo?.userId,
     };
+
     getUserProfile(payload)
       .then((res) => {
+        console.log("Response received:", res); // Log the entire response for debugging
+
         this.setState({ loader: false });
-        if (res.status === statusCode.HTTP_200_OK) {
+        if (res.status == statusCode.HTTP_200_OK) {
           const data = res.data?.data;
           this.setState({
             name: data.name,
-            phone: data.phone,
+            phone: data.phone || "", // Handle null or undefined phone
             email: data.email,
             gender: data.gender,
           });
         } else {
-          toast.success("Something went wrong", { ...toastStyle.error });
+          // Handle unexpected response status here if needed
+          console.error("Unexpected response:", res);
+          toast.error("Failed to fetch user details");
         }
       })
       .catch((error) => {
-        this.setState({ loader: false });
-        toast.error("Something went wrong", { ...toastStyle.error });
+        console.error("Error fetching user details:", error);
+        toast.error("Network error occurred");
       });
   };
 
@@ -124,11 +136,6 @@ class ProfilePage extends React.Component {
                 ...toastStyle.success,
               });
               this.onLogout();
-              setTimeout(() => {
-                LocalStorageService.clearToken();
-                LocalStorageService.clearLocalStorage();
-                window.location = "/";
-              }, 1000);
             } else {
               toast.error(JSON.stringify(res.response.data), {
                 ...toastStyle.error,
@@ -175,6 +182,7 @@ class ProfilePage extends React.Component {
             localStorage.setItem("name", this.state.name);
             localStorage.setItem("email", this.state.email);
             localStorage.setItem("phone", this.state.phone);
+            localStorage.setItem("gender", this.state.gender);
             this.getUserDetails();
             toast.success("Profile updated successfully", {
               ...toastStyle.success,
@@ -193,127 +201,187 @@ class ProfilePage extends React.Component {
     }
   };
 
+  deleteAccount = () => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete your account? This action cannot be undone."
+    );
+    if (confirmDelete) {
+      const payload = { userid: this.state.id };
+      deleteUserProfile(payload)
+        .then((res) => {
+          if (res.status === statusCode.HTTP_200_OK) {
+            toast.success("Account deleted successfully", {
+              ...toastStyle.success,
+            });
+            this.onLogout();
+          } else {
+            toast.error("Could not delete account", { ...toastStyle.error });
+          }
+        })
+        .catch((error) => {
+          toast.error("Could not delete account", { ...toastStyle.error });
+        });
+    }
+  };
+
   render() {
+    const { edit, name, email, phone, gender, avatar, loader, updatePassword } =
+      this.state;
+
+    console.log("Render state:", this.state); // Debugging state
+
     return (
-      <Card className="card-h center-box">
-        <BarLoader
-          color={"#1761fd"}
-          loading={this.state.loader}
-          size={"100%"}
-          cssOverride={override}
-          aria-label="Loading Spinner"
-          data-testid="loader"
-        />
-        <CardBody>
-          <div className="row justify-content-center">
-            <div className="col-lg-6 text-center">
-              <div className="profile-avatar">
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+        }}
+      >
+        <Card
+          style={{
+            maxWidth: "600px",
+            width: "100%",
+            padding: "20px",
+            boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
+          }}
+        >
+          <BarLoader
+            color={"#1761fd"}
+            loading={loader}
+            cssOverride={override}
+            aria-label="Loading Spinner"
+            data-testid="loader"
+          />
+          <CardBody>
+            <div style={{ textAlign: "center", marginBottom: "20px" }}>
+              <div style={{ position: "relative", display: "inline-block" }}>
                 <img
                   src={
-                    this.state.avatar
-                      ? URL.createObjectURL(this.state.avatar)
+                    avatar
+                      ? URL.createObjectURL(avatar)
                       : "./assets/images/icons/user.png"
                   }
                   alt="avatar"
-                  className="rounded-circle img-fluid avatar"
+                  className="rounded-circle img-fluid"
                   width="100px"
+                  style={{ border: "2px solid #1761fd" }}
                 />
-                {this.state.edit && (
-                  <div className="mt-2">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={this.handleFileChange}
-                    />
-                  </div>
-                )}
-              </div>
-              <div className="profile-form mt-4">
-                <h4 className="mb-4 profile-title">
-                  My Profile
-                  {!this.state.edit && (
-                    <span
-                      className="ml-2 edit-icon"
-                      onClick={() => this.editProfile(true)}
-                    >
-                      <Edit2
-                        className="action-icon action-icon-mr"
-                        size={"16px"}
-                        cursor={"pointer"}
-                      />
-                    </span>
-                  )}
-                </h4>
-                <div className="form-group">
-                  <label>Name *</label>
+                <Edit2
+                  className="edit-avatar-icon"
+                  size={"16px"}
+                  style={{
+                    position: "absolute",
+                    top: "75px",
+                    right: "0",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => this.setState({ edit: !edit })}
+                />
+                {edit && (
                   <input
-                    type="text"
-                    required
-                    readOnly={!this.state.edit}
-                    className="form-control input-box-bg"
-                    value={this.state.name}
-                    onChange={(e) => this.setState({ name: e.target.value })}
+                    type="file"
+                    accept="image/*"
+                    onChange={this.handleFileChange}
+                    style={{
+                      position: "absolute",
+                      top: "100px",
+                      left: "50%",
+                      transform: "translateX(-50%)",
+                      opacity: 0,
+                      width: "100px",
+                      cursor: "pointer",
+                    }}
                   />
-                </div>
-                <div className="form-group">
-                  <label>Email *</label>
-                  <input
-                    type="email"
-                    readOnly={!this.state.edit}
-                    className="form-control input-box-bg"
-                    value={this.state.email}
-                    onChange={(e) => this.setState({ email: e.target.value })}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Phone *</label>
-                  <input
-                    type="text"
-                    readOnly={!this.state.edit}
-                    className="form-control input-box-bg"
-                    value={this.state.phone}
-                    onChange={(e) => this.setState({ phone: e.target.value })}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Gender *</label>
-                  <select
-                    className="form-control input-box-bg"
-                    readOnly={!this.state.edit}
-                    value={this.state.gender}
-                    onChange={(e) => this.setState({ gender: e.target.value })}
-                  >
-                    <option value="" disabled>
-                      Select Gender
-                    </option>
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
-                    <option value="other">Other</option>
-                  </select>
-                </div>
-                {this.state.edit && (
-                  <div className="form-group">
-                    <button
-                      type="submit"
-                      className="btn btn-primary mt-1 waves-effect waves-light"
-                      onClick={() => this.updateProfile()}
-                    >
-                      Submit
-                    </button>
-                    <button
-                      type="reset"
-                      className="btn btn-outline-primary mt-1 waves-effect waves-light"
-                      onClick={() => this.editProfile(false)}
-                    >
-                      Cancel
-                    </button>
-                  </div>
                 )}
               </div>
             </div>
-          </div>
-        </CardBody>
-      </Card>
+            <div
+              style={{ display: "flex", flexDirection: "column", gap: "15px" }}
+            >
+              <Label for="name">First & Last Name *</Label>
+              <Input
+                type="text"
+                id="name"
+                name="name"
+                value={name}
+                onChange={this.handleChange}
+                readOnly={!edit}
+                style={edit ? { border: "2px solid #1761fd" } : {}}
+              />
+              <Label for="phone">Phone Number *</Label>
+              <Input
+                type="text"
+                id="phone"
+                name="phone"
+                value={phone}
+                onChange={this.handleChange}
+                readOnly={!edit}
+                style={edit ? { border: "2px solid #1761fd" } : {}}
+              />
+              <Label for="email">Email *</Label>
+              <Input
+                type="email"
+                id="email"
+                name="email"
+                value={email}
+                onChange={this.handleChange}
+                readOnly={!edit}
+                style={edit ? { border: "2px solid #1761fd" } : {}}
+              />
+              <Label for="gender">Identify Yourself *</Label>
+              <Input
+                type="select"
+                id="gender"
+                name="gender"
+                value={gender}
+                onChange={this.handleChange}
+                disabled={!edit}
+                style={edit ? { border: "2px solid #1761fd" } : {}}
+              >
+                <option value="" disabled>
+                  Select Identity
+                </option>
+                <option value="visually">Visually Impaired</option>
+                <option value="wheelchair">Wheelchair</option>
+                <option value="elderly">Elderly</option>
+                <option value="pregnant">Pregnant Women</option>
+              </Input>
+              {edit && (
+                <>
+                  <Button
+                    color="primary"
+                    className="save-button"
+                    onClick={this.updateProfile}
+                    style={{ marginTop: "20px" }}
+                  >
+                    Save
+                  </Button>
+                  <Button
+                    color="danger"
+                    className="delete-button"
+                    onClick={this.deleteAccount}
+                    // style={{ marginTop: "10px" }}
+                  >
+                    Delete Account
+                  </Button>
+                </>
+              )}
+            </div>
+            {!edit && (
+              <Button
+                color="danger"
+                onClick={this.onLogout}
+                className="logout"
+                style={{ marginTop: "20px" }}
+              >
+                Log out
+              </Button>
+            )}
+          </CardBody>
+        </Card>
+      </div>
     );
   }
 }

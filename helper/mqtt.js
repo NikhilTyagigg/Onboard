@@ -6,10 +6,10 @@ const { MQTT_DATA_SOURCES } = require("./constant");
 const QueryLogs = models.QueryLog;
 const Vehicle = models.Vehicle;
 const Route = models.Route;
-const VehicleRouteDriverMaps = models.VehicleRouteDriverMap;
+const VehicleRouteDriverMap = models.VehicleRouteDriverMap;
 
 const device = awsIot.device({
-  clientId: "iotconsole-83b31e63-8d8b-4e0c-b477-3602b316aa48",
+  clientId: "iotconsole-e252742f-7981-4db0-bb4e-b819304466d6",
   host: "a31nhrmeyspsde-ats.iot.ap-south-1.amazonaws.com",
   certPath: "onboarddevtestdevice.cert.pem",
   keyPath: "onboarddevtestdevice.private.key",
@@ -32,6 +32,7 @@ main.connectToMqtt = () => {
 
     try {
       payload = JSON.parse(payload.toString());
+      console.log(payload);
       if (
         !payload["UserType"] ||
         (payload["UserType"] != MQTT_DATA_SOURCES.MOBILE_APP &&
@@ -64,7 +65,7 @@ main.connectToMqtt = () => {
             },
           }));
         if (route && vehicle) {
-          let vehicleMap = await VehicleRouteDriverMaps.findOne({
+          let vehicleMap = await VehicleRouteDriverMap.findOne({
             where: {
               vehicleId: vehicle.vehicleId,
               routeId: route.routeId,

@@ -18,9 +18,6 @@ const OtpVerification = ({ userData, otp }) => {
   const handleOtpSubmit = async () => {
     setLoading(true);
     try {
-      console.log(userData.username);
-      console.log("user wala", userotp);
-      console.log("email wala", otp);
       // Assuming userData.username can be either an email or a phone number
       let payload;
 
@@ -39,9 +36,9 @@ const OtpVerification = ({ userData, otp }) => {
           otp: otp,
         };
       }
-      console.log("payload", payload);
+      // console.log("payload", payload);
       const res = await verifyOtp(payload);
-      console.log(userData);
+      // console.log(userData);
 
       if (res.status == statusCode.HTTP_200_OK) {
         const signUpRes = await signUpHandler(userData);

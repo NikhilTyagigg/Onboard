@@ -21,8 +21,8 @@ redis:
 jwt:
   secret_key: "<onboard_app_token_secret>"
   refresh_secret_key: "<onboard_app_refersh_token_secret>"
-  token_life: '8h'
-  refresh_token_life: '24h'
+  token_life: "8h"
+  refresh_token_life: "24h"
   expiry_hours: 8
   caching: true
 
@@ -33,15 +33,14 @@ db:
   password: root
   name: onboard
 
-
 logging:
   level: debug
   # colorize the output on console
   colorize: true
   #     # dirname: './logs'
-  filename: 'Onboard-Server-%DATE%.log'
-  datePattern: 'YYYY-MM-DD-HH'
-  maxSize: '20m'
+  filename: "Onboard-Server-%DATE%.log"
+  datePattern: "YYYY-MM-DD-HH"
+  maxSize: "20m"
 
 IP_request_limit:
   max_limit: 1000

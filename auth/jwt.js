@@ -65,29 +65,65 @@ const getRefreshToken = (user) => {
   );
 };
 
+// const verifyAccessToken = async (token) => {
+//   const value = await redisHGetAsync(JWT_ACCESS_TOKENS, token);
+//   if (!value) {
+//     throw new NotAuthorizedError();
+//   }
+//   let user = null;
+//   try {
+//     if (value) {
+//       user = JSON.parse(value).user;
+//     }
+//     const decode = jwt.verify(token, jwtConfig.secret_key, {
+//       expiresIn: jwtConfig.token_life,
+//     });
+//     return user;
+//   } catch (err) {
+//     await redisHDelAsync(JWT_ACCESS_TOKENS, token);
+//     if (user) {
+//       await redisLRemAsync(userTokenListName(user), 0, token);
+//     }
+//     throw new NotAuthorizedError(
+//       "access token expired",
+//       ErrorCodes.ERR_ACCESS_TOKEN_EXPIRED
+//     );
+//   }
+// };
 const verifyAccessToken = async (token) => {
+  // Retrieve the token from Redis
   const value = await redisHGetAsync(JWT_ACCESS_TOKENS, token);
   if (!value) {
     throw new NotAuthorizedError();
   }
+
   let user = null;
   try {
     if (value) {
       user = JSON.parse(value).user;
     }
-    const decode = jwt.verify(token, jwtConfig.secret_key, {
-      expiresIn: jwtConfig.token_life,
-    });
+
+    // Verify the token without expiresIn option
+    const decode = jwt.verify(token, jwtConfig.secret_key);
+
     return user;
   } catch (err) {
+    // Token verification failed, handle the error
     await redisHDelAsync(JWT_ACCESS_TOKENS, token);
     if (user) {
       await redisLRemAsync(userTokenListName(user), 0, token);
     }
-    throw new NotAuthorizedError(
-      "access token expired",
-      ErrorCodes.ERR_ACCESS_TOKEN_EXPIRED
-    );
+
+    // Throw error with specific message if the token has expired
+    if (err.name === "TokenExpiredError") {
+      throw new NotAuthorizedError(
+        "access token expired",
+        ErrorCodes.ERR_ACCESS_TOKEN_EXPIRED
+      );
+    }
+
+    // Throw generic authorization error for other cases
+    throw new NotAuthorizedError();
   }
 };
 
@@ -152,7 +188,6 @@ main.refreshAccessToken = (refreshToken) => {
     }
   });
 };
-
 main.grantAccess = (user, neverExpire = false) => {
   if (!user || !user.userId || !user.email) {
     return Promise.reject(new NotAuthorizedError());
@@ -162,23 +197,32 @@ main.grantAccess = (user, neverExpire = false) => {
       const accessToken = getAccessToken(user, neverExpire);
       const refreshToken = getRefreshToken(user);
 
+      logger.debug(`Generated AccessToken: ${accessToken}`);
+      logger.debug(`Generated RefreshToken: ${refreshToken}`);
+
       await redisHSetAsync(
         JWT_ACCESS_TOKENS,
         accessToken,
         JSON.stringify({ refreshToken, user })
       );
+      logger.debug(`Stored AccessToken in Redis`);
+
       await redisHSetAsync(
         JWT_REFRESH_TOKENS,
         refreshToken,
         JSON.stringify(user)
       );
+      logger.debug(`Stored RefreshToken in Redis`);
+
       await redisLPushAsync(userTokenListName(user), accessToken, refreshToken);
+      logger.debug(`Pushed tokens to user's token list`);
 
       logger.debug(`login from ${user.email}`);
       updateUserToken(user.userId, accessToken, refreshToken);
+
       resolve({ token: accessToken, refreshToken });
     } catch (err) {
-      logger.error(err);
+      logger.error(`Error in grantAccess: ${err}`);
       reject(err);
     }
   });

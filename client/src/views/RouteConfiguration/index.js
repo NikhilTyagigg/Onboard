@@ -258,6 +258,7 @@ class RouteConfiguration extends Component {
       .then((res) => {
         if (res.status == statusCode.HTTP_200_OK) {
           let routes = res.data.data;
+          console.log("assr routes=", res.data.data);
           this.setState({
             totalItemsCount: routes.count,
             routeConfigList: routes.rows,
@@ -392,8 +393,16 @@ class RouteConfiguration extends Component {
     this.state.routeConfigList.forEach((r, index) => {
       let reqDate = moment.utc(r.dateAndTime).format();
       let isPresent = vehiclesAdded.find((v) => v == r.Vehicle.vehicleNo);
+      console.log(
+        "Checking vehicle:",
+        r.Vehicle.vehicleNo,
+        "isPresent:",
+        isPresent
+      );
+
       if (!isPresent) {
         vehiclesAdded.push(r.Vehicle.vehicleNo);
+        console.log("Added vehicle:", r.Vehicle.vehicleNo);
       }
       userList.push(
         <>
@@ -410,7 +419,7 @@ class RouteConfiguration extends Component {
             >
               <div style={{ width: "50%" }}>{r.Vehicle.vehicleNo}</div>
               {r.isVerified && !isPresent ? (
-                moment().diff(reqDate, "minutes") <= "15" ? (
+                moment().diff(reqDate, "minutes") <= 15 ? (
                   <Circle size={12} color="green" fill="green" />
                 ) : (
                   <RefreshCcw

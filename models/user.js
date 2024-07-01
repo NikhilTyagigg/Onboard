@@ -20,11 +20,14 @@ module.exports = (sequelize, DataTypes) => {
       },
       name: DataTypes.STRING(255),
       password: DataTypes.STRING,
+      ConfirmPassword: DataTypes.STRING,
       phone: DataTypes.STRING(20),
       email: DataTypes.STRING,
       role: DataTypes.INTEGER,
       accessToken: DataTypes.STRING,
       refreshToken: DataTypes.STRING,
+      dob: DataTypes.DATE, // Added Date of Birth field
+      identity: DataTypes.STRING, // Added Identity field
       createdAt: DataTypes.DATE,
       updatedAt: DataTypes.DATE,
     },

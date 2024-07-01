@@ -1,0 +1,114 @@
+/* Improved and Responsive CSS */
+
+/* Font Style for Action Elements */
+.action-font-style {
+  color: #4caf50;
+  cursor: pointer;
+}
+
+/* Three Dots Icon */
+.three-dots:after {
+  cursor: pointer;
+  color: #fcc;
+  content: "\2807";
+  font-size: 1.25rem;
+  padding: 0 5px;
+}
+
+/* Remove Underline from Anchor Tags */
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Padding for Anchor Tag Contents */
+a div {
+  padding: 2px;
+}
+
+/* Dropdown Menu */
+.dropdown {
+  position: absolute;
+  right: 1.25rem;
+  background-color: #66d;
+  outline: none;
+  opacity: 1;
+  z-index: -1;
+  max-height: 0;
+  color: #fff;
+  transition: max-height 0.3s ease-in-out, margin-top 0.3s ease-in-out;
+}
+
+/* Dropdown Container Focus */
+.dropdown-container:focus {
+  outline: none;
+}
+
+/* Dropdown Container Focus Dropdown */
+.dropdown-container:focus .dropdown {
+  opacity: 1;
+  z-index: 100;
+  max-height: 100vh;
+  margin-top: -23px;
+}
+
+/* Padding Utilities */
+.p-10 {
+  padding: 10px;
+  text-align: center;
+}
+
+.pp-4 {
+  padding: 4px;
+  text-align: center;
+  margin-bottom: 0px;
+}
+
+.pth-7 {
+  padding: 7px;
+  text-align: center;
+}
+
+/* Table Cell Padding */
+[dir] .table > :not(caption) > * > * {
+  padding: 0.72rem 0.5rem;
+}
+
+/* Link Color */
+.color-link {
+  color: #1761fd;
+  cursor: pointer;
+}
+
+/* Responsive Styles for Mobile */
+@media only screen and (max-width: 600px) {
+  /* Adjustments for mobile devices */
+  /* For example, you can reduce padding or adjust font sizes */
+  .action-font-style {
+    font-size: 0.9rem;
+  }
+
+  .three-dots:after {
+    font-size: 1rem;
+  }
+
+  .dropdown {
+    right: 0.75rem;
+  }
+
+  .p-10 {
+    padding: 8px;
+  }
+
+  .pp-4 {
+    padding: 3px;
+  }
+
+  .pth-7 {
+    padding: 5px;
+  }
+
+  [dir] .table > :not(caption) > * > * {
+    padding: 0.5rem 0.25rem;
+  }
+}
