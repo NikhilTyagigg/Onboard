@@ -76,21 +76,6 @@ class RouteConfiguration extends Component {
     this.getRouteConfig();
   };
 
-  // componentDidUpdate = () =>{
-  //     if(this.state.waitingForAck){
-  //         let waitTime = 5
-  //         let foo = setInterval(()=>{
-  //             console.log('wait wait ----', waitTime)
-  //             this.setState({remianingTime :waitTime })
-  //             waitTime--;
-  //             if(waitTime==-1){
-  //                 clearInterval(foo)
-  //                 this.getRouteConfig()
-  //             }
-  //         },1000)
-  //     }
-  // }
-
   handlePageChange(pageNumber) {
     console.log(`active page is ${pageNumber}`);
     this.setState({ activePage: pageNumber }, () => {
@@ -157,14 +142,23 @@ class RouteConfiguration extends Component {
       .then((res) => {
         if (res.status == statusCode.HTTP_200_OK) {
           let routes = res.data.data;
-          this.setState({
-            totalItemsCount: routes.count,
-            routeConfigList: routes.rows,
-            loader: false,
-            waitingForAck: false,
-            remianingTime: -1,
-            refreshTime: Date.now() + 900000,
-          });
+          console.log("Fetched Routes: ", routes.rows);
+          this.setState(
+            {
+              totalItemsCount: routes.count,
+              routeConfigList: routes.rows,
+              loader: false,
+              waitingForAck: false,
+              remianingTime: -1,
+              refreshTime: Date.now() + 900000,
+            },
+            () => {
+              console.log(
+                "=========================",
+                this.state.routeConfigList
+              ); // Log the updated state
+            }
+          );
         } else {
           toast.error(res.message, { ...toastStyle.error });
           this.setState({
@@ -349,18 +343,6 @@ class RouteConfiguration extends Component {
               customMargin={true}
               //note="Provide a blog topic that will determine the main theme of the blog"
             />
-            {/* <div className='merge-content-delete'>
-                            <label className='labelTextArea'>Select Date/Time * </label>
-                            <DatePicker
-                                selected={this.state.date}
-                                onChange={this.handleDateChange}
-                                showTimeSelect
-                                dateFormat="Pp"
-                                className='form-control topicAreaStyle form-control-solid w-250px '
-                                isClearable={true}
-                                minDate={new Date()}
-                            />
-                            </div> */}
           </ModalBody>
           <ModalFooter>
             <button
@@ -388,11 +370,13 @@ class RouteConfiguration extends Component {
 
   renderUser = () => {
     const userList = [];
-    console.log("---------", this.state.tokenDetails);
+    console.log("Route Config List:", this.state.routeConfigList); // Debugging statement
     let vehiclesAdded = [];
+
     this.state.routeConfigList.forEach((r, index) => {
+      console.log(`Route ${index} isVerified: ${r.isVerified}`); // Log the isVerified property
       let reqDate = moment.utc(r.dateAndTime).format();
-      let isPresent = vehiclesAdded.find((v) => v == r.Vehicle.vehicleNo);
+      let isPresent = vehiclesAdded.includes(r.Vehicle.vehicleNo); // Check if vehicle is in the array
       console.log(
         "Checking vehicle:",
         r.Vehicle.vehicleNo,
@@ -404,21 +388,22 @@ class RouteConfiguration extends Component {
         vehiclesAdded.push(r.Vehicle.vehicleNo);
         console.log("Added vehicle:", r.Vehicle.vehicleNo);
       }
+
       userList.push(
-        <>
-          <tr key={index}>
-            <th scope="row" style={{ width: "100px" }}>
-              {index + 1}
-            </th>
-            <td
-              style={{
-                alignItems: "center",
-                display: "flex",
-                justifyContent: "center",
-              }}
-            >
-              <div style={{ width: "50%" }}>{r.Vehicle.vehicleNo}</div>
-              {r.isVerified && !isPresent ? (
+        <tr key={index}>
+          <th scope="row" style={{ width: "100px" }}>
+            {index + 1}
+          </th>
+          <td
+            style={{
+              alignItems: "center",
+              display: "flex",
+              justifyContent: "center",
+            }}
+          >
+            <div style={{ width: "50%" }}>{r.Vehicle.vehicleNo}</div>
+            {!isPresent &&
+              (r.isVerified ? (
                 moment().diff(reqDate, "minutes") <= 15 ? (
                   <Circle size={12} color="green" fill="green" />
                 ) : (
@@ -431,44 +416,36 @@ class RouteConfiguration extends Component {
                   />
                 )
               ) : (
-                <></>
-              )}
-            </td>
-            <td>{r.Route.routeNo}</td>
-            <td>{r.driver}</td>
-            <td>
-              {utcToLocal(r.dateAndTime)}
-              {/* {new Date(r.dateAndTime + " UTC").toLocaleString("en-US", {timeZone: 'Asia/Kolkata'})}         */}
-            </td>
-            <td>
-              {index == 0 && this.state.waitingForAck ? (
-                "Waiting for acknowledgement..." +
-                this.state.remianingTime +
-                "s"
-              ) : r.isVerified ? (
-                "Acknowledged"
-              ) : (
-                <span
-                  onClick={() => {
-                    this.retryConfig(r);
-                  }}
-                  style={{
-                    textDecoration: "underline",
-                    color: "blue",
-                    cursor: "pointer",
-                  }}
-                >
-                  Retry
-                </span>
-              )}
-            </td>
-            {/* <td>
-                        <a href=''><Eye size={20} /></a> &nbsp; <a href=''><Edit3 size={20} /></a>
-                    </td> */}
-          </tr>
-        </>
+                <span style={{ color: "red" }}>Not Verified</span>
+              ))}
+          </td>
+          <td>{r.Route.routeNo}</td>
+          <td>{r.driver}</td>
+          <td>{utcToLocal(r.dateAndTime)}</td>
+          <td>
+            {index === 0 && this.state.waitingForAck ? (
+              "Waiting for acknowledgement..." + this.state.remianingTime + "s"
+            ) : r.isVerified ? (
+              "Acknowledged"
+            ) : (
+              <span
+                onClick={() => {
+                  this.retryConfig(r);
+                }}
+                style={{
+                  textDecoration: "underline",
+                  color: "blue",
+                  cursor: "pointer",
+                }}
+              >
+                Retry
+              </span>
+            )}
+          </td>
+        </tr>
       );
     });
+
     return userList;
   };
 
@@ -633,19 +610,6 @@ class RouteConfiguration extends Component {
             )}
           </div>
           {this.renderModePopup()}
-          {/* <div className='row'>
-    <div className='col-lg-12'>
-      <Pagination
-        activePage={this.state.activePage}
-        itemClass="page-item"
-        linkClass="page-link"
-        itemsCountPerPage={this.state.itemsCountPerPage}
-        totalItemsCount={this.state.totalItemsCount}
-        pageRangeDisplayed={this.state.pageRangeDisplayed}
-        onChange={this.handlePageChange.bind(this)}
-      />
-    </div>
-  </div> */}
         </div>
       </Card>
     );

@@ -496,6 +496,72 @@ main.getRouteVehicleMap = async (filter) => {
   }
 };
 
+// main.addVehicleRouteMap = async (data) => {
+//   //this will be used for adding/updating and deleting a vehicle
+//   logger.info("Adding/updating route details::" + JSON.stringify(data));
+//   try {
+//     let route = null;
+//     let vehicle = await Vehicle.findOne({
+//       where: {
+//         vehicleId: data.vehicleId,
+//       },
+//     });
+//     if (data.id) {
+//       route = await VehicleRouteMap.findOne({
+//         where: {
+//           vehicleRouteDriverMapId: data.id,
+//         },
+//       });
+//       if (!route) {
+//         logger.error("No mapping found!!");
+//         throw new UserError("No mapping found!!");
+//       }
+//       if (!route.isVerified || data.retry) {
+//         mqtt.publishToMqtt({
+//           "Bus Id": vehicle.vehicleModule,
+//           "Route No": data.routeNo,
+//         });
+//         await route.update({
+//           isActive: true,
+//         });
+//       }
+//     } else {
+//       if (!data.routeId || !data.vehicleId || !data.date) {
+//         throw new UserError("Please enter all the valid parameters!!");
+//       }
+//       route = await VehicleRouteMap.create({
+//         routeId: data.routeId,
+//         vehicleId: data.vehicleId,
+//         dateAndTime: data.date,
+//         driver: data.driver || "",
+//         isActive: true,
+//       });
+//       mqtt.publishToMqtt({
+//         "Bus Id": vehicle.vehicleModule,
+//         "Route No": data.routeNo,
+//       });
+//     }
+
+//     let routes = await VehicleRouteMap.findAndCountAll({
+//       where: {
+//         isActive: true,
+//       },
+//       order: [["dateAndTime", "DESC"]],
+//       include: [
+//         {
+//           model: Vehicle,
+//         },
+//         {
+//           model: Route,
+//         },
+//       ],
+//     });
+//     return routes;
+//   } catch (err) {
+//     logger.error(err);
+//     throw new InternalError(err);
+//   }
+// };
 main.addVehicleRouteMap = async (data) => {
   //this will be used for adding/updating and deleting a vehicle
   logger.info("Adding/updating route details::" + JSON.stringify(data));
@@ -517,12 +583,14 @@ main.addVehicleRouteMap = async (data) => {
         throw new UserError("No mapping found!!");
       }
       if (!route.isVerified || data.retry) {
+        console.log("hello this fn called", !route.isVerified);
         mqtt.publishToMqtt({
           "Bus Id": vehicle.vehicleModule,
           "Route No": data.routeNo,
         });
         await route.update({
           isActive: true,
+          isVerified: true,
         });
       }
     } else {
@@ -535,6 +603,7 @@ main.addVehicleRouteMap = async (data) => {
         dateAndTime: data.date,
         driver: data.driver || "",
         isActive: true,
+        isVerified: true,
       });
       mqtt.publishToMqtt({
         "Bus Id": vehicle.vehicleModule,
@@ -562,7 +631,6 @@ main.addVehicleRouteMap = async (data) => {
     throw new InternalError(err);
   }
 };
-
 main.addMultipleRoute = async (data = []) => {
   //this will be used for adding/updating and deleting a vehicle
   logger.info("Adding/updating route details::" + JSON.stringify(data));

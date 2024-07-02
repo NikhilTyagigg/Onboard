@@ -746,6 +746,9 @@ class RouteRecords extends Component {
         startTime: route.startTime,
         endTime: route.endTime,
         frequency: route.frequency,
+        trip_length: route.trip_length || "",
+        SCH_NO: route.SCH_NO || "",
+        SERVICE: route.SERVICE || "",
         intermediateStops: route?.intermediateStops || "",
         id: route.routeId,
       },
@@ -845,7 +848,7 @@ class RouteRecords extends Component {
               </span>{" "}
               &nbsp;{" "}
               <span
-                onClick={() => this.onDeleteClick(route)}
+                onClick={() => this.onDeleteClick(route.routeId)}
                 style={{ cursor: "pointer", color: "blue" }}
               >
                 <Trash2 size={20} />

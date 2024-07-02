@@ -124,6 +124,7 @@ export const getUserProfile = (payload) => {
 };
 
 export const loginHandler = (payload) => {
+  console.log("******", payload);
   return requests.postPublic("auth/login/", qs.stringify({ ...payload }));
 };
 
@@ -176,6 +177,7 @@ export const getRouteConfig = (payload) => {
 };
 
 export const addRouteConfig = (payload) => {
+  console.log("addconfig paylod ****==", payload);
   return requests.post("route/addVehicleConfig", payload);
 };
 
