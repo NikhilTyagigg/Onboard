@@ -583,7 +583,6 @@ main.addVehicleRouteMap = async (data) => {
         throw new UserError("No mapping found!!");
       }
       if (!route.isVerified || data.retry) {
-        console.log("hello this fn called", !route.isVerified);
         mqtt.publishToMqtt({
           "Bus Id": vehicle.vehicleModule,
           "Route No": data.routeNo,

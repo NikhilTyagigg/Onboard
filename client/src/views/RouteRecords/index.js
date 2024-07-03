@@ -47,12 +47,18 @@ class RouteRecords extends Component {
       intermediateStopsPopupData: [], // Initialize as an empty array
 
       newRouteInfo: {
-        intermediateStops: [],
+        number: "",
+        startPoint: "",
+        endPoint: "",
+        depotname: "",
         startTime: "",
         endTime: "",
-        SERVICE: "",
-        SCH_NO: "",
+        frequency: "",
         trip_length: "",
+        SCH_NO: "",
+        SERVICE: "",
+        intermediateStops: [],
+        id: "",
       },
       showDeletePopup: false,
     };
@@ -147,6 +153,11 @@ class RouteRecords extends Component {
       this.getRoutes();
     });
   }
+  toggleModal = () => {
+    this.setState((prevState) => ({
+      showModePopup: !prevState.showModePopup,
+    }));
+  };
 
   changeTab = (index) => {
     this.setState({ selectedTab: index });
@@ -156,28 +167,6 @@ class RouteRecords extends Component {
     this.setState({ searchFilter: e.target.value });
   };
 
-  // getRoutes = () => {
-  //   this.setState({ loader: true });
-  //   const queryParams = `?page=${this.state.activePage}&records=${this.state.itemsCountPerPage}`;
-  //   getRoutes(queryParams)
-  //     .then((res) => {
-  //       if (res.status == statusCode.HTTP_200_OK) {
-  //         let routes = res.data.data;
-  //         this.setState({
-  //           totalItemsCount: routes.count,
-  //           routeList: routes.rows,
-  //           loader: false,
-  //         });
-  //       } else {
-  //         toast.error(res.message, { ...toastStyle.error });
-  //         this.setState({ loader: false, vehicleList: [], userListOrg: [] });
-  //       }
-  //     })
-  //     .catch((err) => {
-  //       toast.error(err?.message, { ...toastStyle.error });
-  //       this.setState({ loader: false, vehicleList: [], userListOrg: [] });
-  //     });
-  // };
   getRoutes = () => {
     this.setState({ loader: true });
     const { activePage, itemsCountPerPage, searchRouteNo } = this.state;
@@ -708,32 +697,27 @@ class RouteRecords extends Component {
   };
 
   onEditClick = (route) => {
-    console.log("Editing route:", route);
-    const intermediateStops = route.intermediateStops || [];
-    this.setState({
-      newRouteInfo: {
-        number: route.routeNo || "",
-        startPoint: route.startPoint || "",
-        endPoint: route.endPoint || "",
-        depotname: route.depotname || "",
-        startTime: route.startTime || "",
-        endTime: route.endTime || "",
-        frequency: route.frequency || "",
-        trip_length: route.trip_length || "",
-        SCH_NO: route.SCH_NO || "",
-        SERVICE: route.SERVICE || "",
-        intermediateStops: intermediateStops.map((stop) => ({
-          ...stop,
-          stopName: stop.stopName || "",
-          arrivalTime: stop.arrivalTime || "",
-          departureTime: stop.departureTime || "",
-          frequency: stop.frequency || "",
-          stopLocation: stop.stopLocation || "",
-        })),
-        id: route.routeId || "",
-      },
-      showModePopup: true,
-    });
+    console.log("Route data:", route);
+    try {
+      this.setState({
+        newRouteInfo: {
+          number: route.routeNo || "",
+          startPoint: route.startPoint || "",
+          endPoint: route.endPoint || "",
+          depotname: route.depotname || "",
+          startTime: route.startTime || "",
+          endTime: route.endTime || "",
+          frequency: route.frequency || "",
+          trip_length: route.trip_length || "",
+          SCH_NO: route.SCH_NO || "",
+          SERVICE: route.SERVICE || "",
+          intermediateStops: route.intermediateStops || [],
+        },
+        showModePopup: true,
+      });
+    } catch (error) {
+      console.error("Error while setting state in onEditClick:", error);
+    }
   };
 
   onDeleteClick = (route) => {
@@ -756,56 +740,6 @@ class RouteRecords extends Component {
     });
   };
 
-  // renderUser = () => {
-  //   return (
-  //     this.state.routeList &&
-  //     this.state.routeList.map((route, index) => {
-  //       const intermediateStopsKey = `intermediateStops_${index}`; // Unique key for intermediate stops
-  //       return (
-  //         <tr key={index}>
-  //           <th scope="row" style={{ width: "100px" }}>
-  //             {index + 1}
-  //           </th>
-  //           <td>{route.routeNo}</td>
-  //           <td>{route.startPoint}</td>
-  //           <td>{route.endPoint}</td>
-  //           <td>{route.depotname}</td>
-  //           <td>{route.startTime}</td>
-  //           <td>{route.endTime}</td>
-  //           <td>{route.frequency}</td>
-  //           <td>{route.trip_length}</td>
-  //           <td>{route.SCH_NO}</td>
-  //           <td>{route.SERVICE}</td>
-  //           <td key={intermediateStopsKey}>
-  //             <button
-  //               onClick={() =>
-  //                 this.openIntermediateStopsPopup(route.intermediateStops)
-  //               }
-  //             >
-  //               View Stops
-  //             </button>
-  //           </td>
-
-  //           <td>
-  //             <span
-  //               style={{ cursor: "pointer" }}
-  //               onClick={() => this.onEditClick(route)}
-  //             >
-  //               <Edit3 size={20} />
-  //             </span>{" "}
-  //             &nbsp;{" "}
-  //             <span
-  //               onClick={() => this.onDeleteClick(route)}
-  //               style={{ cursor: "pointer", color: "blue" }}
-  //             >
-  //               <Trash2 size={20} />
-  //             </span>
-  //           </td>
-  //         </tr>
-  //       );
-  //     })
-  //   );
-  // };
   renderUser = () => {
     const { activePage, itemsCountPerPage, routeList } = this.state;
     const startIndex = (activePage - 1) * itemsCountPerPage + 1;
@@ -859,6 +793,39 @@ class RouteRecords extends Component {
       })
     );
   };
+  renderModal() {
+    const { newRouteInfo, showModePopup } = this.state;
+    if (!showModePopup) return null;
+
+    return (
+      <Modal isOpen={showModePopup} toggle={this.toggleModal}>
+        <ModalHeader toggle={this.toggleModal}>Edit Route</ModalHeader>
+        <ModalBody>
+          <Form>
+            <FormGroup>
+              <Label for="routeNumber">Route Number</Label>
+              <Input
+                type="text"
+                name="routeNumber"
+                id="routeNumber"
+                value={newRouteInfo.number}
+                onChange={this.handleInputChange}
+              />
+            </FormGroup>
+            {/* Add other form fields similarly */}
+          </Form>
+        </ModalBody>
+        <ModalFooter>
+          <Button color="primary" onClick={this.saveChanges}>
+            Save
+          </Button>
+          <Button color="secondary" onClick={this.toggleModal}>
+            Cancel
+          </Button>
+        </ModalFooter>
+      </Modal>
+    );
+  }
 
   openIntermediateStopsPopup = (intermediateStops) => {
     this.setState({

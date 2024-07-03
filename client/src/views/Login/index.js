@@ -41,6 +41,7 @@ const Login = () => {
   const [data, setData] = React.useState({
     email: "",
     password: "",
+    phone: "",
   });
   const [showVerificationLink, setVerificationLink] = React.useState(false);
 
@@ -66,7 +67,8 @@ const Login = () => {
       setLoader(true);
       // superLoginHandler({
       loginHandler({
-        email: data.email,
+        email: data.email || null,
+        phone: data.phone || null,
         password: data.password,
       })
         .then((res) => {

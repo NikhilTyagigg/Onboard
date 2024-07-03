@@ -39,7 +39,8 @@ router.get("/me", checkAccess, function (req, res, next) {
 router.post(
   "/login", //checkUserLoggedIn,
   runAsyncWrapper(async (req, res, next) => {
-    const { email, password } = req.body;
+    const { email, password, phone } = req.body;
+    console.log("here is login info = ", req.body);
     logger.info(`BODYYYYY: ${req.body}`);
     const timezone = req.headers["tz-full"];
     var today_date = moment.utc().toDate();
@@ -50,23 +51,39 @@ router.post(
       .format("YYYY-MM-DD HH:mm:ssZ");
 
     try {
-      var user = await db.User.findOne({
-        where: {
-          email,
-          password: sha512(password),
-        },
-      });
+      var user;
+
+      // Check login with email and password
+      if (email) {
+        user = await db.User.findOne({
+          where: {
+            email,
+            password: sha512(password),
+          },
+        });
+      }
+
+      // Check login with phone and password
+      if (!user && phone) {
+        user = await db.User.findOne({
+          where: {
+            phone,
+            password: sha512(password),
+          },
+        });
+      }
 
       if (!user) {
-        throw new NotAuthorizedError("Invalid email or password");
+        throw new NotAuthorizedError("Invalid email/phone or password");
       }
 
       grantAccess({
         userId: user.userId,
         email: user.email,
         role: user.role,
+        phone: user.phone,
       }).then(async (tokens) => {
-        //TODO: Log Activity
+        // TODO: Log Activity
 
         res.send(
           successBody({
@@ -85,6 +102,7 @@ router.post(
     }
   })
 );
+
 // Backend route to resend OTP
 /* refresh the token*/
 router.get("/token", function (req, res, next) {

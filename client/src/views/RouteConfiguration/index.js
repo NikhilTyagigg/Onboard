@@ -371,12 +371,12 @@ class RouteConfiguration extends Component {
   renderUser = () => {
     const userList = [];
     console.log("Route Config List:", this.state.routeConfigList); // Debugging statement
-    let vehiclesAdded = [];
+    let vehiclesAdded = new Set(); // Using Set to store added vehicles
 
     this.state.routeConfigList.forEach((r, index) => {
       console.log(`Route ${index} isVerified: ${r.isVerified}`); // Log the isVerified property
       let reqDate = moment.utc(r.dateAndTime).format();
-      let isPresent = vehiclesAdded.includes(r.Vehicle.vehicleNo); // Check if vehicle is in the array
+      let isPresent = vehiclesAdded.has(r.Vehicle.vehicleNo); // Check if vehicle is in the Set
       console.log(
         "Checking vehicle:",
         r.Vehicle.vehicleNo,
@@ -385,7 +385,7 @@ class RouteConfiguration extends Component {
       );
 
       if (!isPresent) {
-        vehiclesAdded.push(r.Vehicle.vehicleNo);
+        vehiclesAdded.add(r.Vehicle.vehicleNo); // Add vehicle to the Set
         console.log("Added vehicle:", r.Vehicle.vehicleNo);
       }
 

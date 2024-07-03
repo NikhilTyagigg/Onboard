@@ -6,10 +6,10 @@ const { MQTT_DATA_SOURCES } = require("./constant");
 const QueryLogs = models.QueryLog;
 const Vehicle = models.Vehicle;
 const Route = models.Route;
-const VehicleRouteDriverMap = models.VehicleRouteDriverMap;
+const VehicleRouteDriverMaps = models.VehicleRouteDriverMap;
 
 const device = awsIot.device({
-  clientId: "iotconsole-e252742f-7981-4db0-bb4e-b819304466d6",
+  clientId: "onboarddevtestdevice",
   host: "a31nhrmeyspsde-ats.iot.ap-south-1.amazonaws.com",
   certPath: "onboarddevtestdevice.cert.pem",
   keyPath: "onboarddevtestdevice.private.key",
@@ -28,11 +28,10 @@ main.connectToMqtt = () => {
   device.subscribe(["#"]);
 
   device.on("message", async function (topic, payload) {
-    console.log("message2", topic, payload.toString());
+    console.log("message", topic, payload.toString());
 
     try {
       payload = JSON.parse(payload.toString());
-      console.log(payload);
       if (
         !payload["UserType"] ||
         (payload["UserType"] != MQTT_DATA_SOURCES.MOBILE_APP &&
@@ -65,7 +64,7 @@ main.connectToMqtt = () => {
             },
           }));
         if (route && vehicle) {
-          let vehicleMap = await VehicleRouteDriverMap.findOne({
+          let vehicleMap = await VehicleRouteDriverMaps.findOne({
             where: {
               vehicleId: vehicle.vehicleId,
               routeId: route.routeId,
@@ -117,6 +116,7 @@ main.connectToMqtt = () => {
 main.publishToMqtt = (data) => {
   logger.info("Publish to mqtt::" + JSON.stringify(data));
   try {
+    console.log("ye kaam kiya??");
     device.publish(data["Bus Id"], JSON.stringify(data));
   } catch (err) {
     logger.error(err);

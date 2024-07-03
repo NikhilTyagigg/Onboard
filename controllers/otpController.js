@@ -13,27 +13,35 @@ if (!OTP || !User) {
 
 exports.sendOTP = async (req, res) => {
   try {
-    console.log(req.body);
-    const recipient = Object.keys(req.body)[0];
+    console.log("Request body:", req.body);
 
-    console.log("Received email:", recipient);
+    // Extract email or phone from the request body
+    const { email, phone } = req.body;
+    console.log("Email:", email, "Phone:", phone);
+
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const phonePattern = /^\+?[1-9]\d{1,14}$/;
-    let email = null;
-    let phone = null;
-    if (emailPattern.test(recipient)) {
-      email = recipient;
-      console.log("Recipient is an email address.");
-      // Handle email address
-    } else if (phonePattern.test(recipient)) {
-      phone = recipient;
-      console.log("Recipient is a phone number.");
-      // Handle phone number
-    } else {
-      console.log(
-        "Recipient is neither a valid email address nor a valid phone number."
-      );
-      // Handle invalid recipient
+
+    if (!email && !phone) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "No recipient provided. Please provide a valid email address or phone number.",
+      });
+    }
+
+    if (email && !emailPattern.test(email)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid email format. Please provide a valid email address.",
+      });
+    }
+
+    if (phone && !phonePattern.test(phone)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid phone format. Please provide a valid phone number.",
+      });
     }
 
     // Check if user is already present
@@ -41,7 +49,7 @@ exports.sendOTP = async (req, res) => {
     if (email) {
       checkUserPresent = await User.findOne({ where: { email } });
     } else if (phone) {
-      checkUserPresent = await User.findOne({ where: { phone: phone } });
+      checkUserPresent = await User.findOne({ where: { phone } });
     }
 
     if (checkUserPresent) {
@@ -57,7 +65,7 @@ exports.sendOTP = async (req, res) => {
     if (email) {
       checkOtpPresent = await OTP.findOne({ where: { email } });
     } else if (phone) {
-      checkOtpPresent = await OTP.findOne({ where: { phone: phone } });
+      checkOtpPresent = await OTP.findOne({ where: { phone } });
     }
 
     if (checkOtpPresent) {
@@ -85,7 +93,7 @@ exports.sendOTP = async (req, res) => {
     }
 
     const otpPayload = { email, phone, otp };
-    console.log("otphai=", otpPayload);
+    console.log("OTP Payload:", otpPayload);
     await OTP.create(otpPayload);
 
     res.status(200).json({
@@ -98,6 +106,7 @@ exports.sendOTP = async (req, res) => {
     return res.status(500).json({ success: false, error: error.message });
   }
 };
+
 exports.getotpmap = async (filter) => {
   logger.info("Get Otp");
   try {
