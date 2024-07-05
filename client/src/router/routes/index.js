@@ -25,6 +25,7 @@ import RouteConfiguration from "../../views/RouteConfiguration/index.js";
 import AuditLog from "../../views/AuditLogs/index.js";
 import StopDetails from "../../views/StopDetails/index.js";
 import { element } from "prop-types";
+import otpeverification from "../../views/otpeverification.js";
 
 const getLayout = {
   blank: <BlankLayout />,
@@ -82,6 +83,13 @@ const Routes = [
     element: <PrivateRoutes component={ProfilePage} />,
   },
   {
+    path: "/otpe-verification",
+    element: <PublicRoutes component={otpeverification} />,
+    meta: {
+      layout: "blank",
+    },
+  },
+  {
     path: "/login",
     element: <PublicRoutes component={Login} />,
     meta: {
@@ -96,6 +104,14 @@ const Routes = [
   {
     path: "/forgot-password",
     element: <PublicRoutes component={ForgotPassword} />,
+    meta: {
+      layout: "blank",
+    },
+  },
+
+  {
+    path: "/reset-password",
+    element: <PublicRoutes component={ResetPassword} />,
     meta: {
       layout: "blank",
     },

@@ -1,14 +1,13 @@
 const nodemailer = require("nodemailer");
-const crypto = require("crypto"); // Ensure crypto module is imported
+const crypto = require("crypto");
 
-async function sendResetPasswordEmail(email) {
+async function sendResetPasswordEmail(email, otp) {
   try {
-    console.log("Email parameter received:", email); // Log the email parameter
+    console.log("Email parameter received:", email);
 
-    if (!email) {
-      throw new Error("No email address provided");
+    if (!email || !otp) {
+      throw new Error("Email address and OTP are required");
     }
-    const resetToken = crypto.randomBytes(20).toString("hex");
 
     const transporter = nodemailer.createTransport({
       service: "gmail",
@@ -21,19 +20,17 @@ async function sendResetPasswordEmail(email) {
     const mailOptions = {
       from: process.env.MAIL_USER,
       to: email,
-      subject: "Reset Password",
-      text: "Click the link to reset your password: <link>",
-      html: `<p>Click the link to reset your password: <a href="http://localhost:3000/reset-password?email=${encodeURIComponent(
-        email
-      )}&reset-token=${resetToken}">Reset Password</a></p>`,
+      subject: "Your OTP for Verification",
+      text: `Your OTP (One-Time Password) is: ${otp}`,
+      html: `<p>Your OTP (One-Time Password) is: <strong>${otp}</strong></p>`,
     };
 
     const info = await transporter.sendMail(mailOptions);
     console.log("Email sent: " + info.response);
     return info;
   } catch (error) {
-    console.error("Error in sendResetPasswordEmail:", error.message);
-    throw new Error("Failed to send reset password email");
+    console.error("Error in sendOTPEmail:", error.message);
+    throw new Error("Failed to send OTP email");
   }
 }
 

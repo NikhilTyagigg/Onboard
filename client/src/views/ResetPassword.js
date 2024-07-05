@@ -1,67 +1,58 @@
-import React, { useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { useSkin } from "@hooks/useSkin";
-import { ChevronLeft, Feather } from "react-feather";
 import { statusCode } from "../utility/constants/utilObject";
-import {
-  renderLogoText,
-  getQueryVariables,
-  showErrorToast,
-  showSuccessToast,
-} from "../utility/helper";
+import { showErrorToast, showSuccessToast } from "../utility/helper";
 import { resetPasswordHandler } from "../services/agent";
 import {
-  Row,
-  Col,
-  CardTitle,
-  CardText,
   Form,
   Label,
   Input,
   Button,
   Spinner,
+  FormGroup,
+  InputGroup,
+  InputGroupText,
 } from "reactstrap";
 
 // ** Styles
 import "@styles/react/pages/page-authentication.scss";
 import InputPasswordToggle from "@components/input-password-toggle";
-import { ReactComponent as LockIcon } from "../assets/icons/lockIcon.svg";
 import { Message } from "../utility/constants/message";
 
-const ForgotPassword = () => {
+const ResetPassword = () => {
   // ** Hooks
   const { skin } = useSkin();
   const [loader, setLoader] = useState(false);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [submitStatus, setSubmitStatus] = useState(false);
-
-  const fetchTokenFromString = () => {
-    let queries = window.location.search.substring(1).split("&");
-    return queries[0].substring(12);
-  };
+  const [agreeTerms, setAgreeTerms] = useState(false);
+  const location = useLocation();
+  const { userD } = location.state || {};
+  const [payload, setPayload] = useState({
+    // add logic to set this
+    email: userD, // add logic to set this
+    password: "",
+    confirmPassword: "",
+  });
 
   const onSubmitResetPassword = () => {
-    const queryParams = new URLSearchParams(window.location.search);
-    const email = queryParams.get("email");
-    const token = queryParams.get("reset-token");
     if (!password) {
       showErrorToast(Message.MANDATORY_FIELDS);
-    } else if (password.length < 6) {
-      showErrorToast("Password length must be greator than 5 characters");
-    } else if (password != confirmPassword) {
+    } else if (password.length < 8) {
+      showErrorToast("Password must be at least 8 characters long");
+    } else if (password !== confirmPassword) {
       showErrorToast("Passwords do not match. Please check again");
+    } else if (!agreeTerms) {
+      showErrorToast("Please agree to the terms and conditions");
     } else {
       setLoader(true);
-      resetPasswordHandler({
-        password: password,
-        token: token,
-        email: email,
-      })
+      console.log(payload);
+      resetPasswordHandler(payload)
         .then((res) => {
           setLoader(false);
           if (res.status == statusCode.HTTP_200_OK) {
-            showSuccessToast("Your password has been successfully changes");
+            showSuccessToast("Your password has been successfully changed");
             window.location.replace("/login");
           } else {
             showErrorToast(res.message);
@@ -76,80 +67,99 @@ const ForgotPassword = () => {
     }
   };
 
-  const fetchContainer = () => {
-    return (
-      <>
-        <CardText className="textCard">
-          Please provide the details bloew
-        </CardText>
-        <Form
-          className="auth-forgot-password-form"
-          onSubmit={(e) => e.preventDefault()}
-        >
-          <div className="form-group">
-            <Label className="label-text-password">New Password*</Label>
-            <InputPasswordToggle
-              className="input-group-merge"
-              id="Enter your password"
-              name="password"
-              value={password}
-              onChange={(e) => {
-                setPassword(e.target.value);
-              }}
-            />
-          </div>
-
-          <div className="form-group m-b-20">
-            <Label className="label-text-password">Confirm Password*</Label>
-            <InputPasswordToggle
-              className="input-group-merge"
-              id="Enter your password"
-              name="confirmpassword"
-              value={confirmPassword}
-              onChange={(e) => {
-                setConfirmPassword(e.target.value);
-              }}
-            />
-          </div>
-
-          <Button
-            onClick={onSubmitResetPassword}
-            className="submitButton btn btn-secondary btn-size"
-            block
-            disabled={loader}
-          >
-            {loader ? <Spinner size={"sm"} /> : "Reset"}
-          </Button>
-        </Form>
-      </>
-    );
-  };
-
   return (
-    <div className="registerWrapper">
-      <div className="topLeft"></div>
-      <div className="forgetPassDetail">
-        <Link className="brand-logo" to="/login">
-          <img src={"/assets/images/logo/logoColor.png"} width="100%"></img>
-        </Link>
-        <div className="formDetail">
-          <CardTitle>
-            Reset Password <LockIcon />
-          </CardTitle>
-          {fetchContainer()}
-
-          <div className="receivedContent">
-            <div></div>
-            <Link to="/login" className="justify-content-center">
-              <ChevronLeft className="rotate-rtl me-25" size={14} />
-              <span className="align-middle">Sign In</span>
-            </Link>
-          </div>
+    <div style={styles.wrapper}>
+      <div style={styles.inner}>
+        <div style={styles.content}>
+          <h2 style={styles.title}>Set New Password</h2>
+          <Form style={styles.form} onSubmit={(e) => e.preventDefault()}>
+            <FormGroup>
+              <Label for="password">Password*</Label>
+              <InputPasswordToggle
+                className="input-group-merge"
+                id="password"
+                name="password"
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  setPayload({ ...payload, password: e.target.value });
+                }}
+                required
+                minLength="8"
+              />
+            </FormGroup>
+            <FormGroup>
+              <Label for="confirm-password">Confirm Password*</Label>
+              <InputPasswordToggle
+                className="input-group-merge"
+                id="confirm-password"
+                name="confirmPassword"
+                value={confirmPassword}
+                onChange={(e) => {
+                  setConfirmPassword(e.target.value);
+                  setPayload({ ...payload, confirmPassword: e.target.value });
+                }}
+                required
+              />
+            </FormGroup>
+            <FormGroup check>
+              <Input
+                type="checkbox"
+                id="terms"
+                checked={agreeTerms}
+                onChange={(e) => setAgreeTerms(e.target.checked)}
+              />
+              <Label for="terms" check>
+                I agree with the <Link to="/terms">Terms & Conditions</Link> of
+                iWayplus Pvt. Ltd.
+              </Label>
+            </FormGroup>
+            <Button
+              color="primary"
+              block
+              onClick={onSubmitResetPassword}
+              disabled={loader}
+              style={styles.button}
+            >
+              {loader ? <Spinner size="sm" /> : "Confirm"}
+            </Button>
+          </Form>
         </div>
       </div>
-      <div className="bottomRight"></div>
     </div>
   );
 };
 
-export default ForgotPassword;
+const styles = {
+  wrapper: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: "100vh",
+    backgroundColor: "#f8f9fa",
+  },
+  inner: {
+    backgroundColor: "#fff",
+    padding: "2rem",
+    borderRadius: "0.375rem",
+    boxShadow: "0 0.5rem 1rem rgba(0, 0, 0, 0.1)",
+  },
+  content: {
+    textAlign: "center",
+  },
+  title: {
+    fontSize: "1.5rem",
+    fontWeight: "600",
+    marginBottom: "1rem",
+  },
+  form: {
+    marginTop: "2rem",
+  },
+  button: {
+    marginTop: "2rem",
+    backgroundColor: "#7367f0",
+    borderColor: "#7367f0",
+  },
+};
+
+export default ResetPassword;

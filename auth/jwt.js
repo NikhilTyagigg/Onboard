@@ -189,7 +189,8 @@ main.refreshAccessToken = (refreshToken) => {
   });
 };
 main.grantAccess = (user, neverExpire = false) => {
-  if (!user || !user.userId || !user.email) {
+  console.log(user);
+  if (!user || !user.userId || (!user.email && !user.phone)) {
     return Promise.reject(new NotAuthorizedError());
   }
   return new Promise(async (resolve, reject) => {

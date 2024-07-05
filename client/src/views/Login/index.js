@@ -56,12 +56,37 @@ const Login = () => {
   const setLoggedTime = () => {
     localStorage.setItem("logged", Date.now());
   };
+  const [inputType, setInputType] = React.useState("email");
+  const [inputName, setInputName] = React.useState("email");
+
+  const handleChange1 = (e) => {
+    const value = e.target.value;
+
+    if (isValidEmail(value)) {
+      setInputType("email");
+      setInputName("email");
+      setData({ ...data, email: value, phone: "" });
+    } else {
+      setInputType("tel");
+      setInputName("phone");
+      setData({ ...data, email: "", phone: value });
+    }
+  };
+
+  const isValidEmail = (value) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(value);
+  };
 
   const handleSubmit = (e) => {
+    console.log(data);
     e.preventDefault();
-    if (!data.email || !data.password) {
+    if (!data.email && !data.phone) {
+      console.log("yaha ");
       toast.error(Message.MANDATORY_FIELDS, { ...toastStyle.error });
-    } else if (!isValidEmail(data.email)) {
+    } else if (!data.password) {
+      toast.error(Message.MANDATORY_FIELDS, { ...toastStyle.error });
+    } else if (data.email && !isValidEmail(data.email)) {
       toast.error(Message.INVALID_EMAIL_ADDRESS, { ...toastStyle.error });
     } else {
       setLoader(true);
@@ -125,6 +150,7 @@ const Login = () => {
         })
         .catch((err) => {
           setLoader(false);
+          console.log(err);
           toast.error(err.message, {
             ...toastStyle.error,
             duration: toastStyle.duration5,
@@ -196,13 +222,13 @@ const Login = () => {
               <div className="formRow">
                 <Label for="login-email">Email*</Label>
                 <Input
-                  type="email"
+                  type={inputType}
                   id="login-email"
                   placeholder="Enter your email/phone number"
                   autoFocus
-                  name="email"
-                  value={data.email}
-                  onChange={handleChange}
+                  name={inputName}
+                  value={inputType === "email" ? data.email : data.phone}
+                  onChange={handleChange1}
                 />
               </div>
               <div className="formRow">

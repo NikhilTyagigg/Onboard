@@ -483,12 +483,34 @@ main.getRouteVehicleMap = async (filter) => {
       include: [
         {
           model: Vehicle,
+          attributes: [
+            "vehicleId",
+            "vehicleNo",
+            "vehicleModule",
+            "vehicleType",
+            "isActive",
+            "createdAt",
+            "updatedAt",
+          ], // Specify Vehicle attributes needed
         },
         {
           model: Route,
+          attributes: {
+            exclude: ["intermediateStops"], // Exclude intermediateStops initially
+          },
         },
       ],
     });
+
+    // Transform intermediateStops from Buffer to JSON
+    routeConfigList.rows.forEach((row) => {
+      if (row.Route && row.Route.intermediateStops) {
+        row.Route.intermediateStops = JSON.parse(
+          row.Route.intermediateStops.toString()
+        );
+      }
+    });
+
     return routeConfigList;
   } catch (err) {
     logger.error(err);
@@ -565,6 +587,11 @@ main.getRouteVehicleMap = async (filter) => {
 main.addVehicleRouteMap = async (data) => {
   //this will be used for adding/updating and deleting a vehicle
   logger.info("Adding/updating route details::" + JSON.stringify(data));
+  if (!data.routeNo || !data.vehicleId) {
+    logger.error("Invalid input data: Missing required fields");
+    throw new UserError("Please enter all the valid parameters!!");
+  }
+
   try {
     let route = null;
     let vehicle = await Vehicle.findOne({
@@ -584,12 +611,12 @@ main.addVehicleRouteMap = async (data) => {
       }
       if (!route.isVerified || data.retry) {
         mqtt.publishToMqtt({
-          "Bus Id": vehicle.vehicleModule,
+          "Bus Id ye wala": vehicle.vehicleModule,
           "Route No": data.routeNo,
         });
         await route.update({
           isActive: true,
-          isVerified: true,
+          // isVerified: true,
         });
       }
     } else {
@@ -602,7 +629,7 @@ main.addVehicleRouteMap = async (data) => {
         dateAndTime: data.date,
         driver: data.driver || "",
         isActive: true,
-        isVerified: true,
+        //isVerified: true,
       });
       mqtt.publishToMqtt({
         "Bus Id": vehicle.vehicleModule,

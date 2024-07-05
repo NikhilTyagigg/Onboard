@@ -116,6 +116,7 @@ router.post("/getVehicleRouteMap", async (req, res, next) => {
 router.post("/addVehicleConfig", async (req, res, next) => {
   logger.info("Add or update route info");
   try {
+    console.log("addvechileconfig=", req.body);
     let routes = await addVehicleRouteMap(req.body);
     res.send(successBody({ ...routes }));
   } catch (e) {

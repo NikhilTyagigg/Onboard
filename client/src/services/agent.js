@@ -119,19 +119,24 @@ export const updateUserProfile = (payload) => {
 };
 
 export const getUserProfile = (payload) => {
-  console.log("getuseridpayload", payload);
   return requests.post("auth/fetch_user_by_id/", payload);
 };
 
 export const loginHandler = (payload) => {
-  console.log("******", payload);
+  console.log("hello");
   return requests.postPublic("auth/login/", qs.stringify({ ...payload }));
 };
 
 export const signUpHandler = (payload) => {
   return requests.postPublic("auth/register/", payload);
 };
+
+export const checkUser = (payload) => {
+  console.log("kuch aaya????", payload);
+  return requests.postPublic("auth/check", payload);
+};
 export const otpHandler = (payload) => {
+  console.log(payload);
   return requests.postPublic("auth/send-otp/", payload);
 };
 export const verifyOtp = (payload) => {
@@ -142,6 +147,7 @@ export const getotp = (queryParams = "") => {
 };
 export const deleteUserProfile = () => {
   // Your function implementation
+  return requests.delete("auth/deletep");
 };
 
 // ############# ONBOARD APIS ##################
@@ -189,7 +195,7 @@ export const addMultipleRoutes = (payload) => {
   return requests.post("route/addMultipleRoutes", payload);
 };
 
-export const sendResetPasswordLinkHandler = (payload) => {
+export const sendResetPasswordEmail = (payload) => {
   //console.log("hey checking reset wala", payload);
   return requests.post("auth/send_reset_password_email/", payload);
 };

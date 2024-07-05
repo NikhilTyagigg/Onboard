@@ -402,7 +402,7 @@ class RouteConfiguration extends Component {
             }}
           >
             <div style={{ width: "50%" }}>{r.Vehicle.vehicleNo}</div>
-            {!isPresent &&
+            {isPresent &&
               (r.isVerified ? (
                 moment().diff(reqDate, "minutes") <= 15 ? (
                   <Circle size={12} color="green" fill="green" />

@@ -5,7 +5,11 @@ const logger = require("../../../helper/logger");
 const otpController = require("../../../controllers/otpController");
 const verifyOTP = require("../../../controllers/verifyOTP");
 const sendResetPasswordEmail = require("../../../controllers/sendResetPasswordEmail");
+const authController = require("../../../controllers/authController");
+const resetController = require("../../../controllers/resetController");
 const jwt = require("../../../auth/jwt");
+const bcrypt = require("bcrypt");
+const otpGenerator = require("otp-generator");
 
 const {
   NotAuthorizedError,
@@ -43,37 +47,36 @@ router.post(
     console.log("here is login info = ", req.body);
     logger.info(`BODYYYYY: ${req.body}`);
     const timezone = req.headers["tz-full"];
-    var today_date = moment.utc().toDate();
+    const today_date = moment.utc().toDate();
     let clientDate = moment.tz(today_date, timezone).format("YYYY-MM-DD");
-    var expire_time = moment
+    const expire_time = moment
       .utc(today_date)
       .add(15, "minutes")
       .format("YYYY-MM-DD HH:mm:ssZ");
 
     try {
-      var user;
+      let user;
 
-      // Check login with email and password
       if (email) {
         user = await db.User.findOne({
-          where: {
-            email,
-            password: sha512(password),
-          },
+          where: { email },
         });
       }
 
       // Check login with phone and password
       if (!user && phone) {
         user = await db.User.findOne({
-          where: {
-            phone,
-            password: sha512(password),
-          },
+          where: { phone },
         });
       }
 
       if (!user) {
+        throw new NotAuthorizedError("Invalid email/phone or password");
+      }
+
+      // Check if the provided password matches the stored hashed password
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+      if (!isPasswordValid) {
         throw new NotAuthorizedError("Invalid email/phone or password");
       }
 
@@ -136,6 +139,8 @@ router.get("/token_verify/", async function (req, res, next) {
 });
 router.post("/send-otp", otpController.sendOTP);
 router.post("/verify-otp", verifyOTP.verifyotp);
+router.post("/check", authController.checkUser);
+router.post("/reset_password", resetController.resetPassword);
 
 router.post(
   "/logout",
@@ -199,6 +204,10 @@ router.post(
         throw new UserError("Please fill all the mandatory fields!!");
       }
 
+      if (password !== ConfirmPassword) {
+        throw new UserError("Passwords do not match!!");
+      }
+
       let user;
       const isEmail = /\S+@\S+\.\S+/.test(contact);
 
@@ -214,11 +223,13 @@ router.post(
         }
       }
 
+      // Hash the password
+      const hashedPassword = await bcrypt.hash(password, 10);
+
       // Create the user record in the database
       user = await db.User.create({
         name: full_name,
-        password: sha512(password),
-        ConfirmPassword: sha512(ConfirmPassword), // Ensure you have a proper hashing function like sha512
+        password: hashedPassword,
         email: isEmail ? contact : null,
         phone: isEmail ? null : contact,
         role: 1, // Assuming role 1 corresponds to a standard user role
@@ -236,46 +247,64 @@ router.post(
       );
     } catch (e) {
       logger.error(e);
-      throw new Error(e);
+      next(e);
     }
   })
 );
+
+// Set OTP expiration time (e.g., 4 minutes)
+const OTP_EXPIRATION_TIME = 4 * 60 * 1000; // 4 minutes in milliseconds
 
 router.post("/send_reset_password_email", async (req, res) => {
   try {
     console.log("Request body:", req.body);
 
-    const { email } = req.body;
+    const { email, phone } = req.body; // Extract phone as well
     console.log("Extracted email:", email);
+    console.log("Extracted phone:", phone);
 
-    if (!email) {
-      return res.status(400).json({ message: "Email is required" });
+    if (!email && !phone) {
+      return res.status(400).json({ message: "Email or phone is required" });
     }
 
-    await sendResetPasswordEmail(email);
-    res.status(200).json({ message: "Reset password email sent successfully" });
+    // Generate OTP
+    let otp = otpGenerator.generate(4, {
+      upperCaseAlphabets: false,
+      lowerCaseAlphabets: false,
+      specialChars: false,
+    });
+
+    // Calculate OTP expiration time
+    const expiresAt = new Date(Date.now() + OTP_EXPIRATION_TIME);
+
+    // Save OTP in the database
+    await db.OTP.create({
+      email: email || null,
+      phone: phone || null,
+      otp,
+      expiresAt,
+    });
+
+    // Send OTP via email or SMS
+    if (email) {
+      await sendResetPasswordEmail(email, otp);
+    } else if (phone) {
+      // Implement your SMS sending logic here
+    }
+    res.status(200).json({
+      success: true,
+      message: "OTP sent successfully",
+      otp,
+    });
   } catch (error) {
-    console.error("Error sending reset password email:", error.message);
+    console.error("Error sending OTP:", error.message);
     res
       .status(500)
-      .json({ message: "Internal server error", error: error.message });
+      .json({ message: "Failed to send OTP", error: error.message });
   }
 });
 
 // Reset password
-router.post("/reset_password", async (req, res) => {
-  try {
-    const { email, newPassword } = req.body;
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-    user.password = hashedPassword;
-    await user.save();
-
-    res.json({ success: true, message: "Password updated successfully" });
-  } catch (error) {
-    console.error("Error in /reset-password:", error);
-    res.status(500).json({ success: false, message: "Internal server error" });
-  }
-});
 router.post("/getotp", async (req, res, next) => {
   logger.info("Fetching otp data");
   try {

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   Input,
   Button,
@@ -11,20 +11,21 @@ import {
   FormGroup,
   Label,
 } from "reactstrap";
-import { verifyOtp, signUpHandler, resendOtp } from "../services/agent";
+import { checkUser, verifyOtp, otpHandler } from "../services/agent";
 import { statusCode } from "../utility/constants/utilObject";
 import { showErrorToast, showSuccessToast } from "../utility/helper";
 import "@styles/react/pages/page-authentication.scss";
-import { otpHandler } from "../services/agent";
 
-const OtpVerification = ({ userData, otp }) => {
-  const [userotp, setOtp] = useState("");
+const otpeverification = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { userData, otp } = location.state || {}; // Retrieve state
+  const [userOtp, setUserOtp] = useState("");
   const [loading, setLoading] = useState(false);
   const [resendLoading, setResendLoading] = useState(false);
-  const navigate = useNavigate();
 
   const handleOtpChange = (e) => {
-    setOtp(e.target.value);
+    setUserOtp(e.target.value);
   };
 
   const handleOtpSubmit = async () => {
@@ -32,39 +33,49 @@ const OtpVerification = ({ userData, otp }) => {
     try {
       let payload;
 
-      if (userData.username.match(/^\d+$/)) {
+      if (userData.match(/^\d+$/)) {
         payload = {
-          phone: "+91" + userData.username,
-          userOtp: userotp,
-          otp: otp,
+          phone: "+91" + userData,
         };
       } else {
         payload = {
-          email: userData.username,
-          userOtp: userotp,
-          otp: otp,
+          email: userData,
         };
       }
+      console.log("*****", payload);
 
-      const res = await verifyOtp(payload);
+      const userCheckRes = await checkUser(payload);
 
-      if (res.status == statusCode.HTTP_200_OK) {
-        const signUpRes = await signUpHandler(userData);
-        setLoading(false);
-        if (signUpRes.status == statusCode.HTTP_200_OK) {
-          showSuccessToast("Account created successfully. Please log in.");
-          navigate("/login");
+      if (userCheckRes.status == statusCode.HTTP_200_OK) {
+        payload = {
+          ...payload,
+          userOtp,
+          otp,
+        };
+
+        const otpRes = await verifyOtp(payload);
+
+        if (otpRes.status == statusCode.HTTP_200_OK) {
+          setLoading(false);
+          showSuccessToast(
+            "OTP verified successfully. Redirecting to reset password page."
+          );
+          console.log(userData);
+
+          navigate("/reset-password", {
+            state: { userD: userData },
+          });
         } else {
-          showErrorToast(signUpRes.data.message);
+          setLoading(false);
+          showErrorToast("Invalid OTP, please try again.");
         }
       } else {
         setLoading(false);
-        showErrorToast("Invalid OTP, please try again.");
+        showErrorToast("User not found blaha blaha .");
       }
     } catch (err) {
       setLoading(false);
-      showErrorToast("User is already registered");
-      console.error("Error:", err);
+      showErrorToast("An error occurred while verifying OTP.");
     }
   };
 
@@ -73,26 +84,25 @@ const OtpVerification = ({ userData, otp }) => {
     try {
       let payload;
 
-      if (userData.username.match(/^\d+$/)) {
+      if (userData.match(/^\d+$/)) {
         payload = {
-          phone: "+91" + userData.username,
+          phone: "+91" + userData,
         };
       } else {
         payload = {
-          email: userData.username,
+          email: userData,
         };
       }
 
       const res = await otpHandler(payload);
 
-      if (res.status == statusCode.HTTP_200_OK) {
+      if (res.status === statusCode.HTTP_200_OK) {
         showSuccessToast("OTP has been resent successfully.");
       } else {
         showErrorToast("Failed to resend OTP, please try again.");
       }
     } catch (err) {
       showErrorToast("An error occurred while resending the OTP.");
-      console.error("Error:", err);
     } finally {
       setResendLoading(false);
     }
@@ -128,7 +138,7 @@ const OtpVerification = ({ userData, otp }) => {
                 type="text"
                 id="otp"
                 placeholder="Enter OTP"
-                value={userotp}
+                value={userOtp}
                 onChange={handleOtpChange}
                 style={{
                   marginBottom: "15px",
@@ -162,4 +172,4 @@ const OtpVerification = ({ userData, otp }) => {
   );
 };
 
-export default OtpVerification;
+export default otpeverification;

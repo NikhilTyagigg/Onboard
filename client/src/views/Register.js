@@ -67,8 +67,10 @@ const Register = () => {
     };
     setLoader(true);
     setPayload(payload);
-
-    otpHandler(payload.username)
+    otpHandler({
+      email: isEmail ? data.contact : null,
+      phone: isEmail ? null : data.contact,
+    })
       .then((res) => {
         setLoader(false);
         if (res.status == statusCode.HTTP_200_OK) {
@@ -324,19 +326,7 @@ const Register = () => {
           </p>
         </div>
       ) : (
-        <div className="verificationDetail">
-          <div className="forgetPass align-items-center">
-            <p className="titleCard">Verify your email</p>
-            <p className="textArea">{Message.SENT_EMAIL_VERIFICATION_LINK} </p>
-
-            <OtpVerification userData={Payload} otp={otp} />
-
-            <Link to="/login" className="backToHome">
-              <ChevronLeft />
-              <span>Back To Home Page</span>
-            </Link>
-          </div>
-        </div>
+        <OtpVerification userData={Payload} otp={otp} />
       )}
     </div>
   );
