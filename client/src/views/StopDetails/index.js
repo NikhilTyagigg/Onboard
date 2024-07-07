@@ -292,7 +292,7 @@ class StopDetails extends Component {
               placeholderText="Input the vehicle module"
               maxLength={300}
             />
-            <CustomDropDown
+            <CustomDropdown
               label="Vehicle Type"
               mandatory={true}
               onChange={(selected) => {
@@ -394,16 +394,19 @@ class StopDetails extends Component {
     } = this.state;
 
     return (
-      <div>
+      <div className="stop-details-container">
         {loader ? (
           UiLoader
         ) : (
           <div>
             {this.renderModePopup()}
-            <button onClick={() => this.setState({ showModePopup: true })}>
+            <button
+              className="add-vehicle-button"
+              onClick={() => this.setState({ showModePopup: true })}
+            >
               Add Vehicle
             </button>
-            <table>
+            <table className="table">
               <thead>
                 <tr>
                   <th>Vehicle Number</th>
@@ -427,15 +430,17 @@ class StopDetails extends Component {
                 ))}
               </tbody>
             </table>
-            <Pagination
-              activePage={activePage}
-              itemsCountPerPage={itemsCountPerPage}
-              totalItemsCount={totalItemsCount}
-              pageRangeDisplayed={5}
-              onChange={(page) => {
-                this.setState({ activePage: page }, this.getBusRecords);
-              }}
-            />
+            <div className="pagination">
+              <Pagination
+                activePage={activePage}
+                itemsCountPerPage={itemsCountPerPage}
+                totalItemsCount={totalItemsCount}
+                pageRangeDisplayed={5}
+                onChange={(page) => {
+                  this.setState({ activePage: page }, this.getBusRecords);
+                }}
+              />
+            </div>
           </div>
         )}
       </div>

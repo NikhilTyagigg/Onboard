@@ -28,8 +28,6 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import moment from "moment";
 import Countdown from "react-countdown";
-import Excel from "exceljs";
-import Papa from "papaparse";
 
 const override = {
   borderColor: "#1761fd",
@@ -75,6 +73,21 @@ class RouteConfiguration extends Component {
     this.getMasterData();
     this.getRouteConfig();
   };
+
+  // componentDidUpdate = () =>{
+  //     if(this.state.waitingForAck){
+  //         let waitTime = 5
+  //         let foo = setInterval(()=>{
+  //             console.log('wait wait ----', waitTime)
+  //             this.setState({remianingTime :waitTime })
+  //             waitTime--;
+  //             if(waitTime==-1){
+  //                 clearInterval(foo)
+  //                 this.getRouteConfig()
+  //             }
+  //         },1000)
+  //     }
+  // }
 
   handlePageChange(pageNumber) {
     console.log(`active page is ${pageNumber}`);
@@ -142,23 +155,14 @@ class RouteConfiguration extends Component {
       .then((res) => {
         if (res.status == statusCode.HTTP_200_OK) {
           let routes = res.data.data;
-          console.log("Fetched Routes: ", routes.rows);
-          this.setState(
-            {
-              totalItemsCount: routes.count,
-              routeConfigList: routes.rows,
-              loader: false,
-              waitingForAck: false,
-              remianingTime: -1,
-              refreshTime: Date.now() + 900000,
-            },
-            () => {
-              console.log(
-                "=========================",
-                this.state.routeConfigList
-              ); // Log the updated state
-            }
-          );
+          this.setState({
+            totalItemsCount: routes.count,
+            routeConfigList: routes.rows,
+            loader: false,
+            waitingForAck: false,
+            remianingTime: -1,
+            refreshTime: Date.now() + 900000,
+          });
         } else {
           toast.error(res.message, { ...toastStyle.error });
           this.setState({
@@ -252,7 +256,6 @@ class RouteConfiguration extends Component {
       .then((res) => {
         if (res.status == statusCode.HTTP_200_OK) {
           let routes = res.data.data;
-          console.log("assr routes=", res.data.data);
           this.setState({
             totalItemsCount: routes.count,
             routeConfigList: routes.rows,
@@ -343,6 +346,18 @@ class RouteConfiguration extends Component {
               customMargin={true}
               //note="Provide a blog topic that will determine the main theme of the blog"
             />
+            {/* <div className='merge-content-delete'>
+                            <label className='labelTextArea'>Select Date/Time * </label>
+                            <DatePicker
+                                selected={this.state.date}
+                                onChange={this.handleDateChange}
+                                showTimeSelect
+                                dateFormat="Pp"
+                                className='form-control topicAreaStyle form-control-solid w-250px '
+                                isClearable={true}
+                                minDate={new Date()}
+                            />
+                            </div> */}
           </ModalBody>
           <ModalFooter>
             <button
@@ -370,41 +385,30 @@ class RouteConfiguration extends Component {
 
   renderUser = () => {
     const userList = [];
-    console.log("Route Config List:", this.state.routeConfigList); // Debugging statement
-    let vehiclesAdded = new Set(); // Using Set to store added vehicles
-
+    console.log("---------", this.state.tokenDetails);
+    let vehiclesAdded = [];
     this.state.routeConfigList.forEach((r, index) => {
-      console.log(`Route ${index} isVerified: ${r.isVerified}`); // Log the isVerified property
       let reqDate = moment.utc(r.dateAndTime).format();
-      let isPresent = vehiclesAdded.has(r.Vehicle.vehicleNo); // Check if vehicle is in the Set
-      console.log(
-        "Checking vehicle:",
-        r.Vehicle.vehicleNo,
-        "isPresent:",
-        isPresent
-      );
-
+      let isPresent = vehiclesAdded.find((v) => v == r.Vehicle.vehicleNo);
       if (!isPresent) {
-        vehiclesAdded.add(r.Vehicle.vehicleNo); // Add vehicle to the Set
-        console.log("Added vehicle:", r.Vehicle.vehicleNo);
+        vehiclesAdded.push(r.Vehicle.vehicleNo);
       }
-
       userList.push(
-        <tr key={index}>
-          <th scope="row" style={{ width: "100px" }}>
-            {index + 1}
-          </th>
-          <td
-            style={{
-              alignItems: "center",
-              display: "flex",
-              justifyContent: "center",
-            }}
-          >
-            <div style={{ width: "50%" }}>{r.Vehicle.vehicleNo}</div>
-            {isPresent &&
-              (r.isVerified ? (
-                moment().diff(reqDate, "minutes") <= 15 ? (
+        <>
+          <tr key={index}>
+            <th scope="row" style={{ width: "100px" }}>
+              {index + 1}
+            </th>
+            <td
+              style={{
+                alignItems: "center",
+                display: "flex",
+                justifyContent: "center",
+              }}
+            >
+              <div style={{ width: "50%" }}>{r.Vehicle.vehicleNo}</div>
+              {r.isVerified && !isPresent ? (
+                moment().diff(reqDate, "minutes") <= "15" ? (
                   <Circle size={12} color="green" fill="green" />
                 ) : (
                   <RefreshCcw
@@ -416,36 +420,44 @@ class RouteConfiguration extends Component {
                   />
                 )
               ) : (
-                <span style={{ color: "red" }}>Not Verified</span>
-              ))}
-          </td>
-          <td>{r.Route.routeNo}</td>
-          <td>{r.driver}</td>
-          <td>{utcToLocal(r.dateAndTime)}</td>
-          <td>
-            {index === 0 && this.state.waitingForAck ? (
-              "Waiting for acknowledgement..." + this.state.remianingTime + "s"
-            ) : r.isVerified ? (
-              "Acknowledged"
-            ) : (
-              <span
-                onClick={() => {
-                  this.retryConfig(r);
-                }}
-                style={{
-                  textDecoration: "underline",
-                  color: "blue",
-                  cursor: "pointer",
-                }}
-              >
-                Retry
-              </span>
-            )}
-          </td>
-        </tr>
+                <></>
+              )}
+            </td>
+            <td>{r.Route.routeNo}</td>
+            <td>{r.driver}</td>
+            <td>
+              {utcToLocal(r.dateAndTime)}
+              {/* {new Date(r.dateAndTime + " UTC").toLocaleString("en-US", {timeZone: 'Asia/Kolkata'})}         */}
+            </td>
+            <td>
+              {index == 0 && this.state.waitingForAck ? (
+                "Waiting for acknowledgement..." +
+                this.state.remianingTime +
+                "s"
+              ) : r.isVerified ? (
+                "Acknowledged"
+              ) : (
+                <span
+                  onClick={() => {
+                    this.retryConfig(r);
+                  }}
+                  style={{
+                    textDecoration: "underline",
+                    color: "blue",
+                    cursor: "pointer",
+                  }}
+                >
+                  Retry
+                </span>
+              )}
+            </td>
+            {/* <td>
+                        <a href=''><Eye size={20} /></a> &nbsp; <a href=''><Edit3 size={20} /></a>
+                    </td> */}
+          </tr>
+        </>
       );
     });
-
     return userList;
   };
 
@@ -474,59 +486,6 @@ class RouteConfiguration extends Component {
       );
     }
   };
-  _handleFileLoad = async (e) => {
-    const file = e.target.files[0];
-    const extension = e.target.files[0].name.split(".").pop().toLowerCase();
-    this.setState({ loader: true });
-    let params = [];
-    if (extension == "csv") {
-      Papa.parse(file, {
-        header: false,
-        skipEmptyLines: true,
-        complete: (results) => {
-          params = [...results.data];
-          if (params.length > 0) {
-            params.splice(0, 1);
-            this.addRouteConfig(params);
-          }
-          if (params.length > 2000) {
-            this.setState({ loader: false });
-            showErrorToast("Upto 2000 records can be added in one go!!");
-            return;
-          }
-          //  console.log("-----------", params);
-        },
-      });
-    } else if (extension == "xlsx") {
-      const wb = new Excel.Workbook();
-      const reader = new FileReader();
-      reader.readAsArrayBuffer(file);
-      reader.onload = () => {
-        const buffer = reader.result;
-        wb.xlsx.load(buffer).then((workbook) => {
-          workbook.eachSheet((sheet, id) => {
-            sheet.eachRow((row, rowIndex) => {
-              if (rowIndex != 1) {
-                let temp = [...row.values];
-                temp.splice(0, 1);
-                params.push(temp);
-              }
-            });
-            if (params.length > 2000) {
-              this.setState({ loader: false });
-              showErrorToast("Upto 2000 records can be added in one go!!");
-              return;
-            }
-            this.addRouteConfig(params);
-            console.log("-----------", params);
-          });
-        });
-      };
-    } else {
-      this.setState({ loader: false });
-      showErrorToast("We are accepting only csv/xlsx file!");
-    }
-  };
 
   render() {
     return (
@@ -540,48 +499,38 @@ class RouteConfiguration extends Component {
           data-testid="loader"
         />
         <div className="container-fluid vh-50">
-          <div className="page-header header12">
+          <div className="page-header">
             <div className="tab-container" style={{ width: "50%" }}>
               <div className="section-head">Route Configurations</div>
             </div>
-            <div
-              className="d-flex justify-content-between align-items-center"
-              style={{ marginTop: "10px", whiteSpace: "nowrap" }}
-            >
-              <div style={{ marginRight: "10px" }}>
-                {this.state.refreshTime && (
-                  <Countdown
-                    key={this.state.keyValue}
-                    date={this.state.refreshTime}
-                    renderer={({ minutes, seconds }) => (
-                      <span>
-                        Auto refresh in {minutes}:
-                        {seconds < 10 ? `0${seconds}` : seconds} minutes
-                      </span>
-                    )}
-                  />
-                )}
-              </div>
+            <div className="row">
               <div
-                className="d-flex align-items-center"
-                style={{ marginRight: "10px" }}
+                className="col-sm-12 d-flex ml-5"
+                style={{
+                  textAlign: "right",
+                  marginTop: "10px",
+                  float: "right",
+                  marginLeft: "40%",
+                }}
               >
-                <span>Import File:</span>
-                <input
-                  type="file"
-                  accept=".csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
-                  ref={(ref) => (this.state.fileRef = ref)}
-                  onChange={this._handleFileLoad}
-                  style={{ marginLeft: "10px" }}
-                />
+                <div
+                  style={{ width: "40%", marginTop: "15px", marginRight: 10 }}
+                >
+                  {this.state.refreshTime && (
+                    <Countdown
+                      key={this.state.keyValue}
+                      date={this.state.refreshTime}
+                      renderer={this.renderer}
+                    />
+                  )}
+                </div>
+                <button
+                  className="btn btn-sm btn-primary"
+                  onClick={() => this.addRecord()}
+                >
+                  Add Record
+                </button>
               </div>
-              <button
-                className="btn btn-sm btn-primary"
-                onClick={() => this.addRecord()}
-                style={{ marginLeft: "6px" }}
-              >
-                Add Record
-              </button>
             </div>
           </div>
 
@@ -601,7 +550,7 @@ class RouteConfiguration extends Component {
                 <tbody style={{ height: "20%" }}>{this.renderUser()}</tbody>
               </Table>
             ) : (
-              <div className="page-spinner-container">
+              <div className="page-sipnner-container">
                 <Spinner size="lg" color="primary" />
                 <div className="page-spinner-text">
                   Please wait while we load all users...
@@ -610,6 +559,19 @@ class RouteConfiguration extends Component {
             )}
           </div>
           {this.renderModePopup()}
+          {/* <div className='row'>
+                    <div className='col-lg-12' >
+                        <Pagination
+                        activePage={this.state.activePage}
+                        itemClass="page-item"
+                        linkClass="page-link"
+                        itemsCountPerPage={this.state.itemsCountPerPage}
+                        totalItemsCount={this.state.totalItemsCount}
+                        pageRangeDisplayed={this.state.pageRangeDisplayed}
+                        onChange={this.handlePageChange.bind(this)}
+                        />
+                    </div>
+                </div> */}
         </div>
       </Card>
     );

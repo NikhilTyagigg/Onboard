@@ -20,30 +20,18 @@ var main = {};
 
 main.connectToMqtt = () => {
   device.on("connect", function () {
-    console.log("STEP - Connecting to AWS IoT Core");
-    logger.info("Connected to AWS IoT Core");
+    console.log("STEP - Connecting to AWS  IoT Core");
     console.log(
       `---------------------------------------------------------------------------------`
     );
-
-    device.subscribe("devices/#", (err, granted) => {
-      if (err) {
-        logger.error("Subscription error: " + err);
-      } else {
-        logger.info("Subscribed to topics: " + JSON.stringify(granted));
-      }
-    });
   });
+  device.subscribe(["devices/bus1"]);
 
   device.on("message", async function (topic, payload) {
     console.log("message", topic, payload.toString());
-    logger.info(
-      "Received message on topic " + topic + ": " + payload.toString()
-    );
 
     try {
       payload = JSON.parse(payload.toString());
-
       if (
         !payload["UserType"] ||
         (payload["UserType"] != MQTT_DATA_SOURCES.MOBILE_APP &&
@@ -58,8 +46,8 @@ main.connectToMqtt = () => {
         );
         return;
       }
-
       if (payload["UserType"] == MQTT_DATA_SOURCES.WEB_APP) {
+        //  if(!payload["Id"]) return
         let vehicle =
           payload["Bus ID"] &&
           (await Vehicle.findOne({
@@ -88,28 +76,6 @@ main.connectToMqtt = () => {
               isVerified: true,
               dateAndTime: payload["date&Time"] || new Date(),
             });
-            logger.info(
-              "Updated VehicleRouteDriverMap for vehicle ID: " +
-                vehicle.vehicleId +
-                " and route ID: " +
-                route.routeId
-            );
-          } else {
-            logger.error(
-              "No VehicleRouteDriverMap found for vehicle ID: " +
-                vehicle.vehicleId +
-                " and route ID: " +
-                route.routeId
-            );
-          }
-        } else {
-          if (!vehicle) {
-            logger.error("Vehicle not found for Bus ID: " + payload["Bus ID"]);
-          }
-          if (!route) {
-            logger.error(
-              "Route not found for Route_NO: " + payload["Route_NO"]
-            );
           }
         }
         return;
@@ -135,51 +101,24 @@ main.connectToMqtt = () => {
           module: payload["Bus ID"] || "",
         };
         await QueryLogs.create(log);
-        logger.info("Created QueryLog for vehicle ID: " + vehicle.vehicleId);
-      } else {
-        logger.error("Vehicle not found for Bus ID: " + payload["Bus ID"]);
       }
     } catch (err) {
-      logger.error("Error processing message: " + err);
+      logger.error(err);
     }
   });
 
-  device.on("error", function (error) {
-    console.log("Error:", error.toString());
-    logger.error("Error:" + error.toString());
-  });
-
-  device.on("offline", function () {
-    console.log("Device went offline");
-    logger.warn("Device went offline");
-  });
-
-  device.on("reconnect", function () {
-    console.log("Attempting to reconnect...");
-    logger.info("Attempting to reconnect...");
+  device.on("error", function (topic, payload) {
+    console.log("Error:", topic, payload?.toString());
+    logger.error("Error:" + topic + payload?.toString());
   });
 };
 
 main.publishToMqtt = (data) => {
-  logger.info("Publish to MQTT::" + JSON.stringify(data));
-
-  // Check if the device is connected before publishing
-  if (!device.connected) {
-    logger.error("Device not connected. Cannot publish to MQTT.");
-    return;
-  }
-
+  logger.info("Publish to mqtt::" + JSON.stringify(data));
   try {
-    console.log("Attempting to publish...");
-    device.publish(data["Bus Id"], JSON.stringify(data), (err) => {
-      if (err) {
-        logger.error("Publish error: " + err);
-      } else {
-        logger.info("Published message to topic: " + data["Bus Id"]);
-      }
-    });
+    device.publish(data["Bus Id"], JSON.stringify(data));
   } catch (err) {
-    logger.error("Error publishing message: " + err);
+    logger.error(err);
   }
 };
 
