@@ -131,6 +131,10 @@ export const signUpHandler = (payload) => {
   return requests.postPublic("auth/register/", payload);
 };
 
+export const favorite = (payload) => {
+  return requests.postPublic("auth/favorite/", payload);
+};
+
 export const checkUser = (payload) => {
   console.log("kuch aaya????", payload);
   return requests.postPublic("auth/check", payload);

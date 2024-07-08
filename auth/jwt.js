@@ -128,20 +128,26 @@ const verifyAccessToken = async (token) => {
 };
 
 const verifyRefreshToken = async (token) => {
+  console.log(`Verifying refresh token: ${token}`);
   const value = await redisHGetAsync(JWT_REFRESH_TOKENS, token);
+  console.log(`Token value from Redis: ${value}`);
+
   if (!value) {
+    console.log(`Refresh token not found in Redis: ${token}`);
     throw new NotAuthorizedError();
   }
+
   let user = null;
   try {
-    if (value) {
-      user = JSON.parse(value);
-    }
-    const decode = jwt.verify(token, jwtConfig.refresh_secret_key, {
-      expiresIn: jwtConfig.refresh_token_life,
-    });
+    user = JSON.parse(value);
+    console.log(`Parsed user from Redis: ${JSON.stringify(user)}`);
+
+    const decode = jwt.verify(token, jwtConfig.refresh_secret_key);
+    console.log(`Decoded token: ${JSON.stringify(decode)}`);
+
     return user;
   } catch (err) {
+    console.log(`Error verifying refresh token: ${err}`);
     await redisHDelAsync(JWT_REFRESH_TOKENS, token);
     if (user) {
       await redisLRemAsync(userTokenListName(user), 0, token);
@@ -156,38 +162,60 @@ const verifyRefreshToken = async (token) => {
 main.refreshAccessToken = (refreshToken) => {
   return new Promise(async (resolve, reject) => {
     try {
-      if (
-        !refreshToken ||
-        !(await redisHGetAsync(JWT_REFRESH_TOKENS, refreshToken))
-      ) {
-        reject(new NotAuthorizedError());
-      }
-      const user = await verifyRefreshToken(refreshToken);
+      console.log(
+        `Starting refreshAccessToken with refreshToken: ${refreshToken}`
+      );
 
-      var { access_token, refresh_token } = await getUserToken(user.userId);
+      const tokenInRedis = await redisHGetAsync(
+        JWT_REFRESH_TOKENS,
+        refreshToken
+      );
+      console.log(`Token in Redis: ${tokenInRedis}`);
 
-      if (refresh_token != refreshToken) {
+      if (!refreshToken || !tokenInRedis) {
+        console.log(`Refresh token not found or invalid: ${refreshToken}`);
         reject(new NotAuthorizedError());
         return;
       }
 
-      const accessToken = getAccessToken(user);
+      const user = await verifyRefreshToken(refreshToken);
+      console.log(`Verified user: ${JSON.stringify(user)}`);
 
-      updateUserToken(user.userId, accessToken, refreshToken);
+      const {
+        accessToken: storedAccessToken,
+        refreshToken: storedRefreshToken,
+      } = await getUserToken(user.userId);
+      console.log(
+        `Stored access token: ${storedAccessToken}, stored refresh token: ${storedRefreshToken}`
+      );
 
+      if (storedRefreshToken !== refreshToken) {
+        console.log(
+          `Stored refresh token does not match the provided refresh token`
+        );
+        reject(new NotAuthorizedError());
+        return;
+      }
+
+      const newAccessToken = getAccessToken(user);
+      console.log(`Generated new access token: ${newAccessToken}`);
+
+      await updateUserToken(user.userId, newAccessToken, refreshToken);
       await redisHSetAsync(
         JWT_ACCESS_TOKENS,
-        accessToken,
+        newAccessToken,
         JSON.stringify({ refreshToken, user })
       );
-      await redisLPushAsync(userTokenListName(user), accessToken);
-      resolve(accessToken);
+      await redisLPushAsync(userTokenListName(user), newAccessToken);
+
+      resolve(newAccessToken);
     } catch (err) {
-      logger.error(err);
+      console.error("Error in refreshAccessToken:", err);
       reject(err);
     }
   });
 };
+
 main.grantAccess = (user, neverExpire = false) => {
   console.log(user);
   if (!user || !user.userId || (!user.email && !user.phone)) {

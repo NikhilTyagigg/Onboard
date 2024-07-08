@@ -1,5 +1,5 @@
 const bcrypt = require("bcrypt");
-const { User } = require("../models"); // Adjust the path as per your structure
+const { User, Vehicle } = require("../models");
 
 exports.resetPassword = async (req, res) => {
   try {
@@ -34,5 +34,69 @@ exports.resetPassword = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error, please try again later" });
+  }
+};
+exports.favoriteBus = async (req, res) => {
+  try {
+    const token = localStorage.getItem("token");
+    console.log("______________", token);
+    if (!token) {
+      return res.status(401).json({ message: "Access denied" });
+    }
+
+    // Retrieve the token from Redis
+    const value = await redisHGetAsync("jwt_access_tokens", token);
+    if (!value) {
+      throw new NotAuthorizedError();
+    }
+
+    let user = null;
+    if (value) {
+      user = JSON.parse(value).user;
+    }
+
+    // Verify the token without expiresIn option
+    jwt.verify(token, process.env.JWT_SECRET_KEY);
+
+    const { vehicleId } = req.body;
+
+    // Ensure the vehicleId is valid (assuming Vehicle model is correctly imported)
+    const bus = await Vehicle.findById(vehicleId);
+    if (!bus) {
+      return res.status(404).json({ message: "Bus not found" });
+    }
+
+    // Retrieve user details based on the verified token
+    const existingUser = await User.findById(user.id);
+    if (!existingUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Toggle the favorite status
+    const isFavorite = existingUser.favorites.includes(vehicleId);
+    if (isFavorite) {
+      existingUser.favorites = existingUser.favorites.filter(
+        (fav) => fav.toString() !== vehicleId
+      );
+    } else {
+      existingUser.favorites.push(vehicleId);
+    }
+
+    // Save the updated user document
+    await existingUser.save();
+
+    // Respond with success message and updated favorite status
+    res
+      .status(200)
+      .json({ message: "Favorite status updated", isFavorite: !isFavorite });
+  } catch (err) {
+    // Handle errors, including token expiration
+    if (err.name === "TokenExpiredError") {
+      return res.status(401).json({
+        message: "Access token expired",
+        code: ErrorCodes.ERR_ACCESS_TOKEN_EXPIRED,
+      });
+    }
+    res.status(401).json({ message: "Not authorized" });
   }
 };

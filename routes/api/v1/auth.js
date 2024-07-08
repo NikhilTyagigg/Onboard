@@ -10,6 +10,7 @@ const resetController = require("../../../controllers/resetController");
 const jwt = require("../../../auth/jwt");
 const bcrypt = require("bcrypt");
 const otpGenerator = require("otp-generator");
+const verifyAccessToken = require("../../../auth/jwt");
 
 const {
   NotAuthorizedError,
@@ -109,18 +110,22 @@ router.post(
 // Backend route to resend OTP
 /* refresh the token*/
 router.get("/token", function (req, res, next) {
-  var refreshToken = req.headers["refreshtoken"];
+  const refreshToken = req.headers["refreshtoken"];
+  console.log(`Received refresh token: ${refreshToken}`);
+
   if (!refreshToken || refreshToken.trim().length === 0) {
     next(new NotAuthorizedError());
     return;
   }
+
   refreshAccessToken(refreshToken)
     .then((accessToken) => {
+      console.log(`Generated access token: ${accessToken}`);
       res.send({ token: accessToken });
     })
     .catch((err) => {
-      console.log(err);
-      if (err instanceof ApplicationError) {
+      console.error("Error refreshing token:", err);
+      if (err instanceof NotAuthorizedError) {
         next(err);
       } else {
         next(new UserError("Invalid request"));
@@ -141,6 +146,7 @@ router.post("/send-otp", otpController.sendOTP);
 router.post("/verify-otp", verifyOTP.verifyotp);
 router.post("/check", authController.checkUser);
 router.post("/reset_password", resetController.resetPassword);
+router.post("/favorite", resetController.favoriteBus);
 
 router.post(
   "/logout",

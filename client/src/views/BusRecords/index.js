@@ -14,12 +14,21 @@ import {
   getVehicleRecords,
   addVehicle,
   addMultipleVehicles,
+  favorite,
 } from "../../services/agent";
 import { Card, Spinner, Table } from "reactstrap";
 import toast from "react-hot-toast";
 import { statusCode } from "../../utility/constants/utilObject";
 import { showErrorToast, toastStyle } from "../../utility/helper";
-import { Edit3, Plus, Search, Square, Trash, Trash2 } from "react-feather";
+import {
+  Edit3,
+  Plus,
+  Search,
+  Square,
+  Trash,
+  Trash2,
+  Heart,
+} from "react-feather";
 import "./index.css";
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from "reactstrap";
 import moment from "moment";
@@ -71,6 +80,29 @@ class BusRecords extends Component {
 
   componentDidMount = () => {
     this.getBusRecords();
+  };
+  addToFavorites = (vehicle) => {
+    const payload = { vehicleId: vehicle.vehicleId };
+    favorite(payload)
+      .then((res) => {
+        if (res.status === statusCode.HTTP_200_OK) {
+          this.setState((prevState) => {
+            const updatedVehicleList = prevState.vehicleList.map((v) => {
+              if (v.vehicleId === vehicle.vehicleId) {
+                return { ...v, isFavorite: !v.isFavorite };
+              }
+              return v;
+            });
+            return { vehicleList: updatedVehicleList };
+          });
+          toast.success("Favorite status updated!", { ...toastStyle.success });
+        } else {
+          toast.error(res.message, { ...toastStyle.error });
+        }
+      })
+      .catch((err) => {
+        toast.error(err?.message, { ...toastStyle.error });
+      });
   };
 
   getBusRecords = () => {
@@ -202,67 +234,6 @@ class BusRecords extends Component {
         this.setState({ loader: false });
       });
   };
-
-  /*Api calling function here  */
-  // fetchVehicleFromAPI = () => {
-  //     this.setState({ loader: true });
-
-  //     const apiEndpoint = 'http://localhost:5000/api/products'; {/*Api Link here */}
-
-  //     axios.get(apiEndpoint)
-  //         .then((response) => {
-
-  //             const vehicleData = response.data;
-
-  //             if (vehicleData && vehicleData.vehicleNo && vehicleData.vehicleModule && vehicleData.vehicleType) {
-  //                 const payload = {
-  //                     vehicleModule: vehicleData.vehicleModule,
-  //                     vehicleNo: vehicleData.vehicleNo,
-  //                     vehicleType: vehicleData.vehicleType,
-  //                 };
-
-  //                 // Add the fetched vehicle record
-  //                 this.addVehicleFromAPI(payload);
-  //             } else {
-  //                 toast.error('Invalid vehicle data received from API');
-  //                 this.setState({ loader: false });
-  //             }
-  //         })
-  //         .catch((error) => {
-  //             // Handle errors
-  //             console.error('Error fetching vehicle data from API:', error);
-  //             toast.error('Failed to fetch vehicle data from API');
-  //             this.setState({ loader: false });
-  //         });
-  // };
-
-  // addVehicleFromAPI = (payload) => {
-  //     addVehicle(payload)
-  //         .then((res) => {
-  //             if (res.status === statusCode.HTTP_200_OK) {
-  //                 // Vehicle added successfully
-  //                 const vehicles = res.data.data;
-  //                 this.setState({
-  //                     totalItemsCount: vehicles.count,
-  //                     vehicleList: vehicles.rows,
-  //                     loader: false,
-  //                     showModePopup: false,
-  //                     showDeletePopup: false,
-  //                     newVehicleInfo: {},
-  //                 });
-  //                 toast.success('Vehicle record added successfully');
-  //             } else {
-  //                 // Handle error response
-  //                 toast.error(res.message, { ...toastStyle.error });
-  //                 this.setState({ loader: false });
-  //             }
-  //         })
-  //         .catch((err) => {
-  //             // Handle errors
-  //             toast.error(err?.message, { ...toastStyle.error });
-  //             this.setState({ loader: false });
-  //         });
-  // };
   /*handling file records csv */
   _handleFileLoad = async (e) => {
     const file = e.target.files[0];
@@ -555,6 +526,18 @@ class BusRecords extends Component {
               style={{ cursor: "pointer", color: "blue" }}
             >
               <Trash2 size={20} />
+            </span>{" "}
+            &nbsp;{" "}
+            <span
+              onClick={() => {
+                this.addToFavorites(vehicle);
+              }}
+              style={{
+                cursor: "pointer",
+                color: vehicle.isFavorite ? "green" : "red",
+              }}
+            >
+              <Heart size={20} />
             </span>
           </td>
         </tr>
