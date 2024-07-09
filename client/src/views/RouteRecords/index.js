@@ -51,6 +51,7 @@ class RouteRecords extends Component {
         startPoint: "",
         endPoint: "",
         depotname: "",
+        sll: "",
         startTime: "",
         endTime: "",
         frequency: "",
@@ -62,18 +63,78 @@ class RouteRecords extends Component {
       },
       showDeletePopup: false,
     };
+    this.handleInputChange = this.handleInputChange.bind(this);
     this.onEditClick = this.onEditClick.bind(this);
   }
+  handleInputChange(name, value) {
+    if (name === "sll") {
+      // Extract latitude and longitude
+      const [latitude, longitude] = value.split(",");
 
-  handleInputChange = (event) => {
-    const { name, value } = event.target;
-    this.setState((prevState) => ({
-      newRouteInfo: {
-        ...prevState.newRouteInfo,
-        [name]: value,
-      },
-    }));
-  };
+      const isValidLatitude = (lat) => !isNaN(lat) && lat >= -90 && lat <= 90;
+      const isValidLongitude = (lng) =>
+        !isNaN(lng) && lng >= -180 && lng <= 180;
+
+      if (
+        latitude &&
+        longitude &&
+        isValidLatitude(parseFloat(latitude.trim())) &&
+        isValidLongitude(parseFloat(longitude.trim()))
+      ) {
+        this.setState((prevState) => ({
+          newRouteInfo: {
+            ...prevState.newRouteInfo,
+            sll: value.trim(), // Trim the entire value
+            latitude: parseFloat(latitude.trim()), // Convert to float
+            longitude: parseFloat(longitude.trim()), // Convert to float
+          },
+        }));
+      } else {
+        // Handle case where latitude or longitude is missing or invalid
+        console.warn("Invalid format for latitude and longitude");
+        this.setState((prevState) => ({
+          newRouteInfo: {
+            ...prevState.newRouteInfo,
+            sll: value.trim(), // Trim the entire value
+            latitude: null,
+            longitude: null,
+          },
+        }));
+        // Optionally, add UI feedback for invalid input
+        alert(
+          "Please enter a valid latitude and longitude in the format: lat,long"
+        );
+      }
+    } else if (name === "startTime" || name === "endTime") {
+      // Validate the time format
+      const isValidTime = (time) => {
+        // Basic validation for HH:MM format
+        const timePattern = /^([01]\d|2[0-3]):?([0-5]\d)$/;
+        return timePattern.test(time);
+      };
+
+      if (isValidTime(value.trim())) {
+        this.setState((prevState) => ({
+          newRouteInfo: {
+            ...prevState.newRouteInfo,
+            [name]: value.trim(),
+          },
+        }));
+      } else {
+        // Handle case where time format is invalid
+        console.warn("Invalid time format");
+        alert("Please enter a valid time in the format: HH:MM");
+      }
+    } else {
+      this.setState((prevState) => ({
+        newRouteInfo: {
+          ...prevState.newRouteInfo,
+          [name]: value,
+        },
+      }));
+    }
+  }
+
   handleSearchChange = (e) => {
     this.setState({ searchRouteNo: e.target.value });
   };
@@ -91,7 +152,7 @@ class RouteRecords extends Component {
       newRouteInfo: {
         ...prevState.newRouteInfo,
         intermediateStops: [
-          ...prevState.newRouteInfo.intermediateStops,
+          ...(prevState.newRouteInfo.intermediateStops || []),
           {
             stopName: "",
             arrivalTime: "",
@@ -103,6 +164,7 @@ class RouteRecords extends Component {
       },
     }));
   };
+
   handleIntermediateStopChange = (event, index, field) => {
     const { value } = event.target;
 
@@ -220,6 +282,7 @@ class RouteRecords extends Component {
       startPoint: newRouteInfo.startPoint,
       endPoint: newRouteInfo.endPoint,
       depotname: newRouteInfo.depotname,
+      sll: newRouteInfo.sll,
       startTime: formatDate(newRouteInfo.startTime), // Use formatted start time
       endTime: formatDate(newRouteInfo.endTime),
       frequency: newRouteInfo.frequency,
@@ -394,6 +457,19 @@ class RouteRecords extends Component {
                 />
               </div>
               <div className="col-lg-6 custom-input-box">
+                <label className="label">Starting Point (Lat, Long)</label>
+                <CustomInputBox
+                  mandatory={true}
+                  onChange={(text) => {
+                    this.handleInputChange("sll", text);
+                  }}
+                  value={this.state.newRouteInfo?.sll || ""}
+                  size={"md"}
+                  placeholderText="Enter Lat Long name"
+                />
+              </div>
+
+              <div className="col-lg-6 custom-input-box">
                 <label className="label">Depot Name</label>
                 <CustomInputBox
                   mandatory={true}
@@ -420,7 +496,9 @@ class RouteRecords extends Component {
                   name="startTime"
                   placeholder="Enter Start Time"
                   value={this.state.newRouteInfo.startTime}
-                  onChange={this.handleInputChange}
+                  onChange={(e) =>
+                    this.handleInputChange("startTime", e.target.value)
+                  }
                   size="md"
                 />
               </div>
@@ -434,7 +512,9 @@ class RouteRecords extends Component {
                   placeholder="Enter End Time"
                   name="endTime"
                   value={this.state.newRouteInfo.endTime}
-                  onChange={this.handleInputChange}
+                  onChange={(e) =>
+                    this.handleInputChange("endTime", e.target.value)
+                  }
                   size="md"
                 />
               </div>
@@ -705,6 +785,7 @@ class RouteRecords extends Component {
           startPoint: route.startPoint || "",
           endPoint: route.endPoint || "",
           depotname: route.depotname || "",
+          sll: route.sll || "",
           startTime: route.startTime || "",
           endTime: route.endTime || "",
           frequency: route.frequency || "",
@@ -727,6 +808,7 @@ class RouteRecords extends Component {
         startPoint: route.startPoint,
         endPoint: route.endPoint,
         depotname: route.depotname,
+        sll: route.sll,
         startTime: route.startTime,
         endTime: route.endTime,
         frequency: route.frequency,
@@ -757,6 +839,7 @@ class RouteRecords extends Component {
             <td>{route.startPoint}</td>
             <td>{route.endPoint}</td>
             <td>{route.depotname}</td>
+            <td>{route.sll}</td>
             <td>{route.startTime}</td>
             <td>{route.endTime}</td>
             <td>{route.frequency}</td>
@@ -969,6 +1052,7 @@ class RouteRecords extends Component {
                     <th style={{ width: "20%" }}>Start Point</th>
                     <th style={{ width: "20%" }}>End Point</th>
                     <th style={{ width: "40%" }}>Depot Name</th>
+                    <th style={{ width: "40%" }}>Start Point (Lat,Long)</th>
                     <th style={{ width: "20%" }}>Start Time</th>
                     <th style={{ width: "20%" }}>End Time</th>
                     <th style={{ width: "20%" }}>Frequency</th>

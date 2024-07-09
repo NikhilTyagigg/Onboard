@@ -83,7 +83,9 @@ class BusRecords extends Component {
   };
   addToFavorites = (vehicle) => {
     const payload = { vehicleId: vehicle.vehicleId };
-    favorite(payload)
+    const token = localStorage.getItem("token");
+
+    favorite(payload, token)
       .then((res) => {
         if (res.status === statusCode.HTTP_200_OK) {
           this.setState((prevState) => {
@@ -104,6 +106,8 @@ class BusRecords extends Component {
         toast.error(err?.message, { ...toastStyle.error });
       });
   };
+
+  // Adjust the favorite function to accept a token parameter
 
   getBusRecords = () => {
     this.setState({ loader: true });

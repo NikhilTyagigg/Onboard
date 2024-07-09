@@ -131,8 +131,12 @@ export const signUpHandler = (payload) => {
   return requests.postPublic("auth/register/", payload);
 };
 
-export const favorite = (payload) => {
-  return requests.postPublic("auth/favorite/", payload);
+export const favorite = (payload, token) => {
+  return requests.postPublic("auth/favorite/", payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 };
 
 export const checkUser = (payload) => {

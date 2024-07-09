@@ -49,12 +49,13 @@ main.connectToMqtt = () => {
     try {
       console.log(")))))))))))))yaha aata?");
       payload = JSON.parse(payload.toString());
+      console.log(payload);
 
       if (
-        !payload["UserType"] ||
-        (payload["UserType"] != MQTT_DATA_SOURCES.MOBILE_APP &&
-          payload["UserType"] != MQTT_DATA_SOURCES.USER_MODULE &&
-          payload["UserType"] != MQTT_DATA_SOURCES.WEB_APP)
+        !payload["User Type"] ||
+        (payload["User Type"] != MQTT_DATA_SOURCES.MOBILE_APP &&
+          payload["User Type"] != MQTT_DATA_SOURCES.USER_MODULE &&
+          payload["User Type"] != MQTT_DATA_SOURCES.WEB_APP)
       ) {
         logger.debug(
           "The payload is not in appropriate format for topic::" +
@@ -65,22 +66,23 @@ main.connectToMqtt = () => {
         return;
       }
 
-      if (payload["UserType"] == MQTT_DATA_SOURCES.WEB_APP) {
+      if (payload["User Type"] == MQTT_DATA_SOURCES.WEB_APP) {
         let vehicle =
-          payload["Bus ID"] &&
+          payload["Bus Id"] &&
           (await Vehicle.findOne({
             where: {
-              vehicleModule: payload["Bus ID"],
+              vehicleModule: payload["Bus Id"],
               isActive: true,
             },
           }));
         let route =
-          payload["Route_NO"] &&
+          payload["Route No"] &&
           (await Route.findOne({
             where: {
-              routeNo: payload["Route_NO"],
+              routeNo: payload["Route No"],
             },
           }));
+        console.log(payload["Bus Id"], route);
         if (route && vehicle) {
           let vehicleMap = await VehicleRouteDriverMaps.findOne({
             where: {
@@ -111,11 +113,11 @@ main.connectToMqtt = () => {
           }
         } else {
           if (!vehicle) {
-            logger.error("Vehicle not found for Bus ID: " + payload["Bus ID"]);
+            logger.error("Vehicle not found for Bus Id: " + payload["Bus Id"]);
           }
           if (!route) {
             logger.error(
-              "Route not found for Route_NO: " + payload["Route_NO"]
+              "Route not found for Route No: " + payload["Route No"]
             );
           }
         }
@@ -123,28 +125,28 @@ main.connectToMqtt = () => {
       }
 
       let vehicle =
-        payload["Bus ID"] &&
+        payload["Bus Id"] &&
         (await Vehicle.findOne({
           where: {
-            vehicleModule: payload["Bus ID"],
+            vehicleModule: payload["Bus Id"],
             isActive: true,
           },
         }));
       if (vehicle) {
         const log = {
           vehicleNo: vehicle.vehicleNo || "",
-          routeNo: payload["Route_NO"] || "",
+          routeNo: payload["Route No"] || "",
           rssi: payload["Sig RSSI"] || "",
           ackTime: payload["Ack Time"] || "",
           userId: payload["User ID"] || 1,
-          source: payload["UserType"],
+          source: payload["User Type"],
           requestedAt: payload["date&Time"] || new Date(),
-          module: payload["Bus ID"] || "",
+          module: payload["Bus Id"] || "",
         };
         await QueryLogs.create(log);
         logger.info("Created QueryLog for vehicle ID: " + vehicle.vehicleId);
       } else {
-        logger.error("Vehicle not found for Bus ID: " + payload["Bus ID"]);
+        logger.error("Vehicle not found for Bus Id: " + payload["Bus Id"]);
       }
     } catch (err) {
       logger.error("Error processing message: " + err);
@@ -186,17 +188,10 @@ main.publishToMqtt = (data) => {
 
     try {
       console.log("Attempting to publish...");
-      const topic = `devices/${data.BusId}`; // Define the topic
+      const topic = `devices/bus1`; // Define the topic
       const message = {
         BusId: data.BusId,
         RouteNo: data.RouteNo,
-        Timestamp: new Date().toISOString(),
-        Location: {
-          Latitude: data.Latitude,
-          Longitude: data.Longitude,
-        },
-        Speed: data.Speed,
-        Status: data.Status,
         UserType: data.UserType || "WEB_APP", // Ensure UserType is included
       };
 

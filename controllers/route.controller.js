@@ -197,6 +197,7 @@ main.addRoute = async (data) => {
       !data.routeNo ||
       !data.startPoint ||
       !data.endPoint ||
+      !data.sll ||
       !data.startTime ||
       !data.endTime ||
       !data.depotname ||
@@ -244,6 +245,7 @@ main.addRoute = async (data) => {
         endPoint: data.endPoint,
         startTime: data.startTime,
         endTime: data.endTime,
+        sll: data.sll,
         depotname: data.depotname,
         frequency: data.frequency,
         trip_length: data.trip_length,
@@ -269,6 +271,7 @@ main.addRoute = async (data) => {
           endPoint: data.endPoint,
           startTime: data.startTime,
           endTime: data.endTime,
+          sll: data.sll,
           depotname: data.depotname,
           frequency: data.frequency,
           trip_length: data.trip_length,
@@ -283,6 +286,7 @@ main.addRoute = async (data) => {
           startPoint: data.startPoint,
           endPoint: data.endPoint,
           startTime: data.startTime,
+          sll: data.sll,
           endTime: data.endTime,
           depotname: data.depotname,
           frequency: data.frequency,
@@ -367,7 +371,12 @@ main.addRoute = async (data) => {
 //     throw new InternalError("An error occurred while retrieving routes.");
 //   }
 // };
-main.getRoutes = async ({ page = 1, records = 10, routeNo = null }) => {
+main.getRoutes = async ({
+  page = 1,
+  records = 10,
+  routeNo = null,
+  startPoint = null,
+}) => {
   logger.info("Get routes");
 
   try {
@@ -384,11 +393,15 @@ main.getRoutes = async ({ page = 1, records = 10, routeNo = null }) => {
       whereClause.routeNo = routeNo;
     }
 
+    if (startPoint) {
+      whereClause.startPoint = startPoint;
+    }
+
     const routes = await Route.findAndCountAll({
       order: [["updatedAt", "DESC"]],
       where: whereClause,
-      limit: routeNo ? undefined : limit, // Ignore limit if searching by routeNo
-      offset: routeNo ? undefined : offset, // Ignore offset if searching by routeNo
+      limit: routeNo || startPoint ? undefined : limit, // Ignore limit if searching by routeNo or startPoint
+      offset: routeNo || startPoint ? undefined : offset, // Ignore offset if searching by routeNo or startPoint
       logging: (sql) => logger.info(`SQL Query: ${sql}`),
     });
 
@@ -405,8 +418,7 @@ main.getRoutes = async ({ page = 1, records = 10, routeNo = null }) => {
       );
     }
 
-    for (let i = 0; i < routes.rows.length; i++) {
-      const route = routes.rows[i];
+    const transformedRoutes = routes.rows.map((route) => {
       if (route.intermediateStops && Buffer.isBuffer(route.intermediateStops)) {
         try {
           const bufferData = route.intermediateStops;
@@ -420,9 +432,24 @@ main.getRoutes = async ({ page = 1, records = 10, routeNo = null }) => {
           );
         }
       }
-    }
 
-    return routes;
+      // Split sll into latitude and longitude
+      let latitude = null;
+      let longitude = null;
+      if (route.sll) {
+        const [lat, lng] = route.sll.split(",");
+        latitude = parseFloat(lat.trim());
+        longitude = parseFloat(lng.trim());
+      }
+
+      return {
+        ...route.dataValues, // Spread the original route object
+        latitude,
+        longitude,
+      };
+    });
+
+    return { ...routes, rows: transformedRoutes };
   } catch (err) {
     logger.error(`Error retrieving routes: ${err.message}`);
     throw new InternalError("An error occurred while retrieving routes.");
@@ -608,6 +635,7 @@ main.addVehicleRouteMap = async (data) => {
         mqtt.publishToMqtt({
           "Bus Id": vehicle.vehicleModule,
           "Route No": data.routeNo,
+          "User Type": 3,
         });
         await route.update({
           isActive: true,
@@ -698,11 +726,12 @@ main.addMultipleRoute = async (data = []) => {
           trip_length: d[3],
           SERVICE: d[4],
           SCH_NO: d[5],
-          depotname: d[6],
-          startTime: d[7],
-          endTime: d[8],
-          frequency: d[9],
-          intermediateStops: d.length > 3 ? d[10] : "",
+          sll: d[6],
+          depotname: d[7],
+          startTime: d[8],
+          endTime: d[9],
+          frequency: d[10],
+          intermediateStops: d.length > 3 ? d[11] : "",
           isActive: true,
         });
       });
@@ -721,6 +750,7 @@ main.addMultipleRoute = async (data = []) => {
         "startTime",
         "endTime",
         "frequency",
+        "sll",
         "trip_length",
         "SERVICE",
         "SCH_NO",
@@ -796,20 +826,6 @@ main.addMultipleVehicles = async (data = []) => {
   } catch (err) {
     logger.error(err);
     throw new InternalError(err);
-  }
-};
-main.verifyToken = async (payload) => {
-  const url = "http://localhost:5000/api/v1/auth/token_verify/";
-  const headers = {
-    "Content-Type": "application/json",
-  };
-  const data = JSON.stringify({ token: payload });
-
-  try {
-    const response = await fetch(url, { method: "POST", headers, data });
-    return response.json();
-  } catch (error) {
-    throw error;
   }
 };
 

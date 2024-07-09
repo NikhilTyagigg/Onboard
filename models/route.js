@@ -39,6 +39,9 @@ module.exports = (sequelize, DataTypes) => {
       depotname: {
         type: DataTypes.STRING,
       },
+      sll: {
+        type: DataTypes.STRING,
+      },
       frequency: {
         type: DataTypes.STRING,
       },

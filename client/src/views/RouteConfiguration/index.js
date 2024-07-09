@@ -74,21 +74,6 @@ class RouteConfiguration extends Component {
     this.getRouteConfig();
   };
 
-  // componentDidUpdate = () =>{
-  //     if(this.state.waitingForAck){
-  //         let waitTime = 5
-  //         let foo = setInterval(()=>{
-  //             console.log('wait wait ----', waitTime)
-  //             this.setState({remianingTime :waitTime })
-  //             waitTime--;
-  //             if(waitTime==-1){
-  //                 clearInterval(foo)
-  //                 this.getRouteConfig()
-  //             }
-  //         },1000)
-  //     }
-  // }
-
   handlePageChange(pageNumber) {
     console.log(`active page is ${pageNumber}`);
     this.setState({ activePage: pageNumber }, () => {
@@ -199,6 +184,7 @@ class RouteConfiguration extends Component {
       vehicleId: newConfigInfo.vehicle.value,
       date: this.state.date,
       driver: newConfigInfo.driver,
+      type: 3,
     };
 
     if (newConfigInfo.id) {
@@ -346,18 +332,6 @@ class RouteConfiguration extends Component {
               customMargin={true}
               //note="Provide a blog topic that will determine the main theme of the blog"
             />
-            {/* <div className='merge-content-delete'>
-                            <label className='labelTextArea'>Select Date/Time * </label>
-                            <DatePicker
-                                selected={this.state.date}
-                                onChange={this.handleDateChange}
-                                showTimeSelect
-                                dateFormat="Pp"
-                                className='form-control topicAreaStyle form-control-solid w-250px '
-                                isClearable={true}
-                                minDate={new Date()}
-                            />
-                            </div> */}
           </ModalBody>
           <ModalFooter>
             <button
@@ -559,19 +533,6 @@ class RouteConfiguration extends Component {
             )}
           </div>
           {this.renderModePopup()}
-          {/* <div className='row'>
-                    <div className='col-lg-12' >
-                        <Pagination
-                        activePage={this.state.activePage}
-                        itemClass="page-item"
-                        linkClass="page-link"
-                        itemsCountPerPage={this.state.itemsCountPerPage}
-                        totalItemsCount={this.state.totalItemsCount}
-                        pageRangeDisplayed={this.state.pageRangeDisplayed}
-                        onChange={this.handlePageChange.bind(this)}
-                        />
-                    </div>
-                </div> */}
         </div>
       </Card>
     );

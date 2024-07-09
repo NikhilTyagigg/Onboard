@@ -38,8 +38,9 @@ exports.resetPassword = async (req, res) => {
 };
 exports.favoriteBus = async (req, res) => {
   try {
-    const token = localStorage.getItem("token");
-    console.log("______________", token);
+    console.log("Request Headers:", req.headers); // Log all headers
+    const token = req.header("Authorization")?.split(" ")[1];
+    console.log("Extracted Token:", token);
     if (!token) {
       return res.status(401).json({ message: "Access denied" });
     }
@@ -47,32 +48,27 @@ exports.favoriteBus = async (req, res) => {
     // Retrieve the token from Redis
     const value = await redisHGetAsync("jwt_access_tokens", token);
     if (!value) {
-      throw new NotAuthorizedError();
+      return res.status(401).json({ message: "Not authorized" });
     }
 
-    let user = null;
-    if (value) {
-      user = JSON.parse(value).user;
-    }
-
-    // Verify the token without expiresIn option
+    const user = JSON.parse(value).user;
     jwt.verify(token, process.env.JWT_SECRET_KEY);
 
     const { vehicleId } = req.body;
 
-    // Ensure the vehicleId is valid (assuming Vehicle model is correctly imported)
+    // Validate vehicle ID
     const bus = await Vehicle.findById(vehicleId);
     if (!bus) {
       return res.status(404).json({ message: "Bus not found" });
     }
 
-    // Retrieve user details based on the verified token
+    // Retrieve user details
     const existingUser = await User.findById(user.id);
     if (!existingUser) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Toggle the favorite status
+    // Toggle favorite status
     const isFavorite = existingUser.favorites.includes(vehicleId);
     if (isFavorite) {
       existingUser.favorites = existingUser.favorites.filter(
@@ -82,15 +78,15 @@ exports.favoriteBus = async (req, res) => {
       existingUser.favorites.push(vehicleId);
     }
 
-    // Save the updated user document
+    // Save updated user document
     await existingUser.save();
 
-    // Respond with success message and updated favorite status
+    // Respond with success
     res
       .status(200)
       .json({ message: "Favorite status updated", isFavorite: !isFavorite });
   } catch (err) {
-    // Handle errors, including token expiration
+    // Handle errors
     if (err.name === "TokenExpiredError") {
       return res.status(401).json({
         message: "Access token expired",
