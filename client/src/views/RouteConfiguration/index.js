@@ -184,7 +184,6 @@ class RouteConfiguration extends Component {
       vehicleId: newConfigInfo.vehicle.value,
       date: this.state.date,
       driver: newConfigInfo.driver,
-      type: 3,
     };
 
     if (newConfigInfo.id) {
@@ -368,68 +367,58 @@ class RouteConfiguration extends Component {
         vehiclesAdded.push(r.Vehicle.vehicleNo);
       }
       userList.push(
-        <>
-          <tr key={index}>
-            <th scope="row" style={{ width: "100px" }}>
-              {index + 1}
-            </th>
-            <td
-              style={{
-                alignItems: "center",
-                display: "flex",
-                justifyContent: "center",
-              }}
-            >
-              <div style={{ width: "50%" }}>{r.Vehicle.vehicleNo}</div>
-              {r.isVerified && !isPresent ? (
-                moment().diff(reqDate, "minutes") <= "15" ? (
-                  <Circle size={12} color="green" fill="green" />
-                ) : (
-                  <RefreshCcw
-                    size={20}
-                    style={{ cursor: "pointer" }}
-                    onClick={() => {
-                      this.retryConfig(r, true);
-                    }}
-                  />
-                )
+        <tr key={index}>
+          <th scope="row" style={{ width: "100px" }}>
+            {index + 1}
+          </th>
+          <td
+            style={{
+              alignItems: "center",
+              display: "flex",
+              justifyContent: "center",
+            }}
+          >
+            <div style={{ width: "50%" }}>{r.Vehicle.vehicleNo}</div>
+            {r.isVerified && !isPresent ? (
+              moment().diff(reqDate, "minutes") <= "15" ? (
+                <Circle size={12} color="green" fill="green" />
               ) : (
-                <></>
-              )}
-            </td>
-            <td>{r.Route.routeNo}</td>
-            <td>{r.driver}</td>
-            <td>
-              {utcToLocal(r.dateAndTime)}
-              {/* {new Date(r.dateAndTime + " UTC").toLocaleString("en-US", {timeZone: 'Asia/Kolkata'})}         */}
-            </td>
-            <td>
-              {index == 0 && this.state.waitingForAck ? (
-                "Waiting for acknowledgement..." +
-                this.state.remianingTime +
-                "s"
-              ) : r.isVerified ? (
-                "Acknowledged"
-              ) : (
-                <span
+                <RefreshCcw
+                  size={20}
+                  style={{ cursor: "pointer" }}
                   onClick={() => {
-                    this.retryConfig(r);
+                    this.retryConfig(r, true);
                   }}
-                  style={{
-                    textDecoration: "underline",
-                    color: "blue",
-                    cursor: "pointer",
-                  }}
-                >
-                  Retry
-                </span>
-              )}
-            </td>
-            {/* <td>
-                        <a href=''><Eye size={20} /></a> &nbsp; <a href=''><Edit3 size={20} /></a>
-                    </td> */}
-          </tr>
-        </>
+                />
+              )
+            ) : (
+              <></>
+            )}
+          </td>
+          <td>{r.Route ? r.Route.routeNo : "N/A"}</td>
+          <td>{r.driver}</td>
+          <td>{utcToLocal(r.dateAndTime)}</td>
+          <td>
+            {index === 0 && this.state.waitingForAck ? (
+              "Waiting for acknowledgement..." + this.state.remianingTime + "s"
+            ) : r.isVerified ? (
+              "Acknowledged"
+            ) : (
+              <span
+                onClick={() => {
+                  this.retryConfig(r);
+                }}
+                style={{
+                  textDecoration: "underline",
+                  color: "blue",
+                  cursor: "pointer",
+                }}
+              >
+                Retry
+              </span>
+            )}
+          </td>
+        </tr>
       );
     });
     return userList;
