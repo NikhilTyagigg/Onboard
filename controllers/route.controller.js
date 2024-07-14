@@ -510,34 +510,12 @@ main.getRouteVehicleMap = async (filter) => {
       include: [
         {
           model: Vehicle,
-          attributes: [
-            "vehicleId",
-            "vehicleNo",
-            "vehicleModule",
-            "vehicleType",
-            "isActive",
-            "createdAt",
-            "updatedAt",
-          ], // Specify Vehicle attributes needed
         },
         {
           model: Route,
-          attributes: {
-            exclude: ["intermediateStops"], // Exclude intermediateStops initially
-          },
         },
       ],
     });
-
-    // Transform intermediateStops from Buffer to JSON
-    routeConfigList.rows.forEach((row) => {
-      if (row.Route && row.Route.intermediateStops) {
-        row.Route.intermediateStops = JSON.parse(
-          row.Route.intermediateStops.toString()
-        );
-      }
-    });
-
     return routeConfigList;
   } catch (err) {
     logger.error(err);
@@ -635,7 +613,6 @@ main.addVehicleRouteMap = async (data) => {
         mqtt.publishToMqtt({
           "Bus Id": vehicle.vehicleModule,
           "Route No": data.routeNo,
-          "User Type": 3,
         });
         await route.update({
           isActive: true,

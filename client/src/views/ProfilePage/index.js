@@ -362,7 +362,7 @@ class ProfilePage extends React.Component {
                     color="danger"
                     className="delete-button"
                     onClick={this.deleteAccount}
-                    // style={{ marginTop: "10px" }}
+                    style={{ marginTop: "10px" }}
                   >
                     Delete Account
                   </Button>
