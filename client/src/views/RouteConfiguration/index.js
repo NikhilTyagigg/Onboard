@@ -226,7 +226,6 @@ class RouteConfiguration extends Component {
           });
           let seconds = 5;
           let foo = setInterval(() => {
-            //   document.getElementById("seconds").innerHTML = seconds;
             seconds--;
             this.setState({ remianingTime: seconds });
             if (seconds == -1) {
@@ -240,7 +239,14 @@ class RouteConfiguration extends Component {
         }
       })
       .catch((err) => {
-        toast.error(err?.message, { ...toastStyle.error });
+        if (err.name === "SequelizeUniqueConstraintError") {
+          toast.error(
+            "Configuration already exists. Please check your input.",
+            { ...toastStyle.error }
+          );
+        } else {
+          toast.error(err?.message, { ...toastStyle.error });
+        }
         this.setState({ loader: false, vehicleList: [], userListOrg: [] });
       });
   };

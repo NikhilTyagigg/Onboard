@@ -532,7 +532,7 @@ class BusRecords extends Component {
               <Trash2 size={20} />
             </span>{" "}
             &nbsp;{" "}
-            <span
+            {/* <span
               onClick={() => {
                 this.addToFavorites(vehicle);
               }}
@@ -542,7 +542,7 @@ class BusRecords extends Component {
               }}
             >
               <Heart size={20} />
-            </span>
+            </span> */}
           </td>
         </tr>
       );

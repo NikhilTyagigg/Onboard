@@ -1,6 +1,5 @@
 "use strict";
 const { Model } = require("sequelize");
-
 module.exports = (sequelize, DataTypes) => {
   class VehicleRouteDriverMap extends Model {
     /**
@@ -20,7 +19,6 @@ module.exports = (sequelize, DataTypes) => {
       });
     }
   }
-
   VehicleRouteDriverMap.init(
     {
       vehicleRouteDriverMapId: {
@@ -30,23 +28,20 @@ module.exports = (sequelize, DataTypes) => {
       },
       vehicleId: {
         type: DataTypes.INTEGER,
-        allowNull: false,
       },
       routeId: {
         type: DataTypes.INTEGER,
-        allowNull: false,
       },
       driver: {
         type: DataTypes.STRING,
-        allowNull: false,
+        index: true,
       },
       dateAndTime: {
         type: DataTypes.DATE,
-        allowNull: false,
       },
       isActive: {
         type: DataTypes.BOOLEAN,
-        defaultValue: true,
+        default: true,
         allowNull: false,
       },
       isVerified: {
@@ -54,29 +49,13 @@ module.exports = (sequelize, DataTypes) => {
         defaultValue: false,
         allowNull: false,
       },
-      createdAt: {
-        type: DataTypes.DATE,
-        allowNull: false,
-        defaultValue: DataTypes.NOW,
-      },
-      updatedAt: {
-        type: DataTypes.DATE,
-        allowNull: false,
-        defaultValue: DataTypes.NOW,
-      },
+      createdAt: DataTypes.DATE,
+      updatedAt: DataTypes.DATE,
     },
     {
       sequelize,
       modelName: "VehicleRouteDriverMap",
-      indexes: [
-        {
-          unique: true,
-          fields: ["vehicleId", "routeId", "driver"],
-        },
-      ],
-      timestamps: true,
     }
   );
-
   return VehicleRouteDriverMap;
 };

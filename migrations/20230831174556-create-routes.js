@@ -1,55 +1,69 @@
-'use strict';
+"use strict";
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('Routes', {
+    await queryInterface.createTable("Routes", {
       routeId: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
       routeNo: {
         type: Sequelize.STRING(20),
-        index:true,
-        allowNull:false
+        allowNull: false,
+        unique: true, // Adding unique constraint here
       },
-      startPoint:{
+      startPoint: {
         type: Sequelize.STRING,
-        allowNull: false
       },
-      endPoint:{
+      endPoint: {
         type: Sequelize.STRING,
-        allowNull : false
       },
-      intermediateStops:{
-        type: Sequelize.TEXT
+      startTime: {
+        type: Sequelize.STRING,
       },
-      isActive:{
+      endTime: {
+        type: Sequelize.STRING,
+      },
+      depotname: {
+        type: Sequelize.STRING,
+      },
+      sll: {
+        type: Sequelize.STRING,
+      },
+      frequency: {
+        type: Sequelize.STRING,
+      },
+      trip_length: {
+        type: Sequelize.STRING,
+      },
+      SCH_NO: {
+        type: Sequelize.STRING,
+      },
+      SERVICE: {
+        type: Sequelize.STRING,
+      },
+      intermediateStops: {
+        type: Sequelize.TEXT,
+      },
+      isActive: {
         type: Sequelize.BOOLEAN,
-        default : true,
-        allowNull : false
+        defaultValue: true, // Using defaultValue instead of default
+        allowNull: false,
       },
       createdAt: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
       updatedAt: {
         allowNull: false,
-        type: Sequelize.DATE
-      }
+        type: Sequelize.DATE,
+      },
     });
-    await queryInterface.addConstraint('Routes',{
-      type: 'UNIQUE',
-      name: 'routeno_unique', 
-      fields:['routeNo'],
-      onDelete: 'NO ACTION',
-      onUpdate: 'CASCADE',
-    })
   },
 
- 
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('Routes');
-  }
+    await queryInterface.dropTable("Routes");
+  },
 };

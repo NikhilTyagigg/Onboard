@@ -9,8 +9,8 @@ const Route = models.Route;
 const VehicleRouteDriverMaps = models.VehicleRouteDriverMap;
 
 const device = awsIot.device({
-  clientId: "onboarddevtestdevice",
-  host: "a31nhrmeyspsde-ats.iot.ap-south-1.amazonaws.com",
+  clientId: "onboardtestdevice",
+  host: "axn2gml74xyrs-ats.iot.us-east-1.amazonaws.com",
   certPath: "onboarddevtestdevice.cert.pem",
   keyPath: "onboarddevtestdevice.private.key",
   caPath: "root-CA.crt",
@@ -20,59 +20,57 @@ var main = {};
 
 main.connectToMqtt = () => {
   device.on("connect", function () {
-    console.log("STEP - Connecting to AWS IoT Core");
+    console.log("STEP - Connecting to AWS  IoT Core");
     console.log(
       `---------------------------------------------------------------------------------`
     );
   });
-
-  device.subscribe("devices/bus1");
+  device.subscribe(["#"]);
 
   device.on("message", async function (topic, payload) {
     console.log("message", topic, payload.toString());
 
     try {
       payload = JSON.parse(payload.toString());
-
-      // Check if UserType is valid
       if (
         !payload["UserType"] ||
-        ![
-          MQTT_DATA_SOURCES.MOBILE_APP,
-          MQTT_DATA_SOURCES.USER_MODULE,
-          MQTT_DATA_SOURCES.WEB_APP,
-        ].includes(payload["UserType"])
+        (payload["UserType"] != MQTT_DATA_SOURCES.MOBILE_APP &&
+          payload["UserType"] != MQTT_DATA_SOURCES.USER_MODULE &&
+          payload["UserType"] != MQTT_DATA_SOURCES.WEB_APP)
       ) {
         logger.debug(
-          `The payload is not in appropriate format for topic: ${topic} & payload: ${JSON.stringify(
-            payload
-          )}`
+          "The payload is not in appropriate format for topic::" +
+            topic +
+            " & payload:: " +
+            JSON.stringify(payload)
         );
         return;
       }
-
-      // Handle WEB_APP UserType
-      if (payload["UserType"] === MQTT_DATA_SOURCES.WEB_APP) {
-        console.log("Processing WEB_APP payload");
-
-        const vehicle =
+      if (payload["UserType"] == MQTT_DATA_SOURCES.WEB_APP) {
+        //  if(!payload["Id"]) return
+        let vehicle =
           payload["Bus ID"] &&
           (await Vehicle.findOne({
-            where: { vehicleModule: payload["Bus ID"], isActive: true },
+            where: {
+              vehicleModule: payload["Bus ID"],
+              isActive: true,
+            },
           }));
-
-        const route =
+        let route =
           payload["Route_NO"] &&
           (await Route.findOne({
-            where: { routeNo: payload["Route_NO"] },
+            where: {
+              routeNo: payload["Route_NO"],
+            },
           }));
-
-        if (vehicle && route) {
-          const vehicleMap = await VehicleRouteDriverMaps.findOne({
-            where: { vehicleId: vehicle.vehicleId, routeId: route.routeId },
+        if (route && vehicle) {
+          let vehicleMap = await VehicleRouteDriverMaps.findOne({
+            where: {
+              vehicleId: vehicle.vehicleId,
+              routeId: route.routeId,
+            },
             order: [["dateAndTime", "DESC"]],
           });
-
           if (vehicleMap) {
             await vehicleMap.update({
               isVerified: true,
@@ -83,13 +81,14 @@ main.connectToMqtt = () => {
         return;
       }
 
-      // Handle other UserType
-      const vehicle =
+      let vehicle =
         payload["Bus ID"] &&
         (await Vehicle.findOne({
-          where: { vehicleModule: payload["Bus ID"], isActive: true },
+          where: {
+            vehicleModule: payload["Bus ID"],
+            isActive: true,
+          },
         }));
-
       if (vehicle) {
         const log = {
           vehicleNo: vehicle.vehicleNo || "",
@@ -104,22 +103,22 @@ main.connectToMqtt = () => {
         await QueryLogs.create(log);
       }
     } catch (err) {
-      logger.error(`Error processing message: ${err}`);
+      logger.error(err);
     }
   });
 
   device.on("error", function (topic, payload) {
     console.log("Error:", topic, payload?.toString());
-    logger.error(`Error: ${topic} ${payload?.toString()}`);
+    logger.error("Error:" + topic + payload?.toString());
   });
 };
 
 main.publishToMqtt = (data) => {
-  logger.info(`Publish to mqtt: ${JSON.stringify(data)}`);
+  logger.info("Publish to mqtt::" + JSON.stringify(data));
   try {
     device.publish(data["Bus Id"], JSON.stringify(data));
   } catch (err) {
-    logger.error(`Error publishing to MQTT: ${err}`);
+    logger.error(err);
   }
 };
 

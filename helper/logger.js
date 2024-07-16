@@ -77,7 +77,7 @@ const dailyRotateTransport = new winston.transports.DailyRotateFile({
 let logger = null;
 if (!process.env.NODE_ENV || process.env.NODE_ENV == "local") {
   logger = winston.createLogger({
-    levels: winston.config.npm.levels, // Change this line
+    levels: winston.config.syslog.levels,
     level: loggingConfig.has("level") ? loggingConfig.get("level") : "debug",
     format: loggingFormat,
     transports: [
@@ -92,13 +92,13 @@ if (!process.env.NODE_ENV || process.env.NODE_ENV == "local") {
   const AWS = require("aws-sdk");
 
   AWS.config.update({
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    region: "ap-south-1", // Replace with your desired AWS region
+    accessKeyId: process.env.CLOUDWATCH_ACCESS_KEY_ID,
+    secretAccessKey: process.env.CLOUDWATCH_SECRET_ACCESS_KEY,
+    region: "us-west-2", // Replace with your desired AWS region
   });
 
   logger = winston.createLogger({
-    levels: winston.config.npm.levels, // Change this line
+    levels: winston.config.syslog.levels,
     level: loggingConfig.has("level") ? loggingConfig.get("level") : "debug",
     format: loggingFormat,
     transports: [

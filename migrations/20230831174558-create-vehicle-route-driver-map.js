@@ -15,19 +15,18 @@ module.exports = {
       },
       routeId: {
         type: Sequelize.INTEGER,
-        allowNull: false,
       },
       driver: {
         type: Sequelize.STRING,
-        allowNull: false,
+        index: true,
       },
       dateAndTime: {
         type: Sequelize.DATE,
-        allowNull: false,
+        index: true,
       },
       isActive: {
         type: Sequelize.BOOLEAN,
-        defaultValue: true,
+        default: true,
         allowNull: false,
       },
       isVerified: {
@@ -38,21 +37,11 @@ module.exports = {
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,
-        defaultValue: Sequelize.NOW,
       },
       updatedAt: {
         allowNull: false,
         type: Sequelize.DATE,
-        defaultValue: Sequelize.NOW,
       },
-    });
-
-    await queryInterface.addIndex("VehicleRouteDriverMaps", ["driver"]);
-    await queryInterface.addIndex("VehicleRouteDriverMaps", ["dateAndTime"]);
-    await queryInterface.addConstraint("VehicleRouteDriverMaps", {
-      fields: ["vehicleId", "routeId", "driver"],
-      type: "unique",
-      name: "unique_vehicle_route_driver",
     });
 
     await queryInterface.addConstraint("VehicleRouteDriverMaps", {
@@ -66,7 +55,6 @@ module.exports = {
       onDelete: "NO ACTION",
       onUpdate: "CASCADE",
     });
-
     await queryInterface.addConstraint("VehicleRouteDriverMaps", {
       type: "FOREIGN KEY",
       name: "FK_vehicleRouteMap_route",
