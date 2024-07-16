@@ -59,7 +59,7 @@ class RouteRecords extends Component {
         SCH_NO: "",
         SERVICE: "",
         intermediateStops: [],
-        id: "",
+        id: null,
       },
       showDeletePopup: false,
     };
@@ -686,6 +686,7 @@ class RouteRecords extends Component {
   };
 
   renderDeletePopup = () => {
+    console.log("Route Number:", this.state.newRouteInfo.number);
     if (this.state.showDeletePopup) {
       return (
         <Modal
@@ -802,6 +803,7 @@ class RouteRecords extends Component {
   };
 
   onDeleteClick = (route) => {
+    console.log("deleteclick", route.routeNo);
     this.setState({
       newRouteInfo: {
         number: route.routeNo || "",
@@ -865,7 +867,7 @@ class RouteRecords extends Component {
               </span>{" "}
               &nbsp;{" "}
               <span
-                onClick={() => this.onDeleteClick(route.routeId)}
+                onClick={() => this.onDeleteClick(route)}
                 style={{ cursor: "pointer", color: "blue" }}
               >
                 <Trash2 size={20} />
