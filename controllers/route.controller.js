@@ -187,17 +187,12 @@ main.getVehicles = async (filter) => {
 };
 
 main.addRoute = async (data) => {
-  // console.log(JSON.stringify(data));
-
-  //this will be used for adding/updating and deleting a vehicle
   logger.info("Adding/updating route details::" + JSON.stringify(data));
   try {
-    let route = null;
     if (
       !data.routeNo ||
       !data.startPoint ||
       !data.endPoint ||
-      !data.sll ||
       !data.startTime ||
       !data.endTime ||
       !data.depotname ||
@@ -208,44 +203,34 @@ main.addRoute = async (data) => {
     ) {
       throw new UserError("Please enter all the valid parameters!!");
     }
+
     let routeNo = data.routeNo;
-    if (routeNo.length < 6) {
-      while (routeNo.length < 6) {
-        routeNo = "0" + routeNo;
-      }
+    while (routeNo.length < 6) {
+      routeNo = "0" + routeNo;
     }
+
+    let route = null;
+
     if (data.routeId) {
-      route = await Route.findOne({
-        where: {
-          routeId: data.routeId,
-        },
-      });
+      route = await Route.findOne({ where: { routeId: data.routeId } });
+
       if (!route) {
         logger.error("No route found!!");
         throw new UserError("No route found!!");
       }
-      if (data.routeNo != route.routeNo) {
-        let oldRoute = await Route.findOne({
-          where: {
-            routeNo: routeNo,
-          },
-        });
-        if (oldRoute && oldRoute.isActive) {
-          throw new ConflictError("Route number is already added!!");
-        } else if (oldRoute) {
-          await route.update({
-            isActive: false,
-          });
-          route = oldRoute;
-        }
+
+      let oldRoute = await Route.findOne({ where: { routeNo: routeNo } });
+      if (oldRoute && oldRoute.routeId !== data.routeId) {
+        await oldRoute.update({ isActive: false });
       }
+
       await route.update({
         routeNo: routeNo,
         startPoint: data.startPoint,
         endPoint: data.endPoint,
         startTime: data.startTime,
         endTime: data.endTime,
-        sll: data.sll,
+        // sll: data.sll,
         depotname: data.depotname,
         frequency: data.frequency,
         trip_length: data.trip_length,
@@ -255,59 +240,35 @@ main.addRoute = async (data) => {
         isActive: data.isActive,
       });
     } else {
-      route = await Route.findOne({
-        where: {
-          routeNo: routeNo,
-          // isActive: true
-        },
+      let oldRoute = await Route.findOne({ where: { routeNo: routeNo } });
+      if (oldRoute && oldRoute.isActive) {
+        await oldRoute.update({ isActive: false });
+      }
+
+      route = await Route.create({
+        routeNo: routeNo,
+        startPoint: data.startPoint,
+        endPoint: data.endPoint,
+        startTime: data.startTime,
+        endTime: data.endTime,
+        //sll: data.sll,
+        depotname: data.depotname,
+        frequency: data.frequency,
+        trip_length: data.trip_length,
+        SCH_NO: data.SCH_NO,
+        SERVICE: data.SERVICE,
+        intermediateStops: data.intermediateStops || "",
+        isActive: true,
       });
-      if (route && route.isActive) {
-        logger.error("Route Number already exits!!");
-        throw new UserError("Route Number already exits!!");
-      }
-      if (route) {
-        await route.update({
-          startPoint: data.startPoint,
-          endPoint: data.endPoint,
-          startTime: data.startTime,
-          endTime: data.endTime,
-          sll: data.sll,
-          depotname: data.depotname,
-          frequency: data.frequency,
-          trip_length: data.trip_length,
-          SCH_NO: data.SCH_NO,
-          SERVICE: data.SERVICE,
-          intermediateStops: data.intermediateStops || "",
-          isActive: true,
-        });
-      } else {
-        route = await Route.create({
-          routeNo: routeNo,
-          startPoint: data.startPoint,
-          endPoint: data.endPoint,
-          startTime: data.startTime,
-          sll: data.sll,
-          endTime: data.endTime,
-          depotname: data.depotname,
-          frequency: data.frequency,
-          trip_length: data.trip_length,
-          SCH_NO: data.SCH_NO,
-          SERVICE: data.SERVICE,
-          intermediateStops: data.intermediateStops || "",
-          isActive: true,
-        });
-      }
     }
 
     let routes = await Route.findAndCountAll({
       order: [["updatedAt", "DESC"]],
-      where: {
-        isActive: true,
-      },
+      where: { isActive: true },
     });
+
     return routes;
   } catch (err) {
-    //logger.error(err);
     console.log(err);
     throw new InternalError(err);
   }

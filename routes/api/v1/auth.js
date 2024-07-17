@@ -146,7 +146,6 @@ router.post("/send-otp", otpController.sendOTP);
 router.post("/verify-otp", verifyOTP.verifyotp);
 router.post("/check", authController.checkUser);
 router.post("/reset_password", resetController.resetPassword);
-router.post("/favorite", resetController.favoriteBus);
 
 router.post(
   "/logout",

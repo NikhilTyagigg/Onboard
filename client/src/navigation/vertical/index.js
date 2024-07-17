@@ -44,12 +44,12 @@ const allUserRoutes = [
     title: "Logs",
     icon: <FileText size={20} />,
   },
-  {
-    id: "Stop-Details",
-    navLink: "/stop-details",
-    title: "Stops",
-    icon: <Folder size={20} />,
-  },
+  // {
+  //   id: "Stop-Details",
+  //   navLink: "/stop-details",
+  //   title: "Stops",
+  //   icon: <Folder size={20} />,
+  // },
 ];
 
 export default isAdmin() || LocalStorageService.isAdminUser()

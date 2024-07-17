@@ -226,6 +226,7 @@ class RouteConfiguration extends Component {
           });
           let seconds = 5;
           let foo = setInterval(() => {
+            //   document.getElementById("seconds").innerHTML = seconds;
             seconds--;
             this.setState({ remianingTime: seconds });
             if (seconds == -1) {
@@ -239,14 +240,7 @@ class RouteConfiguration extends Component {
         }
       })
       .catch((err) => {
-        if (err.name === "SequelizeUniqueConstraintError") {
-          toast.error(
-            "Configuration already exists. Please check your input.",
-            { ...toastStyle.error }
-          );
-        } else {
-          toast.error(err?.message, { ...toastStyle.error });
-        }
+        toast.error(err?.message, { ...toastStyle.error });
         this.setState({ loader: false, vehicleList: [], userListOrg: [] });
       });
   };
@@ -429,7 +423,7 @@ class RouteConfiguration extends Component {
                 <></>
               )}
             </td>
-            <td>{r.Route ? r.Route.routeNo : "N/A"}</td>
+            <td>{r.Route.routeNo}</td>
             <td>{r.driver}</td>
             <td>
               {utcToLocal(r.dateAndTime)}
@@ -545,7 +539,7 @@ class RouteConfiguration extends Component {
               <Table style={{ textAlign: "center", overflow: "auto" }} bordered>
                 <thead style={{ position: "sticky", top: 0 }}>
                   <tr>
-                    <th>#</th>
+                    <th>Serial Number</th>
                     <th>Vehicle</th>
                     <th>Route</th>
                     <th>Driver</th>
@@ -565,19 +559,6 @@ class RouteConfiguration extends Component {
             )}
           </div>
           {this.renderModePopup()}
-          {/* <div className='row'>
-                    <div className='col-lg-12' >
-                        <Pagination
-                        activePage={this.state.activePage}
-                        itemClass="page-item"
-                        linkClass="page-link"
-                        itemsCountPerPage={this.state.itemsCountPerPage}
-                        totalItemsCount={this.state.totalItemsCount}
-                        pageRangeDisplayed={this.state.pageRangeDisplayed}
-                        onChange={this.handlePageChange.bind(this)}
-                        />
-                    </div>
-                </div> */}
         </div>
       </Card>
     );

@@ -12,6 +12,7 @@ import BarLoader from "react-spinners/BarLoader";
 import Pagination from "react-js-pagination";
 import Excel from "exceljs";
 import Papa from "papaparse";
+import { useState } from "react";
 
 const override = {
   borderColor: "#1761fd",
@@ -51,7 +52,7 @@ class RouteRecords extends Component {
         startPoint: "",
         endPoint: "",
         depotname: "",
-        sll: "",
+        // sll: "",
         startTime: "",
         endTime: "",
         frequency: "",
@@ -62,6 +63,7 @@ class RouteRecords extends Component {
         id: null,
       },
       showDeletePopup: false,
+      isFormVisible: true,
     };
     this.handleInputChange = this.handleInputChange.bind(this);
     this.onEditClick = this.onEditClick.bind(this);
@@ -157,7 +159,7 @@ class RouteRecords extends Component {
             stopName: "",
             arrivalTime: "",
             departureTime: "",
-            frequency: "",
+            // frequency: "",
             stopLocation: "",
           },
         ],
@@ -228,6 +230,9 @@ class RouteRecords extends Component {
   handleSearch = (e) => {
     this.setState({ searchFilter: e.target.value });
   };
+  handleClosef = () => {
+    this.setState({ isFormVisible: false });
+  };
 
   getRoutes = () => {
     this.setState({ loader: true });
@@ -282,7 +287,7 @@ class RouteRecords extends Component {
       startPoint: newRouteInfo.startPoint,
       endPoint: newRouteInfo.endPoint,
       depotname: newRouteInfo.depotname,
-      sll: newRouteInfo.sll,
+      //sll: newRouteInfo.sll,
       startTime: formatDate(newRouteInfo.startTime), // Use formatted start time
       endTime: formatDate(newRouteInfo.endTime),
       frequency: newRouteInfo.frequency,
@@ -397,15 +402,21 @@ class RouteRecords extends Component {
           style={{ marginTop: "5%" }}
         >
           <ModalHeader className="d-flex justify-content-between">
-            <span>Add Route</span>
-            <button
-              type="button"
-              className="close"
-              onClick={this.props.onClose}
-              aria-label="Close"
-            >
-              <span aria-hidden="true">&times;</span>
-            </button>
+            {this.state.isFormVisible && (
+              <>
+                <span>Add Route</span>
+                <div className="form-container">
+                  <button
+                    type="button"
+                    className="close"
+                    onClick={this.handleClosef}
+                    aria-label="Close"
+                  >
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+              </>
+            )}
           </ModalHeader>
           <ModalBody>
             <div className="row">
@@ -456,7 +467,7 @@ class RouteRecords extends Component {
                   value={this.state.newRouteInfo?.endPoint || ""}
                 />
               </div>
-              <div className="col-lg-6 custom-input-box">
+              {/* <div className="col-lg-6 custom-input-box">
                 <label className="label">Starting Point (Lat, Long)</label>
                 <CustomInputBox
                   mandatory={true}
@@ -467,7 +478,7 @@ class RouteRecords extends Component {
                   size={"md"}
                   placeholderText="Enter Lat Long name"
                 />
-              </div>
+              </div> */}
 
               <div className="col-lg-6 custom-input-box">
                 <label className="label">Depot Name</label>
@@ -632,7 +643,7 @@ class RouteRecords extends Component {
                               )
                             }
                           />
-                          <input
+                          {/* <input
                             type="text"
                             name="frequency"
                             placeholder="Frequency"
@@ -644,7 +655,7 @@ class RouteRecords extends Component {
                                 "frequency"
                               )
                             }
-                          />
+                          /> */}
                           <input
                             type="text"
                             name="stopLocation"
@@ -683,6 +694,16 @@ class RouteRecords extends Component {
         </Modal>
       );
     }
+  };
+
+  // Function to handle closing the modal
+  handleClosef = () => {
+    this.setState({ showModePopup: false });
+  };
+
+  // Function to hide the popup
+  hidePopup = () => {
+    this.setState({ showModePopup: false });
   };
 
   renderDeletePopup = () => {
@@ -747,7 +768,6 @@ class RouteRecords extends Component {
                   <th>Stop Name</th>
                   <th>Arrival Time</th>
                   <th>Departure Time</th>
-                  <th>Frequency</th>
                   <th>Stop Location (Lat, Long)</th>
                 </tr>
               </thead>
@@ -758,7 +778,6 @@ class RouteRecords extends Component {
                     <td>{stop.stopName}</td>
                     <td>{stop.arrivalTime}</td>
                     <td>{stop.departureTime}</td>
-                    <td>{stop.frequency}</td>
                     <td>{stop.stopLocation}</td>
                   </tr>
                 ))}
@@ -786,7 +805,7 @@ class RouteRecords extends Component {
           startPoint: route.startPoint || "",
           endPoint: route.endPoint || "",
           depotname: route.depotname || "",
-          sll: route.sll || "",
+          // sll: route.sll || "",
           startTime: route.startTime || "",
           endTime: route.endTime || "",
           frequency: route.frequency || "",
@@ -810,7 +829,7 @@ class RouteRecords extends Component {
         startPoint: route.startPoint || "",
         endPoint: route.endPoint || "",
         depotname: route.depotname || "",
-        sll: route.sll || "",
+        //sll: route.sll || "",
         startTime: route.startTime || "",
         endTime: route.endTime || "",
         frequency: route.frequency || "",
@@ -841,7 +860,6 @@ class RouteRecords extends Component {
             <td>{route.startPoint}</td>
             <td>{route.endPoint}</td>
             <td>{route.depotname}</td>
-            <td>{route.sll}</td>
             <td>{route.startTime}</td>
             <td>{route.endTime}</td>
             <td>{route.frequency}</td>
@@ -1054,7 +1072,6 @@ class RouteRecords extends Component {
                     <th style={{ width: "20%" }}>Start Point</th>
                     <th style={{ width: "20%" }}>End Point</th>
                     <th style={{ width: "40%" }}>Depot Name</th>
-                    <th style={{ width: "40%" }}>Start Point (Lat,Long)</th>
                     <th style={{ width: "20%" }}>Start Time</th>
                     <th style={{ width: "20%" }}>End Time</th>
                     <th style={{ width: "20%" }}>Frequency</th>

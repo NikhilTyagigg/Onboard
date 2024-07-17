@@ -70,10 +70,10 @@ const Routes = [
     path: "/route-configuration",
     element: <PrivateRoutes component={RouteConfiguration} />,
   },
-  {
-    path: "/stop-details",
-    element: <PrivateRoutes component={StopDetails} />,
-  },
+  // {
+  //   path: "/stop-details",
+  //   element: <PrivateRoutes component={StopDetails} />,
+  // },
   {
     path: "/logs",
     element: <PrivateRoutes component={AuditLog} />,
