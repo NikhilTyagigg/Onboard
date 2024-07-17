@@ -598,21 +598,17 @@ class BusRecords extends Component {
             <div className="tab-container" style={{ width: "20%" }}>
               <div className="section-head">Bus Records</div>
             </div>
-            <div className="row justify-content-end">
-              <div
-                className="col-auto text-right"
-                style={{
-                  marginTop: "15px",
-                  textAlign: "right",
-                  paddingRight: "10px",
-                }}
-              >
-                <span>Import File:</span>
+            <div className="row">
+              <div className="col-sm-5">
+                {/* <input type={'text'} placeholder="Search by Vehicle ID/Number and Type" name='filter' value={this.state.filter} className="form-control" onChange={(e)=>{this.onSearchByString(e.target.value)}} style={{marginTop: '7px'}}></input> */}
               </div>
               <div
-                className="col-auto"
-                style={{ marginTop: "12px", paddingRight: "10px" }}
+                className="col-sm-2 text-right"
+                style={{ marginTop: "15px", textAlign: "right" }}
               >
+                <span> Import File: </span>
+              </div>
+              <div className="col-lg-2" style={{ marginTop: "12px" }}>
                 <input
                   type="file"
                   accept=".csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
@@ -620,10 +616,13 @@ class BusRecords extends Component {
                   onChange={this._handleFileLoad}
                 />
               </div>
-              <div className="col-auto" style={{ marginTop: "12px" }}>
+              <div
+                className="col-sm-3"
+                style={{ textAlign: "right", marginTop: "12px" }}
+              >
                 <button
                   className="btn btn-sm btn-primary"
-                  onClick={this.addRecord}
+                  onClick={() => this.addRecord()}
                 >
                   Add Record
                 </button>
