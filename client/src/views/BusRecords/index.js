@@ -541,7 +541,7 @@ class BusRecords extends Component {
                 color: vehicle.isFavorite ? "green" : "red",
               }}
             >
-              <Heart size={20} />
+              <Heart size={20} /> 
             </span> */}
           </td>
         </tr>
@@ -601,11 +601,18 @@ class BusRecords extends Component {
             <div className="row justify-content-end">
               <div
                 className="col-auto text-right"
-                style={{ marginTop: "15px", textAlign: "right" }}
+                style={{
+                  marginTop: "15px",
+                  textAlign: "right",
+                  paddingRight: "10px",
+                }}
               >
-                <span> Import File: </span>
+                <span>Import File:</span>
               </div>
-              <div className="col-auto" style={{ marginTop: "12px" }}>
+              <div
+                className="col-auto"
+                style={{ marginTop: "12px", paddingRight: "10px" }}
+              >
                 <input
                   type="file"
                   accept=".csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"

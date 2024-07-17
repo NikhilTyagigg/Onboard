@@ -198,14 +198,7 @@ router.post(
       req.body;
 
     try {
-      if (
-        !full_name ||
-        !contact ||
-        !password ||
-        !ConfirmPassword ||
-        !dob ||
-        !identity
-      ) {
+      if (!full_name || !contact || !password || !ConfirmPassword) {
         throw new UserError("Please fill all the mandatory fields!!");
       }
 

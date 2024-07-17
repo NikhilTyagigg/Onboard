@@ -215,7 +215,7 @@ const Register = () => {
               />
             </div>
 
-            <div style={{ marginBottom: "15px" }}>
+            {/* <div style={{ marginBottom: "15px" }}>
               <Label
                 for="dob"
                 style={{
@@ -264,7 +264,7 @@ const Register = () => {
                 <option value="ELDERLY">ELDERLY</option>
                 <option value="PREGNANT">PREGNANT WOMEN</option>
               </Input>
-            </div>
+            </div> */}
 
             <div
               style={{
