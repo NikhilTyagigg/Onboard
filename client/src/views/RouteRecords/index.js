@@ -564,7 +564,7 @@ class RouteRecords extends Component {
                 />
               </div>
               <div className="col-lg-6 custom-input-box">
-                <label className="label">SCH_NO</label>
+                <label className="label">Schedule Number</label>
                 <CustomInputBox
                   mandatory={true}
                   size={"md"}
@@ -1068,16 +1068,16 @@ class RouteRecords extends Component {
                 <thead style={{ position: "sticky", top: 0 }}>
                   <tr>
                     <th style={{ width: "20%" }}>SERIAL NUMBER</th>
-                    <th style={{ width: "20%" }}>Route Number</th>
-                    <th style={{ width: "20%" }}>Start Point</th>
-                    <th style={{ width: "20%" }}>End Point</th>
-                    <th style={{ width: "40%" }}>Depot Name</th>
-                    <th style={{ width: "20%" }}>Start Time</th>
-                    <th style={{ width: "20%" }}>End Time</th>
+                    <th style={{ width: "10%" }}>Route Number</th>
+                    <th style={{ width: "10%" }}>Start Point</th>
+                    <th style={{ width: "10%" }}>End Point</th>
+                    <th style={{ width: "10%" }}>Depot Name</th>
+                    <th style={{ width: "10%" }}>Start Time</th>
+                    <th style={{ width: "10%" }}>End Time</th>
                     <th style={{ width: "20%" }}>Frequency</th>
                     <th style={{ width: "20%" }}>Trip Length</th>
                     <th style={{ width: "20%" }}>Schedule Number </th>
-                    <th style={{ width: "20%" }}>Services</th>
+                    <th style={{ width: "10%" }}>Services</th>
                     <th style={{ width: "20%" }}>Intermediatery stops</th>
                     <th style={{ width: "20%" }}>Action</th>
                   </tr>
