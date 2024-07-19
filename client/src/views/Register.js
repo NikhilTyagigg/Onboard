@@ -22,15 +22,181 @@ const Register = () => {
     contact: "",
     password: "",
     ConfirmPassword: "",
-    dob: "", // Added Date of Birth field
-    identity: "", // Added Identity field
+    city: "",
   });
   const [loader, setLoader] = useState(false);
   const [status, setStatus] = useState(false);
   const [iAgree, setIAgree] = useState(false);
   const [showVerificationPage, setShowVerificationPage] = useState(false);
   const [otp, setOtp] = useState("");
-  const [Payload, setPayload] = useState(""); // State to hold the OTP
+  const [Payload, setPayload] = useState("");
+  const indianCities = [
+    "Mumbai",
+    "Delhi",
+    "Bangalore",
+    "Hyderabad",
+    "Ahmedabad",
+    "Chennai",
+    "Kolkata",
+    "Surat",
+    "Pune",
+    "Jaipur",
+    "Lucknow",
+    "Kanpur",
+    "Nagpur",
+    "Indore",
+    "Thane",
+    "Bhopal",
+    "Visakhapatnam",
+    "Pimpri-Chinchwad",
+    "Patna",
+    "Vadodara",
+    "Ghaziabad",
+    "Ludhiana",
+    "Agra",
+    "Nashik",
+    "Faridabad",
+    "Meerut",
+    "Rajkot",
+    "Kalyan-Dombivli",
+    "Vasai-Virar",
+    "Varanasi",
+    "Srinagar",
+    "Aurangabad",
+    "Dhanbad",
+    "Amritsar",
+    "Navi Mumbai",
+    "Allahabad",
+    "Howrah",
+    "Ranchi",
+    "Gwalior",
+    "Jabalpur",
+    "Coimbatore",
+    "Vijayawada",
+    "Jodhpur",
+    "Madurai",
+    "Raipur",
+    "Kota",
+    "Guwahati",
+    "Chandigarh",
+    "Solapur",
+    "Hubballi-Dharwad",
+    "Bareilly",
+    "Mysore",
+    "Tiruchirappalli",
+    "Tiruppur",
+    "Moradabad",
+    "Salem",
+    "Aligarh",
+    "Thiruvananthapuram",
+    "Bhiwandi",
+    "Saharanpur",
+    "Gorakhpur",
+    "Bikaner",
+    "Amravati",
+    "Noida",
+    "Jamshedpur",
+    "Bhilai Nagar",
+    "Cuttack",
+    "Firozabad",
+    "Kochi",
+    "Bhavnagar",
+    "Dehradun",
+    "Durgapur",
+    "Asansol",
+    "Nanded-Waghala",
+    "Kolapur",
+    "Ajmer",
+    "Gulbarga",
+    "Jamnagar",
+    "Ujjain",
+    "Loni",
+    "Siliguri",
+    "Jhansi",
+    "Ulhasnagar",
+    "Nellore",
+    "Jammu",
+    "Sangli-Miraj & Kupwad",
+    "Belgaum",
+    "Mangalore",
+    "Ambattur",
+    "Tirunelveli",
+    "Malegaon",
+    "Gaya",
+    "Udaipur",
+    "Maheshtala",
+    "Warangal",
+    "Mira-Bhayandar",
+    "Jalgaon",
+    "Guntur",
+    "Bhiwani",
+    "Saharanpur",
+    "Bhatpara",
+    "Karnal",
+    "Tirupati",
+    "Ujjain",
+    "Pondicherry",
+    "Bilaspur",
+    "Rourkela",
+    "Panipat",
+    "Anantapur",
+    "Hapur",
+    "Gandhinagar",
+    "Parbhani",
+    "Bathinda",
+    "Shimla",
+    "Anantapur",
+    "Kharagpur",
+    "Barasat",
+    "Rohtak",
+    "Karnal",
+    "Bharuch",
+    "Bijapur",
+    "Rampur",
+    "Shivamogga",
+    "Mehsana",
+    "Tumkur",
+    "Khammam",
+    "Puducherry",
+    "Panihati",
+    "Mangalore",
+    "Karimnagar",
+    "Haridwar",
+    "Sri Ganganagar",
+    "Tiruvottiyur",
+    "Naihati",
+    "Secunderabad",
+    "Dibrugarh",
+    "Thanjavur",
+    "Yamunanagar",
+    "Purnia",
+    "Satna",
+    "Raichur",
+    "Motihari",
+    "Gandhidham",
+    "Udupi",
+    "Tenali",
+    "Haldia",
+    "Bhilwara",
+    "Ongole",
+    "Nandyal",
+    "Miryalaguda",
+    "Kumbakonam",
+    "Sirsa",
+    "Thiruvananthapuram",
+    "Nagaon",
+    "Hazaribagh",
+    "Sambalpur",
+    "Junagadh",
+    "Navsari",
+    "Guna",
+    "Rajnandgaon",
+    "Ahmednagar",
+    "Begusarai",
+    "Kolar",
+    "Suryapet",
+    // Add more cities if needed
+  ]; // State to hold the OTP
 
   const handleChange = (e) => {
     const value = e.target.value;
@@ -58,9 +224,8 @@ const Register = () => {
       contact: data.contact,
       password: data.password,
       ConfirmPassword: data.ConfirmPassword,
-      dob: data.dob, // Added Date of Birth field to payload
-      identity: data.identity, // Added Identity field to payload
-      role: 1,
+      city: data.city,
+      role: 2,
       username: isEmail ? getUserNameFromEmail(data.contact) : data.contact,
       phone: isEmail ? null : data.contact,
       email: isEmail ? data.contact : null,
@@ -155,13 +320,13 @@ const Register = () => {
                   fontWeight: "bold",
                 }}
               >
-                Phone Number / Email *
+                Email *
               </Label>
               <Input
                 type="text"
                 id="contact"
                 name="contact"
-                placeholder="Mobile number / E-mail"
+                placeholder="E-mail"
                 value={data.contact}
                 onChange={handleChange}
                 required
@@ -214,57 +379,41 @@ const Register = () => {
                 required
               />
             </div>
-
-            {/* <div style={{ marginBottom: "15px" }}>
-              <Label
-                for="dob"
-                style={{
-                  marginBottom: "5px",
-                  display: "block",
-                  fontWeight: "bold",
-                }}
-              >
-                Date of Birth *
-              </Label>
-              <Input
-                type="date"
-                id="dob"
-                name="dob"
-                placeholder="Select Date of Birth"
-                value={data.dob}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
             <div style={{ marginBottom: "15px" }}>
               <Label
-                for="identity"
+                for="city"
                 style={{
                   marginBottom: "5px",
                   display: "block",
                   fontWeight: "bold",
                 }}
               >
-                Identify Yourself *
+                City *
               </Label>
-              <Input
-                type="select"
-                id="identity"
-                name="identity"
-                value={data.identity}
+              <select
+                id="city"
+                name="city"
+                value={data.city}
                 onChange={handleChange}
                 required
+                style={{
+                  width: "100%",
+                  padding: "10px",
+                  borderRadius: "4px",
+                  border: "1px solid #ccc",
+                  boxShadow: "inset 0 1px 3px rgba(0,0,0,0.12)",
+                }}
               >
                 <option value="" disabled>
-                  Select Identity
+                  Select your city
                 </option>
-                <option value="visually">VISUALLY IMPAIRED</option>
-                <option value="wheelchair">WHEELCHAIR</option>
-                <option value="ELDERLY">ELDERLY</option>
-                <option value="PREGNANT">PREGNANT WOMEN</option>
-              </Input>
-            </div> */}
+                {indianCities.map((city, index) => (
+                  <option key={index} value={city}>
+                    {city}
+                  </option>
+                ))}
+              </select>
+            </div>
 
             <div
               style={{

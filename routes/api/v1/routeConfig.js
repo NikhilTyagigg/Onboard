@@ -45,11 +45,13 @@ router.post("/getLogs", async (req, res) => {
 
 router.post("/getVehicles", async (req, res) => {
   try {
-    let vehicle = await getVehicles();
+    const userId = req.body.userId;
+    console.log("Received userId:", userId);
+    let vehicle = await getVehicles(req.body.filter, userId);
     res.send(successBody({ ...vehicle }));
   } catch (e) {
     logger.error(e);
-    throw new Error(e);
+    res.status(500).send({ error: e.message });
   }
 });
 

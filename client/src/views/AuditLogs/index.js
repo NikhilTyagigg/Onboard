@@ -88,25 +88,35 @@ class AuditLog extends Component {
   getLogs = () => {
     this.setState({ loader: true });
     const queryParams = `?page=${this.state.activePage}&records=${this.state.itemsCountPerPage}`;
-    getLogs(queryParams)
-      .then((res) => {
-        if (res.status == statusCode.HTTP_200_OK) {
-          let totalUsers = res.data.data.logs.count;
-          this.setState({
-            totalItemsCount: res.data.data.logs.count,
-            userList: res.data.data.logs.rows,
-            loader: false,
-            refreshTime: Date.now() + 300000,
-          });
-        } else {
-          toast.error(res.message, { ...toastStyle.error });
+    const city = localStorage.getItem("city");
+    const role = localStorage.getItem("user_role");
+
+    if (city === "Mysore" || role === "0") {
+      getLogs(queryParams)
+        .then((res) => {
+          if (res.status == statusCode.HTTP_200_OK) {
+            let totalUsers = res.data.data.logs.count;
+            this.setState({
+              totalItemsCount: res.data.data.logs.count,
+              userList: res.data.data.logs.rows,
+              loader: false,
+              refreshTime: Date.now() + 300000,
+            });
+          } else {
+            toast.error(res.message, { ...toastStyle.error });
+            this.setState({ loader: false, userList: [], userListOrg: [] });
+          }
+        })
+        .catch((err) => {
+          toast.error(err?.message, { ...toastStyle.error });
           this.setState({ loader: false, userList: [], userListOrg: [] });
-        }
-      })
-      .catch((err) => {
-        toast.error(err?.message, { ...toastStyle.error });
-        this.setState({ loader: false, userList: [], userListOrg: [] });
+        });
+    } else {
+      this.setState({ loader: false });
+      toast.error("User is not authorized to access this data", {
+        ...toastStyle.error,
       });
+    }
   };
 
   renderDocuments = () => {

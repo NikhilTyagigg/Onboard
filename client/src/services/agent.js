@@ -131,12 +131,25 @@ export const signUpHandler = (payload) => {
   return requests.postPublic("auth/register/", payload);
 };
 
-export const favorite = (payload, token) => {
-  return requests.postPublic("auth/favorite/", payload, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+export const fetchRegisteredEmails = async () => {
+  try {
+    const response = await requests.get("auth/registered-emails");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching registered emails:", error);
+    throw error;
+  }
+};
+
+export const someApiToUpdateUserRole = async (userId, role) => {
+  const payload = { userId, role };
+  try {
+    const response = await requests.postPublic("auth/changerole", payload);
+    console.log(response);
+    return response;
+  } catch (error) {
+    throw new Error(error.message);
+  }
 };
 
 export const checkUser = (payload) => {
@@ -163,8 +176,9 @@ export const getLogs = (queryParams = "") => {
   return requests.post("route/getLogs" + queryParams);
 };
 
-export const getVehicleRecords = (queryParams = "") => {
-  return requests.post("route/getVehicles" + queryParams);
+export const getVehicleRecords = (queryParams = "", userId = "") => {
+  console.log("getVehicleRecords userId parameter:", userId);
+  return requests.post("route/getVehicles" + queryParams, { userId });
 };
 
 export const addVehicle = (payload) => {

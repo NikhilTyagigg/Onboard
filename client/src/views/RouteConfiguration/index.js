@@ -115,68 +115,91 @@ class RouteConfiguration extends Component {
   getMasterData = () => {
     this.setState({ loader: true });
     const queryParams = `?page=${this.state.activePage}&records=${this.state.itemsCountPerPage}`;
-    getMasterData(queryParams)
-      .then((res) => {
-        if (res.status == statusCode.HTTP_200_OK) {
-          let vehicles = res.data.data.vehicles;
-          let routes = res.data.data.routes;
-          routes = routes.map((v) => {
-            return {
-              label: v.routeNo,
-              value: v.routeId,
-            };
-          });
-          vehicles = vehicles.map((v) => {
-            return {
-              label: v.vehicleNo,
-              value: v.vehicleId,
-            };
-          });
-          this.setState({
-            vehicles: vehicles,
-            routes: routes,
-            loader: false,
-          });
-        } else {
-          toast.error(res.message, { ...toastStyle.error });
+    const city = localStorage.getItem("city");
+
+    if (city === "Mysore") {
+      getMasterData(queryParams)
+        .then((res) => {
+          if (res.status == statusCode.HTTP_200_OK) {
+            let vehicles = res.data.data.vehicles;
+            let routes = res.data.data.routes;
+            routes = routes.map((v) => {
+              return {
+                label: v.routeNo,
+                value: v.routeId,
+              };
+            });
+            vehicles = vehicles.map((v) => {
+              return {
+                label: v.vehicleNo,
+                value: v.vehicleId,
+              };
+            });
+            this.setState({
+              vehicles: vehicles,
+              routes: routes,
+              loader: false,
+            });
+          } else {
+            toast.error(res.message, { ...toastStyle.error });
+            this.setState({ loader: false, vehicleList: [], userListOrg: [] });
+          }
+        })
+        .catch((err) => {
+          toast.error(err?.message, { ...toastStyle.error });
           this.setState({ loader: false, vehicleList: [], userListOrg: [] });
-        }
-      })
-      .catch((err) => {
-        toast.error(err?.message, { ...toastStyle.error });
-        this.setState({ loader: false, vehicleList: [], userListOrg: [] });
+        });
+    } else {
+      this.setState({ loader: false });
+      toast.error("User is not authorized to access this data", {
+        ...toastStyle.error,
       });
+    }
   };
 
   getRouteConfig = () => {
     this.setState({ loader: true });
     const queryParams = `?page=${this.state.activePage}&records=${this.state.itemsCountPerPage}`;
-    getRouteConfig(queryParams)
-      .then((res) => {
-        if (res.status == statusCode.HTTP_200_OK) {
-          let routes = res.data.data;
+    const city = localStorage.getItem("city");
+    const role = localStorage.getItem("user_role");
+
+    if (city === "Mysore" || role === "0") {
+      getRouteConfig(queryParams)
+        .then((res) => {
+          if (res.status == statusCode.HTTP_200_OK) {
+            let routes = res.data.data;
+            this.setState({
+              totalItemsCount: routes.count,
+              routeConfigList: routes.rows,
+              loader: false,
+              waitingForAck: false,
+              remianingTime: -1,
+              refreshTime: Date.now() + 900000,
+            });
+          } else {
+            toast.error(res.message, { ...toastStyle.error });
+            this.setState({
+              loader: false,
+              routeConfigList: [],
+              userListOrg: [],
+              waitingForAck: null,
+            });
+          }
+        })
+        .catch((err) => {
+          toast.error(err?.message, { ...toastStyle.error });
           this.setState({
-            totalItemsCount: routes.count,
-            routeConfigList: routes.rows,
             loader: false,
-            waitingForAck: false,
-            remianingTime: -1,
-            refreshTime: Date.now() + 900000,
-          });
-        } else {
-          toast.error(res.message, { ...toastStyle.error });
-          this.setState({
-            loader: false,
-            vehicleList: [],
+            routeConfigList: [],
             userListOrg: [],
-            waitingForAck: null,
           });
-        }
-      })
-      .catch((err) => {
-        toast.error(err?.message, { ...toastStyle.error });
-        this.setState({ loader: false, vehicleList: [], userListOrg: [] });
+        });
+    } else {
+      this.setState({ loader: false });
+      toast.error("User is not authorized to access this data", {
+        ...toastStyle.error,
       });
+    }
   };
 
   handleDateChange = (selection) => {
@@ -184,6 +207,11 @@ class RouteConfiguration extends Component {
   };
 
   addConfig = (isActive = true, index) => {
+    const userRole = localStorage.getItem("user_role");
+    if (userRole === "2") {
+      toast.error("You do not have permission to add data!");
+      return;
+    }
     let newConfigInfo = this.state.newConfigInfo;
     if (!newConfigInfo.vehicle || !newConfigInfo.route || !this.state.date) {
       toast.error("Please fill all the mandatory fields!!");

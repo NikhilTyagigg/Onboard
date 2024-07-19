@@ -72,7 +72,7 @@ router.post(
       }
 
       if (!user) {
-        throw new NotAuthorizedError("Invalid email/phone or password");
+        throw new NotAuthorizedError("Invalid email or password");
       }
 
       // Check if the provided password matches the stored hashed password
@@ -94,6 +94,7 @@ router.post(
             userId: user.userId,
             email: user.email,
             name: user.name,
+            city: user.city,
             role: user.role,
             identity: user.identity,
             date: clientDate,
@@ -191,14 +192,28 @@ router.post(
 //     }
 //   })
 // );
+router.get(
+  "/registered-emails",
+  runAsyncWrapper(async (req, res, next) => {
+    try {
+      const users = await db.User.findAll({
+        attributes: ["userId", "email", "role"], // Select only necessary fields
+      });
+
+      res.send(successBody({ data: users }));
+    } catch (error) {
+      next(error);
+    }
+  })
+);
+
 router.post(
   "/register",
   runAsyncWrapper(async (req, res, next) => {
-    const { full_name, contact, password, ConfirmPassword, dob, identity } =
-      req.body;
+    const { full_name, contact, password, ConfirmPassword, city } = req.body;
 
     try {
-      if (!full_name || !contact || !password || !ConfirmPassword) {
+      if (!full_name || !contact || !password || !ConfirmPassword || !city) {
         throw new UserError("Please fill all the mandatory fields!!");
       }
 
@@ -228,11 +243,11 @@ router.post(
       user = await db.User.create({
         name: full_name,
         password: hashedPassword,
+        ConfirmPassword: hashedPassword,
         email: isEmail ? contact : null,
         phone: isEmail ? null : contact,
-        role: 1, // Assuming role 1 corresponds to a standard user role
-        dob: dob,
-        identity: identity,
+        role: 2, // Assuming role 1 corresponds to a standard user role
+        city: city,
       });
 
       // Assuming you have an OTP service to send and validate OTPs
@@ -313,6 +328,35 @@ router.post("/getotp", async (req, res, next) => {
     next(e);
   }
 });
+router.post("/changerole", async (req, res) => {
+  const { userId, role } = req.body;
+  console.log("*********", req.body);
+
+  // Validate input
+  if (!userId) {
+    return res
+      .status(400)
+      .json({ success: false, message: "Missing userId or role" });
+  }
+
+  try {
+    const user = await db.User.findByPk(userId);
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+
+    user.role = role;
+    await user.save();
+
+    res.json({ success: true, message: "User role updated successfully" });
+  } catch (error) {
+    console.error("Error updating user role:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+});
+
 router.post("/fetch_user_by_id", async (req, res) => {
   console.log("dekh dekh dekh = ", req.body);
   const { id } = req.body;

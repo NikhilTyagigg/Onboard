@@ -273,65 +273,6 @@ main.addRoute = async (data) => {
     throw new InternalError(err);
   }
 };
-
-// main.getRoutes = async ({ page = 1, records = 900 }) => {
-//   logger.info("Get routes");
-
-//   try {
-//     const limit = parseInt(records, 10);
-//     const offset = (parseInt(page, 10) - 1) * limit;
-
-//     logger.info(`Fetching routes with limit: ${limit}, offset: ${offset}`);
-
-//     const routes = await Route.findAndCountAll({
-//       order: [["updatedAt", "DESC"]],
-//       where: {
-//         isActive: true,
-//       },
-//       limit: limit,
-//       offset: offset,
-//       logging: (sql) => logger.info(`SQL Query: ${sql}`),
-//     });
-
-//     // Log the count of retrieved routes
-//     logger.info(
-//       `Retrieved ${routes.rows.length} routes out of ${routes.count} total`
-//     );
-
-//     // Check if limit and offset are applied correctly
-//     if (
-//       routes.rows.length < limit &&
-//       routes.count > offset + routes.rows.length
-//     ) {
-//       logger.warn(
-//         `Expected to retrieve ${limit} routes, but got ${routes.rows.length}`
-//       );
-//     }
-
-//     // Iterate through routes and convert intermediateStops from Buffer to JSON
-//     for (let i = 0; i < routes.rows.length; i++) {
-//       const route = routes.rows[i];
-//       if (route.intermediateStops && Buffer.isBuffer(route.intermediateStops)) {
-//         try {
-//           const bufferData = route.intermediateStops;
-//           route.intermediateStops = JSON.parse(bufferData.toString("utf8"));
-//         } catch (jsonError) {
-//           logger.error(
-//             `Failed to parse intermediateStops for route with ID: ${route.id}, error: ${jsonError.message}`
-//           );
-//           throw new InternalError(
-//             `Failed to parse intermediateStops for route with ID: ${route.id}`
-//           );
-//         }
-//       }
-//     }
-
-//     return routes;
-//   } catch (err) {
-//     logger.error(`Error retrieving routes: ${err.message}`);
-//     throw new InternalError("An error occurred while retrieving routes.");
-//   }
-// };
 main.getRoutes = async ({
   page = 1,
   records = 10,

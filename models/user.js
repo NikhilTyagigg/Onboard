@@ -26,8 +26,7 @@ module.exports = (sequelize, DataTypes) => {
       role: DataTypes.INTEGER,
       accessToken: DataTypes.STRING,
       refreshToken: DataTypes.STRING,
-      dob: DataTypes.DATE, // Added Date of Birth field
-      identity: DataTypes.STRING, // Added Identity field
+      city: DataTypes.STRING, // Added Identity field
       createdAt: DataTypes.DATE,
       updatedAt: DataTypes.DATE,
     },

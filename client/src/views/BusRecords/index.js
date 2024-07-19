@@ -14,7 +14,6 @@ import {
   getVehicleRecords,
   addVehicle,
   addMultipleVehicles,
-  favorite,
 } from "../../services/agent";
 import { Card, Spinner, Table } from "reactstrap";
 import toast from "react-hot-toast";
@@ -112,36 +111,48 @@ class BusRecords extends Component {
   getBusRecords = () => {
     this.setState({ loader: true });
     const queryParams = `?page=${this.state.activePage}&records=${this.state.itemsCountPerPage}`;
-    getVehicleRecords(queryParams)
-      .then((res) => {
-        if (res.status == statusCode.HTTP_200_OK) {
-          let vehicles = res.data.data.vehicles;
-          let vehicleType = res.data.data.vehicleType;
-          // console.log(vehicleType)
-          vehicleType = vehicleType.map((v) => {
-            //  console.log(v.vehicleType);
-            return {
-              label: v.name,
-              value: v.vehicleTypeId,
-            };
-          });
-          console.log("Mapped Vehicle Types:", vehicleType[0].label);
+    const userId = localStorage.getItem("id"); // Assuming userId is stored in localStorage
+    const usercity = localStorage.getItem("city");
+    const role = localStorage.getItem("user_role");
+    // Assuming user data is stored in localStorage
 
-          this.setState({
-            totalItemsCount: vehicles.count,
-            vehicleList: vehicles.rows,
-            vehicleType: vehicleType,
-            loader: false,
-          });
-        } else {
-          toast.error(res.message, { ...toastStyle.error });
+    // Check if the user's city is Mysore
+    if (usercity === "Mysore" || role === "0") {
+      console.log("Frontend userId data:", userId);
+      getVehicleRecords(queryParams, userId)
+        .then((res) => {
+          if (res.status == statusCode.HTTP_200_OK) {
+            let vehicles = res.data.data.vehicles;
+            let vehicleType = res.data.data.vehicleType;
+            vehicleType = vehicleType.map((v) => {
+              return {
+                label: v.name,
+                value: v.vehicleTypeId,
+              };
+            });
+            console.log("Mapped Vehicle Types:", vehicleType[0].label);
+
+            this.setState({
+              totalItemsCount: vehicles.count,
+              vehicleList: vehicles.rows,
+              vehicleType: vehicleType,
+              loader: false,
+            });
+          } else {
+            toast.error(res.message, { ...toastStyle.error });
+            this.setState({ loader: false, vehicleList: [], userListOrg: [] });
+          }
+        })
+        .catch((err) => {
+          toast.error(err?.message, { ...toastStyle.error });
           this.setState({ loader: false, vehicleList: [], userListOrg: [] });
-        }
-      })
-      .catch((err) => {
-        toast.error(err?.message, { ...toastStyle.error });
-        this.setState({ loader: false, vehicleList: [], userListOrg: [] });
+        });
+    } else {
+      toast.error("User is not authorized to view this data", {
+        ...toastStyle.error,
       });
+      this.setState({ loader: false, vehicleList: [], userListOrg: [] });
+    }
   };
 
   handlePageChange(pageNumber) {
@@ -162,6 +173,11 @@ class BusRecords extends Component {
   };
 
   addVehicle = (isActive = true) => {
+    const userRole = localStorage.getItem("user_role");
+    if (userRole === "2") {
+      toast.error("You do not have permission to add data!");
+      return;
+    }
     let newVehicleInfo = this.state.newVehicleInfo;
     if (
       !newVehicleInfo.number ||
@@ -187,28 +203,34 @@ class BusRecords extends Component {
         isActive: isActive,
       };
     }
-
-    addVehicle(payload)
-      .then((res) => {
-        if (res.status == statusCode.HTTP_200_OK) {
-          let vehicles = res.data.data;
-          this.setState({
-            totalItemsCount: vehicles.count,
-            vehicleList: vehicles.rows,
-            loader: false,
-            showModePopup: false,
-            showDeletePopup: false,
-            newVehicleInfo: {},
-          });
-        } else {
-          toast.error(res.message, { ...toastStyle.error });
+    const userrole = localStorage.getItem("user_role");
+    const usercity = localStorage.getItem("city");
+    console.log(userrole);
+    if ((userrole == "0" || userrole == "1") && usercity == "Mysore") {
+      addVehicle(payload)
+        .then((res) => {
+          if (res.status == statusCode.HTTP_200_OK) {
+            let vehicles = res.data.data;
+            this.setState({
+              totalItemsCount: vehicles.count,
+              vehicleList: vehicles.rows,
+              loader: false,
+              showModePopup: false,
+              showDeletePopup: false,
+              newVehicleInfo: {},
+            });
+          } else {
+            toast.error(res.message, { ...toastStyle.error });
+            this.setState({ loader: false });
+          }
+        })
+        .catch((err) => {
+          toast.error(err?.message, { ...toastStyle.error });
           this.setState({ loader: false });
-        }
-      })
-      .catch((err) => {
-        toast.error(err?.message, { ...toastStyle.error });
-        this.setState({ loader: false });
-      });
+        });
+    } else {
+      toast.error("You Are Not authorized for adding data");
+    }
   };
 
   addVehicles = (payload) => {

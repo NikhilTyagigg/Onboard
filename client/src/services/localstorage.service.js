@@ -7,6 +7,7 @@ const LocalStorageService = (function () {
     }
     return _service;
   }
+
   function _setToken(tokenObj) {
     localStorage.setItem("token", tokenObj.token);
     localStorage.setItem("refresh_token", tokenObj.refresh);
@@ -17,27 +18,33 @@ const LocalStorageService = (function () {
   }
 
   function _setUserInfo(user) {
-    console.log("function a setinfo ka", user);
     localStorage.setItem("userInfo", JSON.stringify(user));
+    localStorage.setItem("user_role", user.role);
   }
 
   function _getUserInfo() {
-    localStorage.getItem("userInfo");
     if (localStorage.getItem("userInfo")) {
       return JSON.parse(localStorage.getItem("userInfo"));
     }
     return null;
   }
 
+  function _getUserRole() {
+    return parseInt(localStorage.getItem("user_role"), 10);
+  }
+
   function _getAccessToken() {
     return localStorage.getItem("token");
   }
+
   function _getRefreshToken() {
     return localStorage.getItem("refresh_token");
   }
+
   function _isAdminUser() {
-    return localStorage.getItem("user_role") == "ADMIN";
+    return _getUserRole() === 0;
   }
+
   function _clearToken() {
     localStorage.removeItem("token");
     localStorage.removeItem("refresh_token");
@@ -47,8 +54,7 @@ const LocalStorageService = (function () {
     localStorage.removeItem("token");
     localStorage.removeItem("refresh_token");
     localStorage.removeItem("userInfo");
-
-    //localStorage.clear();
+    localStorage.removeItem("user_role");
   }
 
   return {
@@ -56,6 +62,7 @@ const LocalStorageService = (function () {
     setToken: _setToken,
     setUserInfo: _setUserInfo,
     getUserInfo: _getUserInfo,
+    getUserRole: _getUserRole,
     getAccessToken: _getAccessToken,
     getRefreshToken: _getRefreshToken,
     clearToken: _clearToken,

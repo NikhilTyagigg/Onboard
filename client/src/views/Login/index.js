@@ -110,7 +110,7 @@ const Login = () => {
             localStorage.setItem("user_role", res.data.data.role);
             localStorage.setItem("refresh_token", res.data.data.refreshToken);
             localStorage.setItem("token", res.data.data.token);
-            localStorage.setItem("identity", res.data.data.identity);
+            localStorage.setItem("city", res.data.data.city);
             toast.success("Welcome back " + nameArr[0], {
               ...toastStyle.success,
             });

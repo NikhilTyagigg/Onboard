@@ -237,30 +237,41 @@ class RouteRecords extends Component {
   getRoutes = () => {
     this.setState({ loader: true });
     const { activePage, itemsCountPerPage, searchRouteNo } = this.state;
-    let queryParams = `?page=${activePage}&records=${itemsCountPerPage}`;
-    if (searchRouteNo) {
-      queryParams += `&routeNo=${encodeURIComponent(searchRouteNo.trim())}`;
-    }
+    const city = localStorage.getItem("city");
+    const role = localStorage.getItem("user_role");
 
-    getRoutes(queryParams)
-      .then((res) => {
-        if (res.status == statusCode.HTTP_200_OK) {
-          let routes = res.data.data;
-          this.setState({
-            totalItemsCount: routes.count,
-            routeList: routes.rows,
-            loader: false,
-          });
-        } else {
-          toast.error(res.message, { ...toastStyle.error });
-          this.setState({ loader: false, vehicleList: [], userListOrg: [] });
-        }
-      })
-      .catch((err) => {
-        toast.error(err?.message, { ...toastStyle.error });
-        this.setState({ loader: false, vehicleList: [], userListOrg: [] });
+    if (city === "Mysore" || role === "0") {
+      let queryParams = `?page=${activePage}&records=${itemsCountPerPage}`;
+      if (searchRouteNo) {
+        queryParams += `&routeNo=${encodeURIComponent(searchRouteNo.trim())}`;
+      }
+
+      getRoutes(queryParams)
+        .then((res) => {
+          if (res.status == statusCode.HTTP_200_OK) {
+            let routes = res.data.data;
+            this.setState({
+              totalItemsCount: routes.count,
+              routeList: routes.rows,
+              loader: false,
+            });
+          } else {
+            toast.error(res.message, { ...toastStyle.error });
+            this.setState({ loader: false, routeList: [] });
+          }
+        })
+        .catch((err) => {
+          toast.error(err?.message, { ...toastStyle.error });
+          this.setState({ loader: false, routeList: [] });
+        });
+    } else {
+      this.setState({ loader: false });
+      toast.error("User is not authorized to access this data", {
+        ...toastStyle.error,
       });
+    }
   };
+
   addRoute = (isActive = true) => {
     let newRouteInfo = this.state.newRouteInfo;
     if (
@@ -273,6 +284,7 @@ class RouteRecords extends Component {
     }
 
     this.setState({ loader: true });
+
     function formatDate(time) {
       if (!time) {
         console.error("No time value provided to formatDate");
@@ -282,18 +294,18 @@ class RouteRecords extends Component {
       console.log(`Formatted Time: ${formattedTime}`);
       return formattedTime;
     }
+
     let payload = {
       routeNo: newRouteInfo.number,
       startPoint: newRouteInfo.startPoint,
       endPoint: newRouteInfo.endPoint,
       depotname: newRouteInfo.depotname,
-      //sll: newRouteInfo.sll,
       startTime: formatDate(newRouteInfo.startTime), // Use formatted start time
       endTime: formatDate(newRouteInfo.endTime),
       frequency: newRouteInfo.frequency,
       trip_length: newRouteInfo.trip_length,
       SCH_NO: newRouteInfo.SCH_NO,
-      SERVICE: newRouteInfo.SERVICE, // Use formatted end time
+      SERVICE: newRouteInfo.SERVICE,
       intermediateStops: newRouteInfo?.intermediateStops || "",
     };
 
@@ -305,51 +317,64 @@ class RouteRecords extends Component {
       };
     }
 
-    addRoute(payload)
-      .then((res) => {
-        if (res.status == statusCode.HTTP_200_OK) {
-          let routes = res.data.data;
-          this.setState({
-            totalItemsCount: routes.count,
-            routeList: routes.rows,
-            loader: false,
-            showModePopup: false,
-            showDeletePopup: false,
-            newRouteInfo: {},
-          });
-        } else {
-          toast.error(res.message, { ...toastStyle.error });
-          this.setState({ loader: false, newRouteInfo: {}, userListOrg: [] });
-        }
-      })
-      .catch((err) => {
-        toast.error(err?.message, { ...toastStyle.error });
-        this.setState({ loader: false, userListOrg: [] });
-      });
+    const role = localStorage.getItem("user_role");
+    const usert = localStorage.getItem("city");
+    if ((role == "0" || role == "1") && usert == "Mysore") {
+      addRoute(payload)
+        .then((res) => {
+          if (res.status == statusCode.HTTP_200_OK) {
+            let routes = res.data.data;
+            this.setState({
+              totalItemsCount: routes.count,
+              routeList: routes.rows,
+              loader: false,
+              showModePopup: false,
+              showDeletePopup: false,
+              newRouteInfo: {},
+            });
+          } else {
+            toast.error(res.message, { ...toastStyle.error });
+            this.setState({ loader: false, newRouteInfo: {}, userListOrg: [] });
+          }
+        })
+        .catch((err) => {
+          toast.error(err?.message, { ...toastStyle.error });
+          this.setState({ loader: false, userListOrg: [] });
+        });
+    } else {
+      toast.error("You do not have permission to add routes.");
+      this.setState({ loader: false });
+    }
   };
 
   addRoutes = (payload) => {
-    addMultipleRoutes({ routes: payload })
-      .then((res) => {
-        if (res.status == statusCode.HTTP_200_OK) {
-          let routes = res.data.data;
-          this.setState({
-            totalItemsCount: routes.count,
-            routeList: routes.rows,
-            loader: false,
-            showModePopup: false,
-            showDeletePopup: false,
-          });
-          toast.success("Records added successfully!!");
-        } else {
-          toast.error(res.message, { ...toastStyle.error });
-          this.setState({ loader: false, newRouteInfo: {}, userListOrg: [] });
-        }
-      })
-      .catch((err) => {
-        toast.error(err?.message, { ...toastStyle.error });
-        this.setState({ loader: false, userListOrg: [] });
-      });
+    const role = localStorage.getItem("user_role");
+    if ((role == "0" || role == "1") && usert == "Mysore") {
+      addMultipleRoutes({ routes: payload })
+        .then((res) => {
+          if (res.status == statusCode.HTTP_200_OK) {
+            let routes = res.data.data;
+            this.setState({
+              totalItemsCount: routes.count,
+              routeList: routes.rows,
+              loader: false,
+              showModePopup: false,
+              showDeletePopup: false,
+            });
+            toast.success("Records added successfully!!");
+          } else {
+            toast.error(res.message, { ...toastStyle.error });
+            this.setState({ loader: false, newRouteInfo: {}, userListOrg: [] });
+          }
+        })
+        .catch((err) => {
+          toast.error(err?.message, { ...toastStyle.error });
+          this.setState({ loader: false, userListOrg: [] });
+        });
+    } else {
+      toast.error("You do not have permission to add multiple routes.");
+      this.setState({ loader: false });
+    }
   };
 
   showPopup = (email, status = "", type) => {
