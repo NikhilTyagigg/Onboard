@@ -70,7 +70,7 @@ const StopDetails = () => {
         <table className="registered-emails-table">
           <thead>
             <tr>
-              <th style={{ width: "20%" }}>Serial Number</th>
+              <th style={{ width: "15%" }}>Serial Number</th>
               <th style={{ width: "20%" }}>Email</th>
               <th style={{ width: "20%" }}>City</th>
               <th style={{ width: "15%" }}>Role</th>
