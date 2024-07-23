@@ -37,3 +37,25 @@
   background-color: #ccc;
   cursor: not-allowed;
 }
+.role-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.icon {
+  font-size: 1.5rem;
+  margin: 0 0.5rem;
+}
+
+.approve-icon {
+  color: green;
+}
+
+.reject-icon {
+  color: red;
+}
+
+.pending-icon {
+  color: gray;
+}

@@ -1,4 +1,10 @@
 import React, { useEffect, useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faCheckCircle,
+  faTimesCircle,
+  faSpinner,
+} from "@fortawesome/free-solid-svg-icons";
 import {
   fetchRegisteredEmails,
   someApiToUpdateUserRole,
@@ -87,14 +93,48 @@ const StopDetails = () => {
                 <td>
                   {user.role === 0 ? (
                     <span>Root User</span>
-                  ) : (
+                  ) : user.role === 1 ? (
                     <button
                       className="role-button"
-                      onClick={() => handleRoleChange(user.userId, 1)}
-                      disabled={user.role === 1}
+                      onClick={() => handleRoleChange(user.userId, 2)}
                     >
-                      {user.role === 1 ? "Admin" : "Make Admin"}
+                      <FontAwesomeIcon
+                        icon={faTimesCircle}
+                        className="icon reject-icon"
+                      />
                     </button>
+                  ) : user.role === 2 ? (
+                    <>
+                      <button
+                        className="role-button"
+                        onClick={() => handleRoleChange(user.userId, 1)}
+                      >
+                        <FontAwesomeIcon
+                          icon={faCheckCircle}
+                          className="icon approve-icon"
+                        />
+                      </button>
+                      <button
+                        className="role-button"
+                        onClick={() => handleRoleChange(user.userId, 2)}
+                      >
+                        <FontAwesomeIcon
+                          icon={faTimesCircle}
+                          className="icon reject-icon"
+                        />
+                      </button>
+                      <FontAwesomeIcon
+                        icon={faSpinner}
+                        className="icon pending-icon"
+                        spin
+                      />
+                    </>
+                  ) : (
+                    <FontAwesomeIcon
+                      icon={faSpinner}
+                      className="icon pending-icon"
+                      spin
+                    />
                   )}
                 </td>
               </tr>

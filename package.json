@@ -18,6 +18,9 @@
   "license": "ISC",
   "dependencies": {
     "@aws-sdk/client-sns": "^3.600.0",
+    "@fortawesome/fontawesome-svg-core": "^6.6.0",
+    "@fortawesome/free-solid-svg-icons": "^6.6.0",
+    "@fortawesome/react-fontawesome": "^0.2.2",
     "aws-iot-device-sdk": "^2.2.12",
     "aws-sdk": "^2.1633.0",
     "bcrypt": "^5.1.1",
