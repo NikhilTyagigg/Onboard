@@ -56,6 +56,17 @@
   color: red;
 }
 
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .pending-icon {
   color: gray;
+  display: inline-block; /* Ensure the element is inline-block for rotation */
+  animation: rotate 2s linear infinite; /* 2s is the duration of the rotation, change as needed */
 }
