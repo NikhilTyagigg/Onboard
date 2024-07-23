@@ -53,7 +53,7 @@ const StopDetails = () => {
   };
 
   if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
+  //if (error) return <div>Error: {error}</div>;
 
   return (
     <div className="registered-emails-box">
@@ -66,7 +66,8 @@ const StopDetails = () => {
             <tr>
               <th style={{ width: "20%" }}>Serial Number</th>
               <th style={{ width: "20%" }}>Email</th>
-              <th style={{ width: "20%" }}>Role</th>
+              <th style={{ width: "20%" }}>City</th>
+              <th style={{ width: "15%" }}>Role</th>
               <th style={{ width: "40%" }}>Actions</th>
             </tr>
           </thead>
@@ -75,28 +76,26 @@ const StopDetails = () => {
               <tr key={user.userId}>
                 <td>{index + 1}</td>
                 <td>{user.email}</td>
+                <td>{user.city}</td>
                 <td>
                   {user.role === 0
-                    ? "Admin"
+                    ? "Root"
                     : user.role === 1
-                    ? "Standard"
+                    ? "Admin"
                     : "Normal"}
                 </td>
                 <td>
-                  <button
-                    className="role-button"
-                    onClick={() => handleRoleChange(user.userId, 0)}
-                    disabled={user.role === 0}
-                  >
-                    {user.role === 0 ? "Admin" : "Make Admin"}
-                  </button>
-                  <button
-                    className="role-button"
-                    onClick={() => handleRoleChange(user.userId, 1)}
-                    disabled={user.role === 1}
-                  >
-                    {user.role === 1 ? "Standard" : "Make Standard"}
-                  </button>
+                  {user.role === 0 ? (
+                    <span>Root User</span>
+                  ) : (
+                    <button
+                      className="role-button"
+                      onClick={() => handleRoleChange(user.userId, 1)}
+                      disabled={user.role === 1}
+                    >
+                      {user.role === 1 ? "Admin" : "Make Admin"}
+                    </button>
+                  )}
                 </td>
               </tr>
             ))}

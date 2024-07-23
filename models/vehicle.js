@@ -35,6 +35,9 @@ module.exports = (sequelize, DataTypes) => {
       vehicleType: {
         type: DataTypes.INTEGER(5),
       },
+      city: {
+        type: DataTypes.STRING,
+      },
 
       isActive: {
         type: DataTypes.BOOLEAN,

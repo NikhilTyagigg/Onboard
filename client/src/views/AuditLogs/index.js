@@ -87,18 +87,21 @@ class AuditLog extends Component {
 
   getLogs = () => {
     this.setState({ loader: true });
+
     const queryParams = `?page=${this.state.activePage}&records=${this.state.itemsCountPerPage}`;
     const city = localStorage.getItem("city");
     const role = localStorage.getItem("user_role");
 
-    if (city === "Mysore" || role === "0") {
-      getLogs(queryParams)
+    if (role === "1" || role === "0") {
+      getLogs(queryParams, city)
         .then((res) => {
           if (res.status == statusCode.HTTP_200_OK) {
-            let totalUsers = res.data.data.logs.count;
+            const { count, rows } = res.data.data.logs;
+            console.log("Logs Count:", count); // Debug log
+            console.log("Logs Rows:", rows); // Debug log
             this.setState({
-              totalItemsCount: res.data.data.logs.count,
-              userList: res.data.data.logs.rows,
+              totalItemsCount: count,
+              userList: rows,
               loader: false,
               refreshTime: Date.now() + 300000,
             });
@@ -181,9 +184,7 @@ class AuditLog extends Component {
             />
             <CustomInputBox
               label="VEHICLE NUMBER"
-              //smallBoxEnabled={true}
               mandatory={true}
-              //info={"Capture what you want this blog to achieve or for what target audience is this being written for. <br/>For example: to encourage working professionals to try meditation as a tool for stress relief, <br/> to promote organic farming, to motivate parents to take mental health seriously."}
               onChange={(text) => {
                 this.handleText("intent", text);
               }}
@@ -204,8 +205,6 @@ class AuditLog extends Component {
             <CustomInputBox
               label="VEHICLE TYPE"
               mandatory={true}
-              //smallBoxEnabled={true}
-              //info={"Keywords that you want the content to include to improve its visibility and ranking"}
               onChange={(text) => {
                 this.handleText("keywords", text);
               }}
@@ -216,11 +215,9 @@ class AuditLog extends Component {
                 this.handleGuidingText();
               }}
               value={this.state.keywords}
-              //labelButton={this.state.blogId && this.state.blogId > 0 ? "" : 'Suggest keywords'}
               size={"md"}
               placeholderText="Input the vehicle type"
               onLabelBtnClick={this.keywordSuggestion}
-              //note="Provide keywords that will improve visibility and ranking of your blog"
             />
           </ModalBody>
         </Modal>
@@ -229,28 +226,21 @@ class AuditLog extends Component {
   };
 
   renderUser = () => {
-    const userList = [];
-    this.state.userList.forEach((log, index) => {
-      let date = new Date();
-      var offset = date.getTimezoneOffset();
-      userList.push(
-        <>
-          <tr key={index}>
-            <th scope="row" style={{ width: "100px" }}>
-              {index + 1}
-            </th>
-            <td>{log.vehicleNo}</td>
-            <td>{log.routeNo}</td>
-            <td>{log.userId}</td>
-            <td>{log.rssi}</td>
-            <td>{log.ackTime}</td>
-            <td>{utcToLocal(log.requestedAt)}</td>
-            <td title={log?.module || ""}>{LOG_SOURCE[log.source]}</td>
-          </tr>
-        </>
-      );
-    });
-    return userList;
+    console.log("Rendering User Logs:", this.state.userList); // Debug log
+    return this.state.userList.map((log, index) => (
+      <tr key={index}>
+        <th scope="row" style={{ width: "100px" }}>
+          {index + 1}
+        </th>
+        <td>{log.vehicleNo}</td>
+        <td>{log.routeNo}</td>
+        <td>{log.userId}</td>
+        <td>{log.rssi}</td>
+        <td>{log.ackTime}</td>
+        <td>{utcToLocal(log.requestedAt)}</td>
+        <td title={log?.module || ""}>{LOG_SOURCE[log.source]}</td>
+      </tr>
+    ));
   };
 
   renderer = ({ hours, minutes, seconds, completed }) => {

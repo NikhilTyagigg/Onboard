@@ -123,7 +123,6 @@ export const getUserProfile = (payload) => {
 };
 
 export const loginHandler = (payload) => {
-  console.log("hello");
   return requests.postPublic("auth/login/", qs.stringify({ ...payload }));
 };
 
@@ -145,7 +144,6 @@ export const someApiToUpdateUserRole = async (userId, role) => {
   const payload = { userId, role };
   try {
     const response = await requests.postPublic("auth/changerole", payload);
-    console.log(response);
     return response;
   } catch (error) {
     throw new Error(error.message);
@@ -153,11 +151,9 @@ export const someApiToUpdateUserRole = async (userId, role) => {
 };
 
 export const checkUser = (payload) => {
-  console.log("kuch aaya????", payload);
   return requests.postPublic("auth/check", payload);
 };
 export const otpHandler = (payload) => {
-  console.log(payload);
   return requests.postPublic("auth/send-otp/", payload);
 };
 export const verifyOtp = (payload) => {
@@ -172,13 +168,12 @@ export const deleteUserProfile = () => {
 };
 
 // ############# ONBOARD APIS ##################
-export const getLogs = (queryParams = "") => {
-  return requests.post("route/getLogs" + queryParams);
+export const getLogs = (queryParams = "", city = "") => {
+  return requests.post(`route/getLogs${queryParams}`, { city });
 };
 
-export const getVehicleRecords = (queryParams = "", userId = "") => {
-  console.log("getVehicleRecords userId parameter:", userId);
-  return requests.post("route/getVehicles" + queryParams, { userId });
+export const getVehicleRecords = (queryParams = "", userId = "", city = "") => {
+  return requests.post("route/getVehicles" + queryParams, { userId, city });
 };
 
 export const addVehicle = (payload) => {
@@ -186,22 +181,24 @@ export const addVehicle = (payload) => {
 };
 
 export const getRoutes = (queryParams = "") => {
-  console.log("routes wale = ", queryParams);
   return requests.post("route/getRoutes" + queryParams);
 };
 
 export const addRoute = (payload) => {
-  // console.log("payload", payload);
   return requests.post("route/addRoute", payload);
 };
-
-export const getMasterData = (payload) => {
-  return requests.post("route/getMasterData", {});
+export const addMultipleVehicles = (payload) => {
+  return requests.post("route/addMultipleVehicles", payload);
 };
 
-export const getRouteConfig = (payload) => {
+export const getMasterData = (city) => {
+  const payload = { city: city };
+  return requests.post("route/getMasterData", payload);
+};
+
+export const getRouteConfig = (payload, city) => {
   console.log("hello getrouteconfig =", payload);
-  return requests.post("route/getVehicleRouteMap", {});
+  return requests.post("route/getVehicleRouteMap", { city });
 };
 
 export const addRouteConfig = (payload) => {
@@ -209,11 +206,11 @@ export const addRouteConfig = (payload) => {
   return requests.post("route/addVehicleConfig", payload);
 };
 
-export const addMultipleVehicles = (payload) => {
-  return requests.post("route/addMultipleVehicles", payload);
-};
-
-export const addMultipleRoutes = (payload) => {
+export const addMultipleRoutes = (routes, city) => {
+  const payload = {
+    routes: routes,
+    city: city,
+  };
   return requests.post("route/addMultipleRoutes", payload);
 };
 

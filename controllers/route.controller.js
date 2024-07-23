@@ -42,8 +42,122 @@ main.configRoutes = async () => {
   }
 };
 
+// main.addVehicle = async (data) => {
+//   //this will be used for adding/updating and deleting a vehicle
+//   logger.info("Adding/updating vehicle vehicle::" + JSON.stringify(data));
+//   try {
+//     let vehicle = null;
+//     if (!data.vehicleModule || !data.vehicleNo || !data.vehicleType) {
+//       throw new UserError("Please enter all the valid parameters!!");
+//     }
+//     data["vehicleNo"] = data.vehicleNo.trim().toUpperCase();
+//     data["vehicleModule"] = data.vehicleModule.trim().toUpperCase();
+//     if (data.vehicleId) {
+//       vehicle = await Vehicle.findOne({
+//         where: {
+//           vehicleId: data.vehicleId,
+//         },
+//       });
+//       if (!vehicle) {
+//         logger.error("No vehicle found!!");
+//         throw new UserError("No vehicle found!!");
+//       }
+//       if (data.vehicleNo != vehicle.vehicleNo.trim().toUpperCase()) {
+//         let oldVehicle = await Vehicle.findOne({
+//           where: {
+//             vehicleNo: data.vehicleNo,
+//           },
+//         });
+//         if (oldVehicle && oldVehicle.isActive) {
+//           throw new ConflictError("Vehicle is already added!!");
+//         } else if (oldVehicle) {
+//           await vehicle.update({
+//             isActive: false,
+//           });
+//           vehicle = oldVehicle;
+//         }
+//       } else if (
+//         data.vehicleModule != vehicle.vehicleModule.trim().toUpperCase()
+//       ) {
+//         let oldVehicle = await Vehicle.findOne({
+//           where: {
+//             vehicleModule: data.vehicleModule,
+//           },
+//         });
+//         if (oldVehicle && oldVehicle.isActive) {
+//           {
+//             throw new ConflictError(
+//               "Module is already mapped to vehicle No:: " + oldVehicle.vehicleNo
+//             );
+//           }
+//         } else if (oldVehicle) {
+//           await vehicle.update({
+//             isActive: false,
+//           });
+//           vehicle = oldVehicle;
+//         }
+//       }
+
+//       await vehicle.update({
+//         vehicleNo: data.vehicleNo,
+//         vehicleModule: data.vehicleModule || "",
+//         vehicleType: data.vehicleType,
+//         isActive: data.isActive,
+//       });
+//     } else {
+//       vehicle = await Vehicle.findOne({
+//         where: {
+//           [Op.or]: {
+//             vehicleNo: data.vehicleNo,
+//             vehicleModule: data.vehicleModule,
+//           },
+//         },
+//       });
+
+//       if (vehicle && vehicle.isActive) {
+//         if (data.vehicleModule == vehicle.vehicleModule) {
+//           throw new ConflictError(
+//             "Module is already mapped to vehicle No:: " + vehicle.vehicleNo
+//           );
+//         }
+//         logger.error("Vechile number already exists!!");
+//         throw new UserError("Vehicle Number already registered!!");
+//       }
+
+//       if (vehicle) {
+//         await vehicle.update({
+//           vehicleModule: data.vehicleModule,
+//           isActive: true,
+//           vehicleType: data.vehicleType,
+//         });
+//       } else {
+//         vehicle = await Vehicle.create({
+//           vehicleNo: data.vehicleNo,
+//           vehicleModule: data.vehicleModule,
+//           isActive: true,
+//           vehicleType: data.vehicleType,
+//         });
+//       }
+//     }
+
+//     let vehicles = await Vehicle.findAndCountAll({
+//       order: [["updatedAt", "DESC"]],
+//       where: {
+//         isActive: true,
+//       },
+//       include: [
+//         {
+//           model: VehicleType,
+//         },
+//       ],
+//     });
+//     return vehicles;
+//   } catch (err) {
+//     logger.error(err);
+//     throw new InternalError(err);
+//   }
+// };
 main.addVehicle = async (data) => {
-  //this will be used for adding/updating and deleting a vehicle
   logger.info("Adding/updating vehicle vehicle::" + JSON.stringify(data));
   try {
     let vehicle = null;
@@ -85,11 +199,9 @@ main.addVehicle = async (data) => {
           },
         });
         if (oldVehicle && oldVehicle.isActive) {
-          {
-            throw new ConflictError(
-              "Module is already mapped to vehicle No:: " + oldVehicle.vehicleNo
-            );
-          }
+          throw new ConflictError(
+            "Module is already mapped to vehicle No:: " + oldVehicle.vehicleNo
+          );
         } else if (oldVehicle) {
           await vehicle.update({
             isActive: false,
@@ -103,6 +215,7 @@ main.addVehicle = async (data) => {
         vehicleModule: data.vehicleModule || "",
         vehicleType: data.vehicleType,
         isActive: data.isActive,
+        city: data.city, // Adding city to the update
       });
     } else {
       vehicle = await Vehicle.findOne({
@@ -120,7 +233,7 @@ main.addVehicle = async (data) => {
             "Module is already mapped to vehicle No:: " + vehicle.vehicleNo
           );
         }
-        logger.error("Vechile number already exists!!");
+        logger.error("Vehicle number already exists!!");
         throw new UserError("Vehicle Number already registered!!");
       }
 
@@ -129,6 +242,7 @@ main.addVehicle = async (data) => {
           vehicleModule: data.vehicleModule,
           isActive: true,
           vehicleType: data.vehicleType,
+          city: data.city, // Adding city to the update
         });
       } else {
         vehicle = await Vehicle.create({
@@ -136,6 +250,7 @@ main.addVehicle = async (data) => {
           vehicleModule: data.vehicleModule,
           isActive: true,
           vehicleType: data.vehicleType,
+          city: data.city, // Adding city to the new entry
         });
       }
     }
@@ -158,13 +273,14 @@ main.addVehicle = async (data) => {
   }
 };
 
-main.getVehicles = async (filter) => {
+main.getVehicles = async (filter, userId, city) => {
   logger.info("Get vehicles");
   try {
     let vehicles = await Vehicle.findAndCountAll({
       order: [["updatedAt", "DESC"]],
       where: {
         isActive: true,
+        city: city, // Filter by city
       },
       include: [
         {
@@ -199,7 +315,8 @@ main.addRoute = async (data) => {
       !data.frequency ||
       !data.trip_length ||
       !data.SCH_NO ||
-      !data.SERVICE
+      !data.SERVICE ||
+      !data.city // Ensure city is provided
     ) {
       throw new UserError("Please enter all the valid parameters!!");
     }
@@ -230,7 +347,6 @@ main.addRoute = async (data) => {
         endPoint: data.endPoint,
         startTime: data.startTime,
         endTime: data.endTime,
-        // sll: data.sll,
         depotname: data.depotname,
         frequency: data.frequency,
         trip_length: data.trip_length,
@@ -238,6 +354,7 @@ main.addRoute = async (data) => {
         SERVICE: data.SERVICE,
         intermediateStops: data.intermediateStops || "",
         isActive: data.isActive,
+        city: data.city, // Store the city
       });
     } else {
       let oldRoute = await Route.findOne({ where: { routeNo: routeNo } });
@@ -251,7 +368,6 @@ main.addRoute = async (data) => {
         endPoint: data.endPoint,
         startTime: data.startTime,
         endTime: data.endTime,
-        //sll: data.sll,
         depotname: data.depotname,
         frequency: data.frequency,
         trip_length: data.trip_length,
@@ -259,12 +375,13 @@ main.addRoute = async (data) => {
         SERVICE: data.SERVICE,
         intermediateStops: data.intermediateStops || "",
         isActive: true,
+        city: data.city, // Store the city
       });
     }
 
     let routes = await Route.findAndCountAll({
       order: [["updatedAt", "DESC"]],
-      where: { isActive: true },
+      where: { isActive: true, city: data.city }, // Filter by city
     });
 
     return routes;
@@ -273,11 +390,13 @@ main.addRoute = async (data) => {
     throw new InternalError(err);
   }
 };
+
 main.getRoutes = async ({
   page = 1,
   records = 10,
   routeNo = null,
   startPoint = null,
+  city = null,
 }) => {
   logger.info("Get routes");
 
@@ -297,6 +416,10 @@ main.getRoutes = async ({
 
     if (startPoint) {
       whereClause.startPoint = startPoint;
+    }
+
+    if (city) {
+      whereClause.city = city; // Add the city to the query conditions
     }
 
     const routes = await Route.findAndCountAll({
@@ -358,15 +481,11 @@ main.getRoutes = async ({
   }
 };
 
-main.getQueryLogs = async (filter) => {
+main.getQueryLogs = async (city) => {
   logger.info("Get vehicles");
   try {
-    let logs = await QueryLogs.findAndCountAll({
-      // where : {
-      //     requestedAt:{
-      //         [Op.gte] : moment().format('MM/DD/YYYY')
-      //     }
-      // },
+    const logs = await QueryLogs.findAndCountAll({
+      where: { city: city },
       order: [["updatedAt", "DESC"]],
       limit: 500,
     });
@@ -377,12 +496,13 @@ main.getQueryLogs = async (filter) => {
   }
 };
 
-main.getMasterData = async () => {
-  logger.info("Getting master data");
+main.getMasterData = async (city) => {
+  logger.info("Getting master data for city: " + city);
   try {
     let vehicles = await Vehicle.findAll({
       where: {
         isActive: true,
+        city: city, // Filter by city
       },
       attributes: ["vehicleId", "vehicleNo"],
     });
@@ -390,6 +510,7 @@ main.getMasterData = async () => {
     let routes = await Route.findAll({
       where: {
         isActive: true,
+        city: city, // Filter by city
       },
       attributes: ["routeId", "routeNo"],
     });
@@ -401,12 +522,14 @@ main.getMasterData = async () => {
   }
 };
 
-main.getRouteVehicleMap = async (filter) => {
+main.getRouteVehicleMap = async (city) => {
+  // use city parameter
   logger.info("Get vehicles");
   try {
     let routeConfigList = await VehicleRouteMap.findAndCountAll({
       where: {
         isActive: true,
+        city: city, // filter by city
       },
       order: [["updatedAt", "DESC"]],
       include: [
@@ -463,6 +586,7 @@ main.addVehicleRouteMap = async (data) => {
         dateAndTime: data.date,
         driver: data.driver || "",
         isActive: true,
+        city: data.city,
       });
       mqtt.publishToMqtt({
         "Bus Id": vehicle.vehicleModule,
@@ -490,71 +614,200 @@ main.addVehicleRouteMap = async (data) => {
     throw new InternalError(err);
   }
 };
-main.addMultipleRoute = async (data = []) => {
-  //this will be used for adding/updating and deleting a vehicle
+
+// main.addMultipleRoute = async (data = []) => {
+//   //this will be used for adding/updating and deleting a vehicle
+//   logger.info("Adding/updating route details::" + JSON.stringify(data));
+//   try {
+//     if (!data || data.length == 0) {
+//       logger.error("No route data provided!!");
+//       throw new UserError("No route data provided!!");
+//     }
+//     let isDuplicate = false;
+//     let routesData = [];
+//     data &&
+//       data.map((d) => {
+//         if (!d[0] || d.length < 3) {
+//           throw new ConflictError(
+//             "Invalid entry present in the sheet, please check and upload again!!"
+//           );
+//         }
+//         // if (d[0].length > 30) {
+//         //   throw new ConflictError(
+//         //     "Route Number cannot be greater than 6 digits, please check and upload again!!"
+//         //   );
+//         // }
+
+//         // let regex = new RegExp("^[a-zA-Z0-9_]+$");
+//         // if (!regex.test(d[0])) {
+//         //   throw new ConflictError(
+//         //     "Invalid route no" +
+//         //       d[0] +
+//         //       "Only alphanumeric route number data is allowed, please check and upload again!!"
+//         //   );
+//         // }
+//         let rNo = d[0];
+//         rNo = rNo.toString();
+//         while (rNo.length < 6) {
+//           rNo = "0" + rNo;
+//         }
+
+//         // if (routesData.find((r) => r.routeNo == d[0])) {
+//         //   isDuplicate = true;
+//         //   return false;
+//         // }
+//         routesData.push({
+//           routeNo: rNo.toUpperCase(),
+//           startPoint: d[1],
+//           endPoint: d[2],
+//           trip_length: d[3],
+//           SERVICE: d[4],
+//           SCH_NO: d[5],
+//           sll: d[6],
+//           depotname: d[7],
+//           startTime: d[8],
+//           endTime: d[9],
+//           frequency: d[10],
+//           intermediateStops: d.length > 3 ? d[11] : "",
+//           isActive: true,
+//         });
+//       });
+//     if (isDuplicate) {
+//       logger.error(
+//         "Duplicate entries for same route number exists. Please maintain single entry for each route No."
+//       );
+//       throw new ConflictError(
+//         "Duplicate entries for same route number exists. Please maintain single entry for each route No."
+//       );
+//     }
+//     await Route.bulkCreate(routesData, {
+//       updateOnDuplicate: [
+//         "startPoint",
+//         "endPoint",
+//         "startTime",
+//         "endTime",
+//         "frequency",
+//         "sll",
+//         "trip_length",
+//         "SERVICE",
+//         "SCH_NO",
+//         "intermediateStops",
+//         "isActive",
+//       ],
+//     });
+
+//     let routes = await Route.findAndCountAll({
+//       order: [["updatedAt", "DESC"]],
+//       where: {
+//         isActive: true,
+//       },
+//       // attributes : ['routeId', 'routeNo']
+//     });
+//     return routes;
+//   } catch (err) {
+//     logger.error(err);
+//     throw new InternalError(err);
+//   }
+// };
+
+// main.addMultipleVehicles = async (data = []) => {
+//   //this will be used for adding/updating and deleting a vehicle
+//   logger.info(
+//     "Adding/updating vehicle details details::" + JSON.stringify(data)
+//   );
+//   try {
+//     if (!data || data.length == 0) {
+//       logger.error("No vehicle data provided!!");
+//       throw new UserError("No vehicle data provided!!");
+//     }
+//     let isDuplicate = false;
+//     let vehiclesData = [];
+//     data &&
+//       data.map((d) => {
+//         if (vehiclesData.find((r) => r.vehicleNo == d[0])) {
+//           isDuplicate = true;
+//           return false;
+//         }
+//         vehiclesData.push({
+//           vehicleNo: d[0],
+//           vehicleModule: d.length == 3 ? d[1] : "", //if vehicle module is not provided then it will be empty
+//           vehicleType: 1,
+//           isActive: true,
+//         });
+//       });
+//     if (isDuplicate) {
+//       logger.error(
+//         "Duplicate entries for same vehicle number exists. Please maintain single entry for each vehicle No."
+//       );
+//       throw new ConflictError(
+//         "Duplicate entries for same vehicle number exists. Please maintain single entry for each vehicle No."
+//       );
+//     }
+//     await Vehicle.bulkCreate(vehiclesData, {
+//       updateOnDuplicate: ["vehicleModule", "isActive"],
+//       logging: console.log,
+//     });
+
+//     let vehicles = await Vehicle.findAndCountAll({
+//       order: [["updatedAt", "DESC"]],
+//       where: {
+//         isActive: true,
+//       },
+//       include: [
+//         {
+//           model: VehicleType,
+//         },
+//       ],
+//     });
+//     return vehicles;
+//   } catch (err) {
+//     logger.error(err);
+//     throw new InternalError(err);
+//   }
+// };
+main.addMultipleRoute = async (data = [], city) => {
   logger.info("Adding/updating route details::" + JSON.stringify(data));
   try {
-    if (!data || data.length == 0) {
+    if (!data || data.length === 0) {
       logger.error("No route data provided!!");
       throw new UserError("No route data provided!!");
     }
-    let isDuplicate = false;
-    let routesData = [];
-    data &&
-      data.map((d) => {
-        if (!d[0] || d.length < 3) {
-          throw new ConflictError(
-            "Invalid entry present in the sheet, please check and upload again!!"
-          );
-        }
-        // if (d[0].length > 30) {
-        //   throw new ConflictError(
-        //     "Route Number cannot be greater than 6 digits, please check and upload again!!"
-        //   );
-        // }
 
-        // let regex = new RegExp("^[a-zA-Z0-9_]+$");
-        // if (!regex.test(d[0])) {
-        //   throw new ConflictError(
-        //     "Invalid route no" +
-        //       d[0] +
-        //       "Only alphanumeric route number data is allowed, please check and upload again!!"
-        //   );
-        // }
-        let rNo = d[0];
-        rNo = rNo.toString();
-        while (rNo.length < 6) {
-          rNo = "0" + rNo;
-        }
-
-        // if (routesData.find((r) => r.routeNo == d[0])) {
-        //   isDuplicate = true;
-        //   return false;
-        // }
-        routesData.push({
-          routeNo: rNo.toUpperCase(),
-          startPoint: d[1],
-          endPoint: d[2],
-          trip_length: d[3],
-          SERVICE: d[4],
-          SCH_NO: d[5],
-          sll: d[6],
-          depotname: d[7],
-          startTime: d[8],
-          endTime: d[9],
-          frequency: d[10],
-          intermediateStops: d.length > 3 ? d[11] : "",
-          isActive: true,
-        });
-      });
-    if (isDuplicate) {
-      logger.error(
-        "Duplicate entries for same route number exists. Please maintain single entry for each route No."
-      );
-      throw new ConflictError(
-        "Duplicate entries for same route number exists. Please maintain single entry for each route No."
-      );
+    if (!city) {
+      logger.error("City not provided!!");
+      throw new UserError("City not provided!!");
     }
+
+    let routesData = [];
+
+    data.forEach((d) => {
+      if (!d[0] || d.length < 3) {
+        throw new ConflictError(
+          "Invalid entry present in the sheet, please check and upload again!!"
+        );
+      }
+
+      let rNo = d[0].toString().padStart(6, "0");
+
+      routesData.push({
+        routeNo: rNo.toUpperCase(),
+        startPoint: d[1],
+        endPoint: d[2],
+        trip_length: d[3],
+        SERVICE: d[4],
+        SCH_NO: d[5],
+        depotname: d[6],
+        startTime: d[7],
+        endTime: d[8],
+        frequency: d[9],
+        intermediateStops: d.length > 10 ? d[10] : "",
+        isActive: true,
+        city: city, // Ensure city is included from the provided parameter
+      });
+    });
+
+    //console.log("Backend Route Data:", routesData); // Debugging line to verify data
+
     await Route.bulkCreate(routesData, {
       updateOnDuplicate: [
         "startPoint",
@@ -562,12 +815,12 @@ main.addMultipleRoute = async (data = []) => {
         "startTime",
         "endTime",
         "frequency",
-        "sll",
         "trip_length",
         "SERVICE",
         "SCH_NO",
         "intermediateStops",
         "isActive",
+        "city", // Ensure city is updated on duplicate entries
       ],
     });
 
@@ -576,8 +829,8 @@ main.addMultipleRoute = async (data = []) => {
       where: {
         isActive: true,
       },
-      // attributes : ['routeId', 'routeNo']
     });
+
     return routes;
   } catch (err) {
     logger.error(err);
@@ -586,7 +839,6 @@ main.addMultipleRoute = async (data = []) => {
 };
 
 main.addMultipleVehicles = async (data = []) => {
-  //this will be used for adding/updating and deleting a vehicle
   logger.info(
     "Adding/updating vehicle details details::" + JSON.stringify(data)
   );
@@ -605,9 +857,10 @@ main.addMultipleVehicles = async (data = []) => {
         }
         vehiclesData.push({
           vehicleNo: d[0],
-          vehicleModule: d.length == 3 ? d[1] : "", //if vehicle module is not provided then it will be empty
+          vehicleModule: d[1].length > 3 ? d[1] : "",
           vehicleType: 1,
           isActive: true,
+          city: d.city,
         });
       });
     if (isDuplicate) {
@@ -619,7 +872,7 @@ main.addMultipleVehicles = async (data = []) => {
       );
     }
     await Vehicle.bulkCreate(vehiclesData, {
-      updateOnDuplicate: ["vehicleModule", "isActive"],
+      updateOnDuplicate: ["vehicleModule", "isActive", "city"],
       logging: console.log,
     });
 

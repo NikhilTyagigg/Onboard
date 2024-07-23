@@ -80,46 +80,17 @@ class BusRecords extends Component {
   componentDidMount = () => {
     this.getBusRecords();
   };
-  addToFavorites = (vehicle) => {
-    const payload = { vehicleId: vehicle.vehicleId };
-    const token = localStorage.getItem("token");
-
-    favorite(payload, token)
-      .then((res) => {
-        if (res.status === statusCode.HTTP_200_OK) {
-          this.setState((prevState) => {
-            const updatedVehicleList = prevState.vehicleList.map((v) => {
-              if (v.vehicleId === vehicle.vehicleId) {
-                return { ...v, isFavorite: !v.isFavorite };
-              }
-              return v;
-            });
-            return { vehicleList: updatedVehicleList };
-          });
-          toast.success("Favorite status updated!", { ...toastStyle.success });
-        } else {
-          toast.error(res.message, { ...toastStyle.error });
-        }
-      })
-      .catch((err) => {
-        toast.error(err?.message, { ...toastStyle.error });
-      });
-  };
-
-  // Adjust the favorite function to accept a token parameter
 
   getBusRecords = () => {
     this.setState({ loader: true });
     const queryParams = `?page=${this.state.activePage}&records=${this.state.itemsCountPerPage}`;
-    const userId = localStorage.getItem("id"); // Assuming userId is stored in localStorage
+    const userId = localStorage.getItem("id");
     const usercity = localStorage.getItem("city");
     const role = localStorage.getItem("user_role");
-    // Assuming user data is stored in localStorage
 
-    // Check if the user's city is Mysore
-    if (usercity === "Mysore" || role === "0") {
+    if (role === "0" || role === "1") {
       console.log("Frontend userId data:", userId);
-      getVehicleRecords(queryParams, userId)
+      getVehicleRecords(queryParams, userId, usercity)
         .then((res) => {
           if (res.status == statusCode.HTTP_200_OK) {
             let vehicles = res.data.data.vehicles;
@@ -130,8 +101,6 @@ class BusRecords extends Component {
                 value: v.vehicleTypeId,
               };
             });
-            console.log("Mapped Vehicle Types:", vehicleType[0].label);
-
             this.setState({
               totalItemsCount: vehicles.count,
               vehicleList: vehicles.rows,
@@ -194,6 +163,7 @@ class BusRecords extends Component {
       vehicleNo: newVehicleInfo.number,
       vehicleModule: newVehicleInfo.module,
       vehicleType: newVehicleInfo.type.value,
+      city: localStorage.getItem("city"), // Adding usercity to the payload
     };
 
     if (newVehicleInfo.id) {
@@ -206,7 +176,7 @@ class BusRecords extends Component {
     const userrole = localStorage.getItem("user_role");
     const usercity = localStorage.getItem("city");
     console.log(userrole);
-    if ((userrole == "0" || userrole == "1") && usercity == "Mysore") {
+    if (userrole == "0" || userrole == "1") {
       addVehicle(payload)
         .then((res) => {
           if (res.status == statusCode.HTTP_200_OK) {
@@ -219,6 +189,9 @@ class BusRecords extends Component {
               showDeletePopup: false,
               newVehicleInfo: {},
             });
+            setTimeout(() => {
+              window.location.reload();
+            }, 1000);
           } else {
             toast.error(res.message, { ...toastStyle.error });
             this.setState({ loader: false });
@@ -234,11 +207,18 @@ class BusRecords extends Component {
   };
 
   addVehicles = (payload) => {
-    addMultipleVehicles({ vehicles: payload })
+    const usercity = localStorage.getItem("city");
+
+    // Adding usercity to each vehicle in the payload array
+    const updatedPayload = payload.map((vehicle) => ({
+      ...vehicle,
+      city: usercity,
+    }));
+
+    addMultipleVehicles({ vehicles: updatedPayload })
       .then((res) => {
         if (res.status == statusCode.HTTP_200_OK) {
-          // console.log(payload);
-          console.log(payload);
+          console.log(updatedPayload);
 
           let vehicles = res.data.data;
           this.setState({

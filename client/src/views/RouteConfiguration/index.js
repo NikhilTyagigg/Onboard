@@ -114,47 +114,49 @@ class RouteConfiguration extends Component {
 
   getMasterData = () => {
     this.setState({ loader: true });
-    const queryParams = `?page=${this.state.activePage}&records=${this.state.itemsCountPerPage}`;
     const city = localStorage.getItem("city");
 
-    if (city === "Mysore") {
-      getMasterData(queryParams)
-        .then((res) => {
-          if (res.status == statusCode.HTTP_200_OK) {
-            let vehicles = res.data.data.vehicles;
-            let routes = res.data.data.routes;
-            routes = routes.map((v) => {
-              return {
-                label: v.routeNo,
-                value: v.routeId,
-              };
-            });
-            vehicles = vehicles.map((v) => {
-              return {
-                label: v.vehicleNo,
-                value: v.vehicleId,
-              };
-            });
-            this.setState({
-              vehicles: vehicles,
-              routes: routes,
-              loader: false,
-            });
-          } else {
-            toast.error(res.message, { ...toastStyle.error });
-            this.setState({ loader: false, vehicleList: [], userListOrg: [] });
-          }
-        })
-        .catch((err) => {
-          toast.error(err?.message, { ...toastStyle.error });
-          this.setState({ loader: false, vehicleList: [], userListOrg: [] });
-        });
-    } else {
-      this.setState({ loader: false });
-      toast.error("User is not authorized to access this data", {
-        ...toastStyle.error,
+    // Adjust this condition as needed
+    getMasterData(city)
+      .then((res) => {
+        if (res.status == statusCode.HTTP_200_OK) {
+          let vehicles = res.data.data.vehicles;
+          let routes = res.data.data.routes;
+
+          console.log("Fetched vehicles:", vehicles);
+          console.log("Fetched routes:", routes);
+
+          routes = routes.map((v) => {
+            return {
+              label: v.routeNo,
+              value: v.routeId,
+            };
+          });
+
+          vehicles = vehicles.map((v) => {
+            return {
+              label: v.vehicleNo,
+              value: v.vehicleId,
+            };
+          });
+
+          console.log("Mapped vehicles:", vehicles);
+          console.log("Mapped routes:", routes);
+
+          this.setState({
+            vehicles: vehicles,
+            routes: routes,
+            loader: false,
+          });
+        } else {
+          toast.error(res.message, { ...toastStyle.error });
+          this.setState({ loader: false, vehicles: [], routes: [] });
+        }
+      })
+      .catch((err) => {
+        toast.error(err?.message, { ...toastStyle.error });
+        this.setState({ loader: false, vehicles: [], routes: [] });
       });
-    }
   };
 
   getRouteConfig = () => {
@@ -163,8 +165,8 @@ class RouteConfiguration extends Component {
     const city = localStorage.getItem("city");
     const role = localStorage.getItem("user_role");
 
-    if (city === "Mysore" || role === "0") {
-      getRouteConfig(queryParams)
+    if (role === "1" || role === "0") {
+      getRouteConfig(queryParams, city)
         .then((res) => {
           if (res.status == statusCode.HTTP_200_OK) {
             let routes = res.data.data;
@@ -208,6 +210,7 @@ class RouteConfiguration extends Component {
 
   addConfig = (isActive = true, index) => {
     const userRole = localStorage.getItem("user_role");
+    const city = localStorage.getItem("city");
     if (userRole === "2") {
       toast.error("You do not have permission to add data!");
       return;
@@ -227,6 +230,7 @@ class RouteConfiguration extends Component {
       vehicleId: newConfigInfo.vehicle.value,
       date: this.state.date,
       driver: newConfigInfo.driver,
+      city: city,
     };
 
     if (newConfigInfo.id) {

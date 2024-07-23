@@ -39,9 +39,6 @@ module.exports = (sequelize, DataTypes) => {
       depotname: {
         type: DataTypes.STRING,
       },
-      sll: {
-        type: DataTypes.STRING,
-      },
       frequency: {
         type: DataTypes.STRING,
       },
@@ -52,6 +49,9 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
       },
       SERVICE: {
+        type: DataTypes.STRING,
+      },
+      city: {
         type: DataTypes.STRING,
       },
       intermediateStops: {

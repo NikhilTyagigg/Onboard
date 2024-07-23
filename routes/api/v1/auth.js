@@ -45,7 +45,7 @@ router.post(
   "/login", //checkUserLoggedIn,
   runAsyncWrapper(async (req, res, next) => {
     const { email, password, phone } = req.body;
-    console.log("here is login info = ", req.body);
+    //  console.log("here is login info = ", req.body);
     logger.info(`BODYYYYY: ${req.body}`);
     const timezone = req.headers["tz-full"];
     const today_date = moment.utc().toDate();
@@ -112,7 +112,7 @@ router.post(
 /* refresh the token*/
 router.get("/token", function (req, res, next) {
   const refreshToken = req.headers["refreshtoken"];
-  console.log(`Received refresh token: ${refreshToken}`);
+  //  console.log(`Received refresh token: ${refreshToken}`);
 
   if (!refreshToken || refreshToken.trim().length === 0) {
     next(new NotAuthorizedError());
@@ -121,7 +121,7 @@ router.get("/token", function (req, res, next) {
 
   refreshAccessToken(refreshToken)
     .then((accessToken) => {
-      console.log(`Generated access token: ${accessToken}`);
+      //   console.log(`Generated access token: ${accessToken}`);
       res.send({ token: accessToken });
     })
     .catch((err) => {
@@ -136,7 +136,7 @@ router.get("/token", function (req, res, next) {
 router.get("/token_verify/", async function (req, res, next) {
   try {
     const payload = req.body.token;
-    console.log("==================", payload); // assuming payload is passed as a query parameter
+    // console.log("==================", payload); // assuming payload is passed as a query parameter
     const response = await jwt.verifyAccessToken(payload);
     res.json(response.data);
   } catch (error) {
@@ -197,7 +197,7 @@ router.get(
   runAsyncWrapper(async (req, res, next) => {
     try {
       const users = await db.User.findAll({
-        attributes: ["userId", "email", "role"], // Select only necessary fields
+        attributes: ["userId", "email", "role", "city"], // Select only necessary fields
       });
 
       res.send(successBody({ data: users }));
@@ -273,8 +273,8 @@ router.post("/send_reset_password_email", async (req, res) => {
     console.log("Request body:", req.body);
 
     const { email, phone } = req.body; // Extract phone as well
-    console.log("Extracted email:", email);
-    console.log("Extracted phone:", phone);
+    // console.log("Extracted email:", email);
+    // console.log("Extracted phone:", phone);
 
     if (!email && !phone) {
       return res.status(400).json({ message: "Email or phone is required" });
@@ -330,7 +330,7 @@ router.post("/getotp", async (req, res, next) => {
 });
 router.post("/changerole", async (req, res) => {
   const { userId, role } = req.body;
-  console.log("*********", req.body);
+  //  console.log("*********", req.body);
 
   // Validate input
   if (!userId) {
@@ -358,7 +358,7 @@ router.post("/changerole", async (req, res) => {
 });
 
 router.post("/fetch_user_by_id", async (req, res) => {
-  console.log("dekh dekh dekh = ", req.body);
+  //console.log("dekh dekh dekh = ", req.body);
   const { id } = req.body;
   if (!id) {
     return res.status(400).json({ error: "User ID is required" });

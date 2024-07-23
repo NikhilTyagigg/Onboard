@@ -240,8 +240,10 @@ class RouteRecords extends Component {
     const city = localStorage.getItem("city");
     const role = localStorage.getItem("user_role");
 
-    if (city === "Mysore" || role === "0") {
-      let queryParams = `?page=${activePage}&records=${itemsCountPerPage}`;
+    if (role === "1" || role === "0") {
+      let queryParams = `?page=${activePage}&records=${itemsCountPerPage}&city=${encodeURIComponent(
+        city
+      )}`;
       if (searchRouteNo) {
         queryParams += `&routeNo=${encodeURIComponent(searchRouteNo.trim())}`;
       }
@@ -295,6 +297,8 @@ class RouteRecords extends Component {
       return formattedTime;
     }
 
+    const userCity = localStorage.getItem("city"); // Get the user's city from localStorage
+
     let payload = {
       routeNo: newRouteInfo.number,
       startPoint: newRouteInfo.startPoint,
@@ -307,6 +311,7 @@ class RouteRecords extends Component {
       SCH_NO: newRouteInfo.SCH_NO,
       SERVICE: newRouteInfo.SERVICE,
       intermediateStops: newRouteInfo?.intermediateStops || "",
+      city: localStorage.getItem("city"), // Add the city to the payload
     };
 
     if (newRouteInfo.id) {
@@ -318,8 +323,7 @@ class RouteRecords extends Component {
     }
 
     const role = localStorage.getItem("user_role");
-    const usert = localStorage.getItem("city");
-    if ((role == "0" || role == "1") && usert == "Mysore") {
+    if (role == "0" || role == "1") {
       addRoute(payload)
         .then((res) => {
           if (res.status == statusCode.HTTP_200_OK) {
@@ -349,8 +353,9 @@ class RouteRecords extends Component {
 
   addRoutes = (payload) => {
     const role = localStorage.getItem("user_role");
-    if ((role == "0" || role == "1") && usert == "Mysore") {
-      addMultipleRoutes({ routes: payload })
+    const userCity = localStorage.getItem("city"); // Get the user's city from localStorage
+    if (role === "0" || role === "1") {
+      addMultipleRoutes(payload, userCity) // Include the city in the payload
         .then((res) => {
           if (res.status == statusCode.HTTP_200_OK) {
             let routes = res.data.data;
