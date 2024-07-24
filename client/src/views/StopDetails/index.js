@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Spinner } from "reactstrap";
+
 import {
   faCheckCircle,
   faTimesCircle,
@@ -58,7 +60,21 @@ const StopDetails = () => {
     }
   };
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+          color: "blue",
+        }}
+      >
+        <Spinner style={{ width: "3rem", height: "3rem" }} />
+      </div>
+    );
+  }
   //if (error) return <div>Error: {error}</div>;
 
   return (
@@ -73,47 +89,21 @@ const StopDetails = () => {
               <th style={{ width: "15%" }}>Serial Number</th>
               <th style={{ width: "20%" }}>Email</th>
               <th style={{ width: "20%" }}>City</th>
-              <th style={{ width: "15%" }}>Role</th>
+              <th style={{ width: "15%" }}>Status</th>
               <th style={{ width: "40%" }}>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {emails.map((user, index) => (
-              <tr key={user.userId}>
-                <td>{index + 1}</td>
-                <td>{user.email}</td>
-                <td>{user.city}</td>
-                <td>
-                  {user.role === 0
-                    ? "Root"
-                    : user.role === 1
-                    ? "Admin"
-                    : "Normal"}
-                </td>
-                <td>
-                  {user.role === 0 ? (
-                    <span>Root User</span>
-                  ) : user.role === 1 ? (
-                    <button
-                      className="role-button"
-                      onClick={() => handleRoleChange(user.userId, 2)}
-                    >
-                      <FontAwesomeIcon
-                        icon={faTimesCircle}
-                        className="icon reject-icon"
-                      />
-                    </button>
-                  ) : user.role === 2 ? (
-                    <>
-                      <button
-                        className="role-button"
-                        onClick={() => handleRoleChange(user.userId, 1)}
-                      >
-                        <FontAwesomeIcon
-                          icon={faCheckCircle}
-                          className="icon approve-icon"
-                        />
-                      </button>
+            {emails
+              .filter((user) => user.role !== 0)
+              .map((user, index) => (
+                <tr key={user.userId}>
+                  <td>{index + 1}</td>
+                  <td>{user.email}</td>
+                  <td>{user.city}</td>
+                  <td>{user.role === 1 ? "Approved" : "Pending...."}</td>
+                  <td>
+                    {user.role === 1 ? (
                       <button
                         className="role-button"
                         onClick={() => handleRoleChange(user.userId, 2)}
@@ -123,22 +113,36 @@ const StopDetails = () => {
                           className="icon reject-icon"
                         />
                       </button>
-                      <FontAwesomeIcon
-                        icon={faSpinner}
-                        className="icon pending-icon"
-                        spin
-                      />
-                    </>
-                  ) : (
-                    <FontAwesomeIcon
-                      icon={faSpinner}
-                      className="icon pending-icon"
-                      spin
-                    />
-                  )}
-                </td>
-              </tr>
-            ))}
+                    ) : (
+                      <>
+                        <button
+                          className="role-button"
+                          onClick={() => handleRoleChange(user.userId, 1)}
+                        >
+                          <FontAwesomeIcon
+                            icon={faCheckCircle}
+                            className="icon approve-icon"
+                          />
+                        </button>
+                        <button
+                          className="role-button"
+                          onClick={() => handleRoleChange(user.userId, 2)}
+                        >
+                          <FontAwesomeIcon
+                            icon={faTimesCircle}
+                            className="icon reject-icon"
+                          />
+                        </button>
+                        <FontAwesomeIcon
+                          icon={faSpinner}
+                          className="icon pending-icon"
+                          spin
+                        />
+                      </>
+                    )}
+                  </td>
+                </tr>
+              ))}
           </tbody>
         </table>
       </div>
