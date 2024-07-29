@@ -1,14 +1,8 @@
-#!/usr/bin/env node
-
-/**
- * Module dependencies.
- */
-
 var app = require("../app");
 var debug = require("debug")("onboard:server");
 var http = require("http");
 var logger = require("../helper/logger");
-const lgmUrl = ["http://localhost:3000"]; //frontend url to be plugged in
+const lgmUrl = ["http://localhost:3000"]; // frontend URL to be plugged in
 
 /**
  * Get port from environment and store in Express.
@@ -23,12 +17,12 @@ app.set("port", port);
 
 var server = http.createServer(app);
 
-//socket connection
+// socket connection
 const socket_io_server = require("socket.io")(server, {
   handlePreflightRequest: (req, res) => {
     const headers = {
       "Access-Control-Allow-Headers": "Content-Type, Authorization",
-      "Access-Control-Allow-Origin": "*", //or the specific origin you want to give access to,
+      "Access-Control-Allow-Origin": "*", // or the specific origin you want to give access to,
       "Access-Control-Allow-Credentials": true,
     };
     res.writeHead(200, headers);
@@ -40,10 +34,6 @@ const socket_io_server = require("socket.io")(server, {
   allowUpgrades: true,
   transports: ["websocket", "polling"],
 });
-
-// const socketsHandler = require('../routes/api/v1/Socket');
-
-// socketsHandler.populateSocketNamespaces(socket_io_server);
 
 server.listen(port, () => {
   console.log(`Onboard Server is running on the port ${port} ✌️`);
@@ -112,3 +102,5 @@ function onListening() {
   var bind = typeof addr === "string" ? "pipe " + addr : "port " + addr.port;
   debug("Listening on " + bind);
 }
+
+module.exports = { app, socket_io_server };

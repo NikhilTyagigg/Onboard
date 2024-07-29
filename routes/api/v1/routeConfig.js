@@ -36,8 +36,8 @@ router.post("/updateRouteMap", async (req, res) => {
 
 router.post("/getLogs", async (req, res) => {
   try {
-    const city = req.body.city; // Ensure city is sent in the request body
-    const logs = await getQueryLogs(city);
+    //const city = req.body.city; // Ensure city is sent in the request body
+    const logs = await getQueryLogs();
     res.send(successBody({ logs }));
   } catch (e) {
     logger.error(e);
@@ -72,7 +72,7 @@ router.post("/addVehicle", async (req, res, next) => {
 router.post("/getRoutes", async (req, res, next) => {
   try {
     const page = parseInt(req.query.page) || 1;
-    const records = parseInt(req.query.records) || 10;
+    const records = parseInt(req.query.records) || 1000;
     const routeNo = req.query.routeNo || null;
     const city = req.query.city || null; // Get the city from the query parameters
 

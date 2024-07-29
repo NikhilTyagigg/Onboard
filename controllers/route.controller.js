@@ -481,11 +481,11 @@ main.getRoutes = async ({
   }
 };
 
-main.getQueryLogs = async (city) => {
+main.getQueryLogs = async () => {
   logger.info("Get vehicles");
   try {
     const logs = await QueryLogs.findAndCountAll({
-      where: { city: city },
+      //  where: { city: city },
       order: [["updatedAt", "DESC"]],
       limit: 500,
     });
@@ -523,7 +523,6 @@ main.getMasterData = async (city) => {
 };
 
 main.getRouteVehicleMap = async (city) => {
-  // use city parameter
   logger.info("Get vehicles");
   try {
     let routeConfigList = await VehicleRouteMap.findAndCountAll({
@@ -541,12 +540,23 @@ main.getRouteVehicleMap = async (city) => {
         },
       ],
     });
+
+    // Manually parse intermediateStops if necessary
+    routeConfigList.rows.forEach((routeConfig) => {
+      if (routeConfig.Route && routeConfig.Route.intermediateStops) {
+        routeConfig.Route.intermediateStops = JSON.parse(
+          routeConfig.Route.intermediateStops.toString()
+        );
+      }
+    });
+
     return routeConfigList;
   } catch (err) {
     logger.error(err);
     throw new InternalError(err);
   }
 };
+
 main.addVehicleRouteMap = async (data) => {
   //this will be used for adding/updating and deleting a vehicle
   logger.info("Adding/updating route details::" + JSON.stringify(data));

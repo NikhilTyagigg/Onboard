@@ -20,6 +20,7 @@ export const isValidEmail = (email) => {
     );
 };
 
+
 // Function to validate phone number
 export const isValidPhoneNumber = (phone) => {
   const re = /^\d{10}$/; // This regex matches a 10-digit phone number

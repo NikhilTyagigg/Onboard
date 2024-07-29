@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Spinner } from "reactstrap";
-
 import {
   faCheckCircle,
   faTimesCircle,
@@ -10,9 +9,10 @@ import {
 import {
   fetchRegisteredEmails,
   someApiToUpdateUserRole,
-} from "../../services/agent"; // Adjust the import path
-import "./index.css"; // Import CSS file for styling (create this file)
+} from "../../services/agent";
 import toast, { Toaster } from "react-hot-toast";
+import { io } from "socket.io-client";
+import "./index.css";
 
 const StopDetails = () => {
   const [emails, setEmails] = useState([]);
@@ -20,43 +20,68 @@ const StopDetails = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const getEmails = async () => {
-      try {
-        const response = await fetchRegisteredEmails();
-        console.log("Response from fetchRegisteredEmails:", response);
-        if (response && response.data && Array.isArray(response.data.data)) {
-          setEmails(response.data.data); // Adjust to access response.data.data
-        } else {
-          throw new Error("Invalid response format");
-        }
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+    const socket = io("http://localhost:5000");
 
+    socket.on("roleChanged", ({ userId, role }) => {
+      setEmails((prevEmails) =>
+        prevEmails.map((user) =>
+          user.userId === userId ? { ...user, role } : user
+        )
+      );
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
+
+  const getEmails = async () => {
+    try {
+      const response = await fetchRegisteredEmails();
+      if (response && response.data && Array.isArray(response.data.data)) {
+        setEmails(response.data.data);
+      } else {
+        throw new Error("Invalid response format");
+      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     getEmails();
+
+    const intervalId = setInterval(() => {
+      getEmails();
+    }, 10000); // Polling interval set to 10 seconds
+
+    return () => clearInterval(intervalId); // Cleanup interval on component unmount
   }, []);
 
   const handleRoleChange = async (userId, role) => {
     try {
-      // Make an API call to update the role
       const response = await someApiToUpdateUserRole(userId, role);
-      console.log(response);
       if (response.data.success) {
-        //console.log("hahahaha yaha to aaya hai");
         toast.success("User role changed successfully");
-        // Wait for the toast to appear before reloading the page
-        setTimeout(() => {
-          window.location.reload();
-        }, 1000); // Adjust the timeout duration as needed
+        getEmails(); // Fetch updated emails immediately after role change
       } else {
         throw new Error(response.message);
       }
     } catch (error) {
       console.error("Error updating role:", error);
       setError(error.message);
+    }
+  };
+
+  const confirmRoleChange = (userId, role) => {
+    const confirmationMessage =
+      role === 2
+        ? "Are you sure you want to reject this user?"
+        : "Are you sure you want to approve this user?";
+    if (window.confirm(confirmationMessage)) {
+      handleRoleChange(userId, role);
     }
   };
 
@@ -75,11 +100,10 @@ const StopDetails = () => {
       </div>
     );
   }
-  //if (error) return <div>Error: {error}</div>;
 
   return (
     <div className="registered-emails-box">
-      <Toaster /> {/* Include the Toaster component here */}
+      <Toaster />
       <h2>Registered Emails</h2>
       <hr />
       <div className="registered-emails-table-container">
@@ -106,7 +130,7 @@ const StopDetails = () => {
                     {user.role === 1 ? (
                       <button
                         className="role-button"
-                        onClick={() => handleRoleChange(user.userId, 2)}
+                        onClick={() => confirmRoleChange(user.userId, 2)}
                       >
                         <FontAwesomeIcon
                           icon={faTimesCircle}
@@ -117,7 +141,7 @@ const StopDetails = () => {
                       <>
                         <button
                           className="role-button"
-                          onClick={() => handleRoleChange(user.userId, 1)}
+                          onClick={() => confirmRoleChange(user.userId, 1)}
                         >
                           <FontAwesomeIcon
                             icon={faCheckCircle}
@@ -126,7 +150,7 @@ const StopDetails = () => {
                         </button>
                         <button
                           className="role-button"
-                          onClick={() => handleRoleChange(user.userId, 2)}
+                          onClick={() => confirmRoleChange(user.userId, 2)}
                         >
                           <FontAwesomeIcon
                             icon={faTimesCircle}

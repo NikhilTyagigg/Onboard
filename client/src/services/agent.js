@@ -106,7 +106,7 @@ const Auth = {
 
 // Assuming requests.post handles sending the token in the header
 export const verifyToken = (token) => {
-  console.log("Verifying token...");
+ // console.log("Verifying token...");
   return requests.post("auth/token_verify/", { token });
 };
 
@@ -197,12 +197,12 @@ export const getMasterData = (city) => {
 };
 
 export const getRouteConfig = (payload, city) => {
-  console.log("hello getrouteconfig =", payload);
+ // console.log("hello getrouteconfig =", payload);
   return requests.post("route/getVehicleRouteMap", { city });
 };
 
 export const addRouteConfig = (payload) => {
-  console.log("addconfig paylod ****==", payload);
+ // console.log("addconfig paylod ****==", payload);
   return requests.post("route/addVehicleConfig", payload);
 };
 

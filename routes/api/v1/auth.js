@@ -159,39 +159,6 @@ router.post(
     });
   })
 );
-// router.post(
-//   "/register",
-//   runAsyncWrapper(async (req, res, next) => {
-//     let { name, role, password, email } = req.body;
-//     try {
-//       if (!name || !role || !password || !email) {
-//         throw new UserError("Please fill all the mandatory fields!!");
-//       }
-//       let user = await db.User.findOne({
-//         where: {
-//           email: email,
-//         },
-//       });
-//       if (user) {
-//         throw new ConflictError("Email Already registered!!");
-//       }
-//       user = await db.User.create({
-//         name: name,
-//         password: sha512(password),
-//         email: email,
-//         role: role,
-//       });
-//       res.send(
-//         successBody({
-//           msg: "User created successfully. Please login!!",
-//         })
-//       );
-//     } catch (e) {
-//       logger.error(e);
-//       throw new Error(e);
-//     }
-//   })
-// );
 router.get(
   "/registered-emails",
   runAsyncWrapper(async (req, res, next) => {
@@ -270,7 +237,7 @@ const OTP_EXPIRATION_TIME = 4 * 60 * 1000; // 4 minutes in milliseconds
 
 router.post("/send_reset_password_email", async (req, res) => {
   try {
-    console.log("Request body:", req.body);
+    // console.log("Request body:", req.body);
 
     const { email, phone } = req.body; // Extract phone as well
     // console.log("Extracted email:", email);
@@ -330,7 +297,6 @@ router.post("/getotp", async (req, res, next) => {
 });
 router.post("/changerole", async (req, res) => {
   const { userId, role } = req.body;
-  //  console.log("*********", req.body);
 
   // Validate input
   if (!userId) {
