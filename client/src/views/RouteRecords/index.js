@@ -1,5 +1,10 @@
 import React, { Fragment, Component } from "react";
-import { getRoutes, addRoute, addMultipleRoutes } from "../../services/agent";
+import {
+  getRoutes,
+  addRoute,
+  addMultipleRoutes,
+  getuserrole,
+} from "../../services/agent";
 import { Card, Spinner, Table } from "reactstrap";
 import toast from "react-hot-toast";
 import { statusCode } from "../../utility/constants/utilObject";
@@ -45,7 +50,8 @@ class RouteRecords extends Component {
       totalItemsCount: 0,
       pageRangeDisplayed: 10,
       itemsCountPerPage: 100,
-      intermediateStopsPopupData: [], // Initialize as an empty array
+      intermediateStopsPopupData: [],
+      userRole: null, // Initialize as an empty array
 
       newRouteInfo: {
         number: "",
@@ -148,7 +154,32 @@ class RouteRecords extends Component {
   componentDidMount = () => {
     localStorage.removeItem("active_doc");
     this.getRoutes();
+    this.fetchUserRole();
   };
+  fetchUserRole = () => {
+    const userId = localStorage.getItem("id"); // Assuming userId is stored in local storage
+
+    if (!userId) {
+      console.error("User ID is not available in local storage");
+      return;
+    }
+
+    getuserrole(userId)
+      .then((res) => {
+        if (res.status === 200) {
+          const { role } = res.data;
+          localStorage.setItem("user_role", role); // Store role in local storage or state as needed
+          this.setState({ userRole: role }); // Update state with fetched role
+          console.log("User role fetched successfully:", role);
+        } else {
+          console.error("Failed to fetch user role:", res.message);
+        }
+      })
+      .catch((err) => {
+        console.error("Error fetching user role:", err.message);
+      });
+  };
+
   handleAddIntermediateStop = () => {
     this.setState((prevState) => ({
       newRouteInfo: {

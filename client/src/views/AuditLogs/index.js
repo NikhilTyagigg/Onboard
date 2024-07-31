@@ -7,7 +7,7 @@ import {
   faList,
   faL,
 } from "@fortawesome/free-solid-svg-icons";
-import { getLogs } from "../../services/agent";
+import { getLogs, getuserrole } from "../../services/agent";
 import {
   Card,
   Spinner,
@@ -65,11 +65,36 @@ class AuditLog extends Component {
       itemsCountPerPage: 12,
       refreshTime: null,
       keyValue: false,
+      userrole: null,
     };
   }
 
   componentDidMount = () => {
     this.getLogs();
+    this.fetchUserRole();
+  };
+  fetchUserRole = () => {
+    const userId = localStorage.getItem("id"); // Assuming userId is stored in local storage
+
+    if (!userId) {
+      console.error("User ID is not available in local storage");
+      return;
+    }
+
+    getuserrole(userId)
+      .then((res) => {
+        if (res.status === 200) {
+          const { role } = res.data;
+          localStorage.setItem("user_role", role); // Store role in local storage or state as needed
+          this.setState({ userRole: role }); // Update state with fetched role
+          console.log("User role fetched successfully:", role);
+        } else {
+          console.error("Failed to fetch user role:", res.message);
+        }
+      })
+      .catch((err) => {
+        console.error("Error fetching user role:", err.message);
+      });
   };
 
   handlePageChange(pageNumber) {

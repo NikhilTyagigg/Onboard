@@ -322,6 +322,29 @@ router.post("/changerole", async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 });
+router.get("/userrole", async (req, res) => {
+  const userId = req.query.userId; // Assuming you send userId as query param
+
+  if (!userId) {
+    return res.status(400).json({ message: "User ID is required" });
+  }
+
+  try {
+    const user = await db.User.findOne({
+      where: { userId },
+      attributes: ["role"],
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({ role: user.role });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
 
 router.post("/fetch_user_by_id", async (req, res) => {
   //console.log("dekh dekh dekh = ", req.body);

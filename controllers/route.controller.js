@@ -259,6 +259,7 @@ main.addVehicle = async (data) => {
       order: [["updatedAt", "DESC"]],
       where: {
         isActive: true,
+        city: data.city, // Filter by city
       },
       include: [
         {

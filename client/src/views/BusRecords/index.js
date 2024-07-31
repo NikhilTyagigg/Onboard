@@ -14,6 +14,7 @@ import {
   getVehicleRecords,
   addVehicle,
   addMultipleVehicles,
+  getuserrole,
 } from "../../services/agent";
 import { Card, Spinner, Table } from "reactstrap";
 import toast from "react-hot-toast";
@@ -74,11 +75,36 @@ class BusRecords extends Component {
       itemsCountPerPage: 12,
       vehicleType: [],
       newVehicleInfo: {},
+      userRole: null,
     };
   }
 
   componentDidMount = () => {
     this.getBusRecords();
+    this.fetchUserRole();
+  };
+  fetchUserRole = () => {
+    const userId = localStorage.getItem("id"); // Assuming userId is stored in local storage
+
+    if (!userId) {
+      console.error("User ID is not available in local storage");
+      return;
+    }
+
+    getuserrole(userId)
+      .then((res) => {
+        if (res.status === 200) {
+          const { role } = res.data;
+          localStorage.setItem("user_role", role); // Store role in local storage or state as needed
+          this.setState({ userRole: role }); // Update state with fetched role
+          console.log("User role fetched successfully:", role);
+        } else {
+          console.error("Failed to fetch user role:", res.message);
+        }
+      })
+      .catch((err) => {
+        console.error("Error fetching user role:", err.message);
+      });
   };
 
   getBusRecords = () => {
@@ -189,9 +215,6 @@ class BusRecords extends Component {
               showDeletePopup: false,
               newVehicleInfo: {},
             });
-            setTimeout(() => {
-              window.location.reload();
-            }, 1000);
           } else {
             toast.error(res.message, { ...toastStyle.error });
             this.setState({ loader: false });

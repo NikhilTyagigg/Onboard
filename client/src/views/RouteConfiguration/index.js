@@ -3,6 +3,7 @@ import {
   getMasterData,
   addRouteConfig,
   getRouteConfig,
+  getuserrole,
 } from "../../services/agent";
 import { Card, Spinner, Table } from "reactstrap";
 import toast from "react-hot-toast";
@@ -66,28 +67,38 @@ class RouteConfiguration extends Component {
       waitingForAck: null,
       remianingTime: 0,
       refreshTime: null,
+      userRole: null,
     };
   }
 
   componentDidMount = () => {
     this.getMasterData();
     this.getRouteConfig();
+    this.fetchUserRole(); // Fetch user role on component mount
   };
+  fetchUserRole = () => {
+    const userId = localStorage.getItem("id"); // Assuming userId is stored in local storage
 
-  // componentDidUpdate = () =>{
-  //     if(this.state.waitingForAck){
-  //         let waitTime = 5
-  //         let foo = setInterval(()=>{
-  //             console.log('wait wait ----', waitTime)
-  //             this.setState({remianingTime :waitTime })
-  //             waitTime--;
-  //             if(waitTime==-1){
-  //                 clearInterval(foo)
-  //                 this.getRouteConfig()
-  //             }
-  //         },1000)
-  //     }
-  // }
+    if (!userId) {
+      console.error("User ID is not available in local storage");
+      return;
+    }
+
+    getuserrole(userId)
+      .then((res) => {
+        if (res.status === 200) {
+          const { role } = res.data;
+          localStorage.setItem("user_role", role); // Store role in local storage or state as needed
+          this.setState({ userRole: role }); // Update state with fetched role
+          console.log("User role fetched successfully:", role);
+        } else {
+          console.error("Failed to fetch user role:", res.message);
+        }
+      })
+      .catch((err) => {
+        console.error("Error fetching user role:", err.message);
+      });
+  };
 
   handlePageChange(pageNumber) {
     console.log(`active page is ${pageNumber}`);
